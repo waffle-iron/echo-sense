@@ -1,0 +1,295 @@
+body {
+    font-family: 'Roboto', Helvetica, sans-serif;
+    font-weight: 300;
+    margin: 0;
+    padding: 0;
+    background-image: radial-gradient(#184170, #0e2541);
+    background-attachment: fixed;
+    background-position: 50% 50%; /* or: center center */
+    background-size: cover;       /* CSS3 */
+}
+
+#footer {
+    color: white;
+    text-align: center;
+    padding: 10px;
+    min-height: 200px;
+    margin-top: 30px;
+}
+
+#container {
+    min-height: 600px;
+}
+
+/* Public Styles */
+
+body.public {
+    background: #F1F1F1;
+}
+
+body.public h1, h2, h3, p {
+    text-shadow: none;
+}
+
+body.public #footer {
+    background: rgba(0,0,0,0.8);
+    color: white;
+    text-align: center;
+    padding: 20px;
+    min-height: 300px;
+}
+
+body.public #footer a {
+    color: white;
+    text-decoration: underline;
+}
+
+.avatar {
+    display: inline-block;
+    width: 300px;
+    height: 300px;
+    border: 2px solid gray;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: 50% 50%;
+}
+
+.avatar-centered {
+    display: block;
+    margin: 10px auto;
+}
+
+.avatar-sm {
+    width: 35px;
+    height: 35px;
+    border: 2px solid white;
+    vertical-align: middle;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.userAvatar {
+}
+
+.userAvatar .handle {
+    display: block;
+    text-transform: uppercase;
+    color: white;
+    text-align: right;
+}
+
+.userAvatar .location {
+    display: block;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    font-size: 0.8em;
+    text-align: right;
+}
+
+.sensorDetail, .detailBox {
+    display: block;
+    position: absolute;
+    bottom: 0px;
+    left: 30%;
+    right: 0px;
+    top: 50px;
+    -webkit-border-radius:4px;
+    -moz-border-radius:4px;
+    border-radius: 4px;
+    background: #FFF;
+    padding: 12px;
+    -webkit-transition: all 450ms ease-out;
+    transition: all 450ms ease-out;
+    z-index: 20;
+    overflow: scroll;
+}
+
+.map {
+    min-height: 250px;
+    margin: 10px 0;
+}
+
+.sensorMap {
+    display: block;
+    -webkit-border-radius:3px;
+    -moz-border-radius:3px;
+    border-radius: 3px;
+/*    top: 200px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+*/
+    margin: 10px 0;
+    height: 500px;
+}
+
+.sensorMap.narrow {
+    width: 50%;
+}
+
+.sensorMapList {
+    display: block;
+    position: absolute;
+    -webkit-border-radius:3px;
+    -moz-border-radius:3px;
+    border-radius: 3px;
+    bottom: 20px;
+    left: 90px;
+    width: 200px;
+    background: rgba(0,0,0,0.4);
+    padding: 5px;
+}
+
+
+ul.robOptions {
+	list-style-type: none;
+}
+
+.materials {
+
+}
+
+.info {
+    margin: 10px 0;
+}
+
+.info.details {
+    color: gray;
+}
+
+.info p {
+    font-size: 15px;
+    line-height: 17px;
+}
+
+#uloader {
+    color: #CCC;
+    margin: 10px;
+}
+
+/* Piece Viewer */
+
+.pv .prices {
+    margin: 20px 0;
+}
+
+ul.plans {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul.plans li {
+    padding: 0;
+    margin: 2px 0;
+}
+
+#sharethis {
+    float: right;
+}
+
+
+#shareableLink a, #shareableLink a:visited, #shareableLink a:hover {
+    color: gray;
+}
+
+.gap {
+    text-align: center;
+}
+
+/* Major Layout */
+
+#container {
+    margin-left: 50px;
+}
+
+header.topBar {
+    display: block;
+    text-shadow: none;
+    margin-top: 15px;
+}
+
+.content {
+    background: white;
+    margin: 20px 0px;
+    padding: 12px;
+    -webkit-border-radius:3px;
+    -moz-border-radius:3px;
+    border-radius: 3px;
+}
+
+aside.lnav {
+    position: fixed;
+    display: block;
+    top: 0px;
+    bottom :0px;
+    left: 0px;
+    width: 50px;
+    background: rgba(0,0,0,0.7);
+    z-index: 20;
+}
+
+.lnav nav a {
+    display: block;
+    color: gray;
+    text-align: center;
+    margin: 8px 0px;
+}
+
+.lnav nav a:hover {
+    color: white;
+}
+
+.siteHeader {
+
+}
+
+.userSection {
+    text-align: right;
+    color: white;
+}
+
+.siteHeader h1 {
+    font-size: 1.3em;
+    color: white;
+    margin: 0 0 3px 0;
+    text-shadow: none;
+}
+
+.siteHeader h2 {
+    font-size: 0.8em;
+    color: rgba(255,255,255,0.5);
+    font-weight: 0.8em;
+    text-shadow: none;
+    margin: 0;
+}
+
+
+/* Splash */
+
+#splash {
+}
+
+#splash .camp {
+    width: 100%;
+    margin: 0;
+    background-image: url(/images/public/camp_dark.png);
+    background-size: cover;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    height: 600px;
+    color: white;
+    font-size: 18px;
+}
+
+#splash .camp a:link, #splash .camp a:visited, #splash .camp a:hover {
+    color: #41A4FB;
+    border-bottom: 2px solid #41A4FB;
+    text-decoration: none;
+}
+
+#splash .camp a:hover {
+    color: white;
+}
+

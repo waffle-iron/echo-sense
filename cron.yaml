@@ -1,0 +1,13 @@
+cron:
+- description: monthly cron
+  url: /cron/monthly
+  schedule: 1 of month 22:00
+
+- description: daily google key certs update
+  url: /cron/oauth/google_key_certs
+  schedule: every 12 hours
+
+- description: admin digests
+  url: /cron/digests/admin
+  schedule: every day 22:00
+  timezone: Africa/Nairobi

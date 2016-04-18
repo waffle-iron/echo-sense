@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Echo Sense</title>
+  <script src="https://www.google.com/jsapi?autoload={{ gautoload }}"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?libraries=visualization&sensor=false"></script>
+  <script language="javascript" src="/js/main.js"></script>
+  <script language="javascript" src="/js/util.js"></script>
+</head>
+
+<script language="JavaScript">
+	var constants = {{ constants|printjson }};
+</script>
+<body>
+
+
+  <div id="app"></div>
+  <!-- build:js -->
+  <script src="src/build.js"></script>
+  <!-- endbuild -->
+    <script src="/js/map_common.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="/static/font-awesome/css/font-awesome.min.css">
+    <link type="text/css" rel="stylesheet" href="/static/animate.css" />
+    <script src="/js/dropzone.js"></script>
+    
+    <link type="text/css" rel="stylesheet" href="/static/bootstrap.ss.custom.css" />
+    <link type="text/css" rel="stylesheet" href="/js/bootstrap3-dialog/src/css/bootstrap-dialog.css"/>
+    <script language="javascript" src="/js/bootstrap3-dialog/src/js/bootstrap-dialog.js"></script>
+    <link type="text/css" rel="stylesheet" href="/static/echosense.css" />
+    <link type="text/css" rel="stylesheet" href="/static/common.css" />
+
+</body>
+</html>

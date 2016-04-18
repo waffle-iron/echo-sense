@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:fb="http://www.facebook.com/2008/fbml">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="FlashCast.">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title>{{ SITENAME }} | Error</title>
+    <link href="/static/custom-theme/jquery-ui-1.8.5.custom.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="/js/jquery-ui-1.8.5.custom.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="/static/main.css" />
+
+<script language="JavaScript">
+
+$(document).ready(function() {
+
+    });
+
+</script>
+</head>
+
+<body>
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="middle">
+    <span id="title"><a href="{% url Root %}">{{ SITENAME }}</a></span>
+  </div>
+</div>
+
+<!-- CONTAINER -->
+<div id="container">
+  <div class="middle">
+<h1>Sorry, an error has occurred</h1>
+
+<p>Rest assured, we're working on the problem!</p>
+
+  {% if traceback %}
+  <p id="trace"><pre>{{ traceback }}</pre></p>
+  {% endif %}
+    </div>
+</div>
+
+<div id="footer">
+  <p align="center">Copyright &copy; 2011, FlashCast Inc</p>
+</div>
+
+</body>
+
+</html>
