@@ -18,6 +18,7 @@ CL_PRIMARY_DK = "#275D4A"
 
 # Emails
 APP_OWNER = "onejgordon@gmail.com" # This should be an owner of the cloud project
+INSTALL_PW = "REPLACEWITHYOURPASSWORD"
 ADMIN_EMAIL = APP_OWNER
 ERROR_EMAIL = APP_OWNER
 NOTIF_EMAILS = [APP_OWNER]
