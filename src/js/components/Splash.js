@@ -36,7 +36,7 @@ class Splash extends React.Component {
                     <h1>A sensor data analysis platform built for quick deployment in the Google cloud</h1>
                     <h2>Get up and running today, or start developing.</h2>
                     <ul style={{fontSize: "15px"}}>
-                      <li>Source on <a href="https://bitbucket.org/echomobile/echo-sense"><i className="fa fa-bitbucket"></i> Bitbucket</a></li>
+                      <li>Source on <a href="https://github.com/echomobi/echo-sense"><i className="fa fa-github"></i> Github</a></li>
                       <li>Documentation <a href="/docs/index.html">here</a></li>
                       <li>Talk to our team at <a href="mailto:sense@echomobile.org">sense@echomobile.org</a></li>
                     </ul>
