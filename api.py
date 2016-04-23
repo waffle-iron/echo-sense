@@ -39,6 +39,7 @@ class PublicAPI(handlers.JsonRequestHandler):
     @authorized.role()
     def forgot_password(self, email_or_phone, d):
         success = False
+        override_sitename = self.request.get('override_sitename')
         if email_or_phone:
             user = User.FuzzyGet(email_or_phone)
             if user:
@@ -49,7 +50,8 @@ class PublicAPI(handlers.JsonRequestHandler):
                     if tools.on_dev_server():
                         logging.debug(new_password)
                     message = "Password reset successful - check your email"
-                    deferred.defer(mail.send_mail, SENDER_EMAIL, user.email, EMAIL_PREFIX + "Password Reset", "Your password has been reset: %s" % new_password)
+                    prefix = EMAIL_PREFIX if not override_sitename else "[ %s ] " % override_sitename
+                    deferred.defer(mail.send_mail, SENDER_EMAIL, user.email, prefix + "Password Reset", "Your password has been reset: %s. You can change this upon signing in." % new_password)
                 else:
                     message = "No email address on file for that user. Please contact support."
             else:
