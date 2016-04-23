@@ -920,146 +920,6 @@ class Rule(db.Model):
         db.delete(self.alarm_set.fetch(limit=None))
         self.delete()
 
-class Alarm(db.Model):
-    """
-    Parent - Sensor
-    Key - ID
-    Single alarm event for a sensor
-    """
-    enterprise = db.ReferenceProperty(Enterprise)
-    sensor = db.ReferenceProperty(Sensor)
-    target = db.ReferenceProperty(Target)
-    rule = db.ReferenceProperty(Rule)
-    apex = db.FloatProperty()  # Most extreme value during alarm period
-    dt_start = db.DateTimeProperty() # Activation
-    dt_end = db.DateTimeProperty() # Deactivation
-
-    def __repr__(self):
-        return "<Alarm dt_start=%s rule=%s >" % (tools.sdatetime(self.dt_start), self.rule)
-
-    def __str__(self):
-        return self.rule.name
-
-    def json(self, with_props=None):
-        if not with_props:
-            with_props = []
-        res = {
-            'key': str(self.key()),
-            'id': self.key().id(),
-            'ts_start': tools.unixtime(self.dt_start),
-            'ts_end': tools.unixtime(self.dt_end),
-            'rule_name': self.rule.name,
-            'rule_id': tools.getKey(Alarm, 'rule', self, asID=True),
-            'rule_column': self.rule.column,
-            'sensor_key': tools.getKey(Alarm, 'sensor', self, asID=False),
-            'sensor_kn': tools.getKey(Alarm, 'sensor', self, asID=False, asKeyName=True),
-            'apex': self.apex
-        }
-        if 'sensor_name' in with_props:
-            res['sensor_name'] = self.sensor.name
-        return res
-
-
-    @staticmethod
-    def Create(sensor, rule, record, notify=True):
-        start = record.dt_recorded
-        a = Alarm(parent=sensor, sensor=sensor, target=sensor.target, rule=rule, enterprise=sensor.enterprise, dt_start=start, dt_end=start)
-        value = record.columnValue(rule.column)
-        a.set_apex(value)
-        if notify:
-            a.notify_contacts()
-        if rule.payments_enabled():
-            a.request_payments()
-        logging.debug("### Creating alarm '%s'! ###" % a)
-        return a
-
-    @staticmethod
-    def Delete(sensor=None, rule_id=None, limit=300):
-        to_delete = []
-        if sensor:
-            q = Alarm.all(keys_only=True).filter("sensor =", sensor)
-            if rule_id:
-                q.filter("rule =", db.Key.from_path('Rule', rule_id, parent=tools.getKey(Sensor, 'enterprise', sensor, asID=False, keyObj=True)))
-            to_delete = q.fetch(limit=limit)
-        if to_delete:
-            db.delete(to_delete)
-        return len(to_delete)
-
-    @staticmethod
-    def Fetch(sensor=None, enterprise=None, rule=None, limit=50):
-        if sensor:
-            q = sensor.alarm_set.order("-dt_start")
-        elif enterprise:
-            q = enterprise.alarm_set.order("-dt_start")
-        else:
-            return []
-        if rule:
-            q.filter("rule =", rule)
-        return q.fetch(limit=limit)
-
-    # TODO: is this used?
-    def deactivate(self, end):
-        self.dt_end = end
-
-    def set_apex(self, value):
-        '''
-        Value is a pure Record() property
-        '''
-        try:
-            self.apex = float(value)
-        except:
-            logging.warning("Failed to set apex to %s" % value)
-
-    def duration(self):
-        '''
-        Returns timedelta or None
-        '''
-        if self.dt_end and self.dt_start:
-            return self.dt_end - self.dt_start
-        return None
-
-    def render_alert_message(self, recipient=None):
-        '''
-        Converts message with variables to sendable format, e.g.:
-        'Hello {to.name}, device {sensor.name} was above normal limits at {start.datetime}'
-        ->
-        'Hello John, device 00-100 was above normal limits at 2015-08-02 12:34'
-        recipient is either a dict of contact info, or a User() object
-        '''
-        message = self.rule.get_message()
-        sensor = self.sensor
-        rule = self.rule
-        tz = self.enterprise.get_timezone()
-        recipient_name = ""
-        if type(recipient) is User:
-            if recipient.name:
-                recipient_name = recipient.name
-        elif type(recipient) is dict:
-            recipient_name = recipient.get('name', '') if recipient else ''
-        replacements = {
-            'to.name': recipient_name,
-            'rule.name': rule.name,
-            'sensor.name': sensor.name,
-            'sensor.id': sensor.key().name(),
-            'start.date': tools.sdatetime(self.dt_start, fmt="%Y-%m-%d", tz=tz),
-            'start.datetime': tools.sdatetime(self.dt_start, fmt="%Y-%m-%d %H:%M", tz=tz),
-            'start.time': tools.sdatetime(self.dt_start, fmt="%H:%M", tz=tz)
-        }
-        return tools.variable_replacement(message, replacements)
-
-    def notify_contacts(self):
-        if self.rule.alert_contacts and self.rule.get_message():
-            recipients = User.UsersFromSensorContactIDs(self.sensor, self.rule.alert_contacts)
-            for recipient in recipients:
-                rendered_message = self.render_alert_message(recipient=recipient)
-                outbox.send_message(recipient, rendered_message)
-        return self.rule.alert_contacts
-
-    def request_payments(self):
-        recipients = User.UsersFromSensorContactIDs(self.sensor, self.rule.payment_contacts)
-        for recipient in recipients:
-            Payment.Request(self.rule.enterprise, recipient, self.rule.payment_amount)
-        return self.rule.payment_contacts
 
 class Analysis(db.Expando):
     """
@@ -1584,6 +1444,156 @@ class Record(db.Expando):
                 if put:
                     r.put()
         return r
+
+class Alarm(db.Model):
+    """
+    Parent - Sensor
+    Key - ID
+    Single alarm event for a sensor
+    """
+    enterprise = db.ReferenceProperty(Enterprise)
+    sensor = db.ReferenceProperty(Sensor)
+    target = db.ReferenceProperty(Target)
+    rule = db.ReferenceProperty(Rule)
+    first_record = db.ReferenceProperty(Record)
+    apex = db.FloatProperty()  # Most extreme value during alarm period
+    dt_start = db.DateTimeProperty() # Activation
+    dt_end = db.DateTimeProperty() # Deactivation
+
+    def __repr__(self):
+        return "<Alarm dt_start=%s rule=%s >" % (tools.sdatetime(self.dt_start), self.rule)
+
+    def __str__(self):
+        return self.rule.name
+
+    def json(self, with_props=None):
+        if not with_props:
+            with_props = []
+        res = {
+            'key': str(self.key()),
+            'id': self.key().id(),
+            'ts_start': tools.unixtime(self.dt_start),
+            'ts_end': tools.unixtime(self.dt_end),
+            'rule_name': self.rule.name,
+            'rule_id': tools.getKey(Alarm, 'rule', self, asID=True),
+            'rule_column': self.rule.column,
+            'sensor_key': tools.getKey(Alarm, 'sensor', self, asID=False),
+            'sensor_kn': tools.getKey(Alarm, 'sensor', self, asID=False, asKeyName=True),
+            'first_record_kn': tools.getKey(Alarm, 'first_record', asID=False, asKeyName=True),
+            'apex': self.apex
+        }
+        if 'sensor_name' in with_props:
+            res['sensor_name'] = self.sensor.name
+        return res
+
+
+    @staticmethod
+    def Create(sensor, rule, record, notify=True):
+        start = record.dt_recorded
+        a = Alarm(parent=sensor, sensor=sensor, target=sensor.target, rule=rule, enterprise=sensor.enterprise, dt_start=start, dt_end=start, first_record=record)
+        value = record.columnValue(rule.column)
+        a.set_apex(value)
+        if notify:
+            a.notify_contacts()
+        if rule.payments_enabled():
+            a.request_payments()
+        logging.debug("### Creating alarm '%s'! ###" % a)
+        return a
+
+    @staticmethod
+    def Delete(sensor=None, rule_id=None, limit=300):
+        to_delete = []
+        if sensor:
+            q = Alarm.all(keys_only=True).filter("sensor =", sensor)
+            if rule_id:
+                q.filter("rule =", db.Key.from_path('Rule', rule_id, parent=tools.getKey(Sensor, 'enterprise', sensor, asID=False, keyObj=True)))
+            to_delete = q.fetch(limit=limit)
+        if to_delete:
+            db.delete(to_delete)
+        return len(to_delete)
+
+    @staticmethod
+    def Fetch(sensor=None, enterprise=None, rule=None, limit=50):
+        if sensor:
+            q = sensor.alarm_set.order("-dt_start")
+        elif enterprise:
+            q = enterprise.alarm_set.order("-dt_start")
+        else:
+            return []
+        if rule:
+            q.filter("rule =", rule)
+        return q.fetch(limit=limit)
+
+    # TODO: is this used?
+    def deactivate(self, end):
+        self.dt_end = end
+
+    def set_apex(self, value):
+        '''
+        Value is a pure Record() property
+        '''
+        try:
+            self.apex = float(value)
+        except:
+            logging.warning("Failed to set apex to %s" % value)
+
+    def duration(self):
+        '''
+        Returns timedelta or None
+        '''
+        if self.dt_end and self.dt_start:
+            return self.dt_end - self.dt_start
+        return None
+
+    def render_alert_message(self, recipient=None):
+        '''
+        Converts message with variables to sendable format, e.g.:
+        'Hello {to.name}, device {sensor.name} was above normal limits at {start.datetime}'
+        ->
+        'Hello John, device 00-100 was above normal limits at 2015-08-02 12:34'
+        recipient is either a dict of contact info, or a User() object
+        '''
+        message = self.rule.get_message()
+        sensor = self.sensor
+        rule = self.rule
+        tz = self.enterprise.get_timezone()
+        recipient_name = ""
+        if type(recipient) is User:
+            if recipient.name:
+                recipient_name = recipient.name
+        elif type(recipient) is dict:
+            recipient_name = recipient.get('name', '') if recipient else ''
+        replacements = {
+            'to.name': recipient_name,
+            'rule.name': rule.name,
+            'sensor.name': sensor.name,
+            'sensor.id': sensor.key().name(),
+            'start.date': tools.sdatetime(self.dt_start, fmt="%Y-%m-%d", tz=tz),
+            'start.datetime': tools.sdatetime(self.dt_start, fmt="%Y-%m-%d %H:%M", tz=tz),
+            'start.time': tools.sdatetime(self.dt_start, fmt="%H:%M", tz=tz),
+            'record.first.alarm_value': self.first_record_value
+        }
+        return tools.variable_replacement(message, replacements)
+
+    def first_record_value(self):
+        if self.first_record:
+            return self.first_record.columnValue(self.rule.column)
+        return None
+
+    def notify_contacts(self):
+        if self.rule.alert_contacts and self.rule.get_message():
+            recipients = User.UsersFromSensorContactIDs(self.sensor, self.rule.alert_contacts)
+            for recipient in recipients:
+                rendered_message = self.render_alert_message(recipient=recipient)
+                outbox.send_message(recipient, rendered_message)
+        return self.rule.alert_contacts
+
+    def request_payments(self):
+        recipients = User.UsersFromSensorContactIDs(self.sensor, self.rule.payment_contacts)
+        for recipient in recipients:
+            Payment.Request(self.rule.enterprise, recipient, self.rule.payment_amount)
+        return self.rule.payment_contacts
+
 
 class Report(UserAccessible):
     """

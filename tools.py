@@ -676,8 +676,13 @@ def variable_replacement(text, replacements=None, var_parens="{}"):
             key = paren_open + key + paren_close
 
             if key in text:
-                # logging.debug("%s->%s" % (key, val))
-                text = text.replace(key, val)
+                if callable(val):
+                    set_val = val()
+                    if set_val is None:
+                        set_val = "--"
+                else:
+                    set_val = val
+                text = text.replace(key, str(set_val))
 
     return text
 
