@@ -86,7 +86,7 @@ export default class Targets extends React.Component {
         { this.props.children }
 
         <h1><i className="fa fa-th-large"/> Targets</h1>
-        <p className="lead">Targets are physical structures, objects, vehicles or location that you want to track over time.
+        <p className="lead">Targets are physical structures, objects, vehicles or locations that you want to track over time.
           Targets may have one or more associated sensors, which may measure different metrics related to the target.</p>
 
 

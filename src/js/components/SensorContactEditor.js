@@ -58,6 +58,16 @@ export default class SensorContactEditor extends React.Component {
     })
   }
 
+  remove_contact(role) {
+    var contacts = this.props.contacts;
+    delete contacts[role];
+    this.props.onChange(contacts);
+  }
+
+  new_contact() {
+    this.edit_contact("", null);
+  }
+
   select_user(u) {
     var that = this;
     var contacts = this.props.contacts;
@@ -69,7 +79,7 @@ export default class SensorContactEditor extends React.Component {
       this.setState({editing: false}, function() {
         that.props.onChange(contacts);
       })
-    }
+    } else this.setState({editing: false});
   }
 
   render_user(u) {
@@ -94,7 +104,8 @@ export default class SensorContactEditor extends React.Component {
         var user_label = (u!=null) ? (u.name || u.email) : user_id;
         list.push(
           <li className="list-group-item">
-            <a href="javascript:void(0)" className="title" onClick={this.edit_contact.bind(this, contact_role, user_id)}>{ contact_role }</a>
+            <a href="javascript:void(0)" className="title" onClick={this.edit_contact.bind(this, contact_role, user_id)}>{ contact_role }</a>&nbsp;
+            <a href="javascript:void(0)" onClick={this.remove_contact.bind(this, contact_role)}><i className="fa fa-trash" /></a>
             <span className="right">{ user_label }</span>
           </li>
         );
@@ -105,6 +116,10 @@ export default class SensorContactEditor extends React.Component {
           <ul className="list-group">
           { list }
           </ul>
+
+          <div className="vpad">
+            <button className="btn btn-default" onClick={this.new_contact.bind(this)}>Add Contact</button>
+          </div>
 
           <Dialog open={this.state.editing} onRequestClose={this.toggle_editing.bind(this, false)} actions={[<FlatButton label="Done" onClick={this.select_user.bind(this, null)} />]}>
             <TextField floatingLabelText="ID / Role" hint="No spaces, lower case" value={form.role} onChange={this.changeHandler.bind(this, 'form', 'role')} fullWidth={true} />

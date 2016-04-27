@@ -10,6 +10,7 @@ var RefreshIndicator = mui.RefreshIndicator;
 var RaisedButton = mui.RaisedButton;
 var FlatButton = mui.FlatButton;
 var IconButton = mui.IconButton;
+var SaveStatus = require('components/shared/SaveStatus');
 var util = require('utils/util');
 var toastr = require('toastr');
 var bootbox = require('bootbox');
@@ -19,10 +20,12 @@ var MenuItem = require('material-ui/lib/menus/menu-item');
 var api = require('utils/api');
 import connectToStores from 'alt/utils/connectToStores';
 import history from 'config/history'
+import {changeHandler} from 'utils/component-utils';
 
 var Link = Router.Link;
 
 @connectToStores
+@changeHandler
 export default class SensorDetail extends React.Component {
 
   static defaultProps = { user: null };
@@ -36,6 +39,7 @@ export default class SensorDetail extends React.Component {
       alarms: [],
       analyses: [],
       processers: [],
+      last_save: util.nowTimestamp(),
       dialogs: {
         chooser_open: false,
         rule_chooser_open: false
@@ -63,6 +67,10 @@ export default class SensorDetail extends React.Component {
     }
   }
 
+  unsaved() {
+    return this.state.lastChange > this.state.last_save;
+  }
+
   hide_show_dialog(id, open) {
     var dialogs = this.state.dialogs;
     dialogs[id] = open;
@@ -71,6 +79,21 @@ export default class SensorDetail extends React.Component {
 
   prepareSensor(skn) {
     this.fetchData(skn);
+  }
+
+  save_sensor() {
+    var that = this;
+    var s = this.state.sensor;
+    var data = {
+      key: s.key,
+      contacts: s.contacts
+    };
+    api.post("/api/sensor", data, function(res) {
+      if (res.success) {
+
+        that.setState({last_save: util.nowTimestamp(), sensor: res.data.sensor});
+      }
+    });
   }
 
   fetchData(_skn) {
@@ -200,10 +223,9 @@ export default class SensorDetail extends React.Component {
   }
 
   handle_contacts_change(contacts_json) {
-    console.log(contacts_json);
     var s = this.state.sensor;
-    s.contacts = JSON.stringify(contacts_json);
-    this.setState({sensor: s});
+    var contacts = JSON.stringify(contacts_json);
+    this.changeHandlerVal('sensor', 'contacts', contacts);
   }
 
   render() {
@@ -254,7 +276,11 @@ export default class SensorDetail extends React.Component {
       content = (
         <div>
           <Link to="/app/sensors" className='close'><i className="fa fa-close"></i></Link>
-          <h2>{ s.name } <IconButton iconClassName="fa fa-refresh" tooltip="Refresh" onClick={this.fetchData.bind(this, null)}/></h2>
+          <h2>{ s.name }&nbsp;
+            <IconButton iconClassName="fa fa-refresh" tooltip="Refresh" onClick={this.fetchData.bind(this, null)}/>&nbsp;
+            <IconButton iconClassName="fa fa-save" tooltip="Save" onClick={this.save_sensor.bind(this)} disabled={!this.unsaved()}/>
+          </h2>
+          <SaveStatus saved={!this.unsaved()} visible={true} />
           <div className="row">
             <div className="col-sm-6">
               <small>

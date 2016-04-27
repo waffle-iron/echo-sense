@@ -45,8 +45,8 @@ export default class Sensors extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    var detailOpenClose = (prevProps.params.sensorKn == null) != (this.props.params.sensorKn == null);
-    if (detailOpenClose) this.refs.map.resize();
+    // var detailOpenClose = (prevProps.params.sensorKn == null) != (this.props.params.sensorKn == null);
+    // if (detailOpenClose) this.refs.map.resize();
   }
 
   _detail_open() {
@@ -103,8 +103,6 @@ export default class Sensors extends React.Component {
         { this.props.children }
 
         <GroupedSelector onItemClick={this.gotoSensorObj.bind(this)} type="sensors" sortProp="ts_updated" subhead={this.render_item_subhead.bind(this)} />
-
-        <EntityMap addClass={mapClass} keyProp="kn" ref="map" labelAtt="name" center={center} entities={this.state.sensors} handleEntityClick={this.gotoSensorObj.bind(this)} />
 
       </div>
     );
