@@ -22,7 +22,7 @@ TEST_SENSOR_ID = "00-100"
 ANALYSIS_KEY_PATTERN = '%SID_%Y-%M-%D'
 OWNER_NAME = "Dan Owner"
 OWNER_NUM = "254700000000"
-SPEEDING_ALERT_MESSAGE = "Hello {to.name}, {sensor.id} was speeding at {start.time}"
+SPEEDING_ALERT_MESSAGE = "Hello {to.name}, {sensor.id} was speeding at {record.first.alarm_value} at {start.time}"
 
 class ProcessingTestCase(BaseTestCase):
 
@@ -166,9 +166,9 @@ class ProcessingTestCase(BaseTestCase):
 
         # Test alarm notifications
         # TODO: Test output of notification (e.g. log messages or contact records)
-        a = alarms[0]
+        a = alarms[0] # second alarm
         message = a.render_alert_message(recipient=self.owner)
-        SPEEDING_ALERT_MESSAGE_RENDERED = "Hello Dan Owner, %s was speeding at %s" % (TEST_SENSOR_ID, tools.sdatetime(a.dt_start, fmt="%H:%M", tz="Africa/Nairobi"))
+        SPEEDING_ALERT_MESSAGE_RENDERED = "Hello Dan Owner, %s was speeding at 81 at %s" % (TEST_SENSOR_ID, tools.sdatetime(a.dt_start, fmt="%H:%M", tz="Africa/Nairobi"))
         self.assertEqual(message, SPEEDING_ALERT_MESSAGE_RENDERED)
 
         BATCH_2 = {
