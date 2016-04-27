@@ -36,6 +36,8 @@ DEBUG_API = False
 # Memkeys
 MC_FOREX = "FOREX"
 
+FTS_INDEX = "FTS_EID:%s"
+
 # Google OAuth
 ANDROID_CLIENT_ID = ""
 ANDROID_CLIENT_ID_DEBUG = ""

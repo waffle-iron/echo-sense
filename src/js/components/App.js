@@ -23,6 +23,7 @@ var MenuItem = require('material-ui/lib/menus/menu-item');
 
 var UserActions = require('actions/UserActions');
 var UserStore = require('stores/UserStore');
+var SearchWidget = require('components/shared/SearchWidget');
 import connectToStores from 'alt/utils/connectToStores';
 import {authDecorator} from 'utils/component-utils';
 
@@ -35,7 +36,9 @@ export default class App extends React.Component {
   static defaultProps = { enterprise: null };
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      search_open: false
+    };
   }
   static getStores() {
     return [UserStore];
@@ -58,6 +61,10 @@ export default class App extends React.Component {
   componentWillUnmount() {
     $('link[title=app_css]').prop('disabled',true);
     // TODO: Remove automatic timestamps
+  }
+
+  toggle_search(open) {
+    this.setState({search_open: open});
   }
 
   menuSelect(menu, e, value) {
@@ -89,9 +96,13 @@ export default class App extends React.Component {
               <div hidden={!can_write}><Link to="/app/logs" title="Logs"><i className="fa fa-list-ul"></i></Link></div>
               <div ><Link to="/app/sensors"><i className="fa fa-map-pin"></i></Link></div>
               <div ><Link to="/app/targets"><i className="fa fa-th-large"></i></Link></div>
+              <div ><Link to="/app/groups"><i className="fa fa-folder"></i></Link></div>
               <div hidden={!can_write}><Link to="/app/reports"><i className="fa fa-cloud-download"></i></Link></div>
+              <div><a href="javascript:void(0)" onClick={this.toggle_search.bind(this, true)}><i className="fa fa-search"/></a></div>
             </nav>
           </aside>
+
+          <SearchWidget open={this.state.search_open} onRequestClose={this.toggle_search.bind(this, false)} />
 
           <div id="container" className="container">
             <header className="topBar row">

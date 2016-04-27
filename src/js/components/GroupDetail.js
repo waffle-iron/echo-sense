@@ -23,13 +23,13 @@ import history from 'config/history'
 var Link = Router.Link;
 
 @connectToStores
-export default class TargetDetail extends React.Component {
+export default class GroupDetail extends React.Component {
 
   static defaultProps = { user: null };
   constructor(props) {
     super(props);
     this.state = {
-      target: null,
+      group: null,
       loading: false
     };
   }
@@ -42,31 +42,31 @@ export default class TargetDetail extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    var newTarget = nextProps.params.targetID && (!this.props.params.targetID || nextProps.params.targetID != this.props.params.targetID);
-    if (newTarget) {
-      this.prepareTarget(nextProps.params.targetID);
+    var newGroup = nextProps.params.groupID && (!this.props.params.groupID || nextProps.params.groupID != this.props.params.groupID);
+    if (newGroup) {
+      this.prepareGroup(nextProps.params.groupID);
     }
   }
 
   componentDidMount() {
-    if (this.props.params.targetID) {
-      this.prepareTarget(this.props.params.targetID);
+    if (this.props.params.groupID) {
+      this.prepareGroup(this.props.params.groupID);
     }
   }
 
-  prepareTarget(id) {
+  prepareGroup(id) {
     this.fetchData(id);
   }
 
   fetchData(_tid) {
     var that = this;
-    var tid = _tid || this.props.params.targetID;
+    var tid = _tid || this.props.params.groupID;
     if (tid) {
       this.setState({loading: true, sensor: null});
-      api.get("/api/target/"+tid, {}, function(res) {
+      api.get("/api/group/"+tid, {}, function(res) {
         if (res.success) {
           that.setState({
-            target: res.data.target,
+            group: res.data.group,
             loading: false
           }, function() {
             util.printTimestampsNow(null, null, null, "UTC");
@@ -84,28 +84,31 @@ export default class TargetDetail extends React.Component {
     history.pushState(null, `/app/sensors/${s.kn}`);
   }
 
+  gotoTarget(t) {
+    history.pushState(null, `/app/targets/${t.id}`);
+  }
+
   userAdmin() {
     return this.props.user && this.props.user.level == 4;
   }
 
   render() {
-    var t = this.state.target;
+    var g = this.state.group;
     var user = this.props.user;
     var can_write = user ? user.level > AppConstants.USER_READ : false;
     var content;
-    if (!t) {
+    if (!g) {
       content = (<RefreshIndicator size={40} left={50} top={50} status="loading" />);
     } else {
       var _action_items = [];
       content = (
         <div>
-          <Link to="/app/targets" className='close'><i className="fa fa-close"></i></Link>
-          <h2><i className="fa fa-th-large"/> { t.name } <IconButton iconClassName="fa fa-refresh" tooltip="Refresh" onClick={this.fetchData.bind(this, null)}/></h2>
+          <Link to="/app/groups" className='close'><i className="fa fa-close"></i></Link>
+          <h2><i className="fa fa-folder"/> { g.name } <IconButton iconClassName="fa fa-refresh" tooltip="Refresh" onClick={this.fetchData.bind(this, null)}/></h2>
           <div className="row">
             <div className="col-sm-6">
               <small>
-                <b>Created:</b> <span data-ts={t.ts_created}></span><br/>
-                <b>Updated:</b> <span data-ts={t.ts_updated}></span><br/>
+                <b>Created:</b> <span data-ts={g.ts_created}></span><br/>
               </small>
             </div>
             <div className="col-sm-6">
@@ -119,7 +122,11 @@ export default class TargetDetail extends React.Component {
 
           <div>
             <h2>Sensors</h2>
-            <FetchedList url="/api/sensor" params={{target_id: t.id}} autofetch={true} listProp="sensors" labelProp="name" onItemClick={this.gotoSensor.bind(this)} />
+            <FetchedList url="/api/sensor" params={{group_id: g.id}} autofetch={true} listProp="sensors" labelProp="name" onItemClick={this.gotoSensor.bind(this)} />
+          </div>
+          <div>
+            <h2>Targets</h2>
+            <FetchedList url="/api/target" params={{group_id: g.id}} autofetch={true} listProp="targets" labelProp="name" onItemClick={this.gotoTarget.bind(this)} />
           </div>
 
         </div>

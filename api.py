@@ -3,7 +3,7 @@ from datetime import datetime,timedelta
 import webapp2
 from google.appengine.ext import db, blobstore, deferred
 from google.appengine.ext.webapp import blobstore_handlers
-from google.appengine.api import images, taskqueue, users, mail
+from google.appengine.api import images, taskqueue, users, mail, search
 import logging
 from models import *
 import cloudstorage as gcs
@@ -394,6 +394,7 @@ class SensorAPI(handlers.JsonRequestHandler):
             # Update
             s.Update(**params)
             s.put()
+            s.updateSearchDoc()
             if 'process_task_id' in params:
                 # Associate with processer
                 pt = ProcessTask.GetAccessible(params['process_task_id'], d['user'], parent=d['enterprise'])
@@ -523,7 +524,7 @@ class SensorTypeAPI(handlers.JsonRequestHandler):
 class GroupAPI(handlers.JsonRequestHandler):
     @authorized.role('api')
     def list(self, d):
-        success = False
+        success = True
         message = None
 
         _max = self.request.get_range('max', max_value=500, default=100)
@@ -536,8 +537,13 @@ class GroupAPI(handlers.JsonRequestHandler):
         self.json_out(data, success=success, message=message)
 
     @authorized.role('api')
-    def detail(self, cid, id, d):
-        pass
+    def detail(self, id, d):
+        g = SensorGroup.GetAccessible(long(id), d['user'], parent=self.enterprise)
+        success = False
+        message = None
+        if g:
+            success = True
+        self.json_out({'group': g.json() if g else None}, success=success, message=message)
 
     @authorized.role('api')
     def update(self, d):
@@ -560,6 +566,7 @@ class GroupAPI(handlers.JsonRequestHandler):
             # Update
             sg.Update(**params)
             sg.put()
+            sg.updateSearchDoc()
             success = True
         data = {
             'group': sg.json() if sg else None
@@ -640,6 +647,7 @@ class TargetAPI(handlers.JsonRequestHandler):
             # Update
             target.Update(**params)
             target.put()
+            target.updateSearchDoc()
             success = True
         data = {
             'target': target.json() if target else None
@@ -1218,3 +1226,33 @@ class SendEmail(handlers.JsonRequestHandler):
     @authorized.role('api')
     def get(self):
         self.post()
+
+class SearchAPI(handlers.JsonRequestHandler):
+
+    @authorized.role('user')
+    def search(self, d):
+        RESULT_LIMIT = 20
+        term = self.request.get('term')
+        results = []
+        success = False
+        message = None
+        index = d['enterprise'].get_search_index()
+        try:
+            query_options = search.QueryOptions(limit=RESULT_LIMIT)
+            query = search.Query(query_string=term, options=query_options)
+            search_results = index.search(query)
+        except Exception, e:
+            logging.error("Error in search api: %s" % e)
+        else:
+            success = True
+            for sd in search_results.results:
+                fields = sd.fields
+                name = type = None
+                for f in fields:
+                    if f.name == UserAccessible.FTS_DOC_NAME:
+                        name = f.value
+                if name:
+                    type, doc_id = sd.doc_id.split(':')
+                    results.append({'type': type, 'id': doc_id, 'label': name})
+
+        self.json_out({"results": results}, success=success, message=message)

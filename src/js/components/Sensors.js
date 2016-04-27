@@ -98,6 +98,8 @@ export default class Sensors extends React.Component {
     return (
       <div>
 
+        <h1><i className="fa fa-map-pin"/> Sensors</h1>
+
         { this.props.children }
 
         <GroupedSelector onItemClick={this.gotoSensorObj.bind(this)} type="sensors" sortProp="ts_updated" subhead={this.render_item_subhead.bind(this)} />

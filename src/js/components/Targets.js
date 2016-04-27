@@ -44,7 +44,7 @@ export default class Targets extends React.Component {
     this.fetchTargets();
   }
   componentDidUpdate(prevProps, prevState) {
-    var detailOpenClose = (prevProps.params.sensorKn == null) != (this.props.params.sensorKn == null);
+    var detailOpenClose = (prevProps.params.targetID == null) != (this.props.params.targetID == null);
     if (detailOpenClose) this.refs.map.resize();
   }
   _detail_open() {
@@ -70,6 +70,10 @@ export default class Targets extends React.Component {
     this.gotoTarget(null);
   }
 
+  render_item_subhead(g) {
+    return "ID: " + g.id;
+  }
+
   render() {
     var detail;
     var _list;
@@ -81,7 +85,8 @@ export default class Targets extends React.Component {
 
         { this.props.children }
 
-        <GroupedSelector onItemClick={this.gotoTarget.bind(this)} type="targets" sortProp="ts_updated" />
+        <h1><i className="fa fa-th-large"/> Targets</h1>
+        <GroupedSelector onItemClick={this.gotoTarget.bind(this)} type="targets" sortProp="ts_updated" subhead={this.render_item_subhead.bind(this)} />
 
         <EntityMap addClass={mapClass} keyProp="kn" ref="map" labelAtt="name" center={center} entities={this.state.targets} handleEntityClick={this.gotoTarget.bind(this)} />
 

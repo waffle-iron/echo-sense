@@ -2,7 +2,7 @@ import logging
 from datetime import datetime, timedelta
 import webapp2
 from google.appengine.ext import db, deferred, blobstore
-from google.appengine.api import memcache, mail, images, taskqueue
+from google.appengine.api import memcache, mail, images, taskqueue, search
 import json
 import services
 import outbox
@@ -17,7 +17,10 @@ from user_defined_props import DecimalProperty
 class UserAccessible(db.Model):
     '''
     Parent class for items that have gated user access (e.g. sensor, entity)
+    Also enables full-text-search functionality
     '''
+
+    FTS_DOC_NAME = "label"
 
     @classmethod
     def GetAccessible(cls, key_or_id, acc, parent=None):
@@ -50,6 +53,47 @@ class UserAccessible(db.Model):
             return tools.getKey(None, 'enterprise', self, asID=False)
         else:
             return self.enterprise
+
+    def get_doc_id(self):
+        '''Override'''
+        return None
+
+    def get_searchable_type(self):
+        '''Override'''
+        return None
+
+    def get_searchable_label(self):
+        '''Override'''
+        return None
+
+    def get_searchable_index(self):
+        eid = tools.getKey(None, 'enterprise', self, asID=True)
+        return search.Index(name=FTS_INDEX % eid)
+
+    def full_doc_id(self):
+        doc_id = self.get_searchable_type() + ":" + str(self.get_doc_id())
+        return doc_id
+
+    def generate_search_doc(self):
+        doc_id = self.full_doc_id()
+        fields = [
+            search.TextField(name=self.FTS_DOC_NAME, value=self.get_searchable_label())
+        ]
+        sd = search.Document(doc_id=doc_id, fields=fields, language='en')
+        return sd
+
+    def updateSearchDoc(self, delete=False):
+        index = self.get_searchable_index()
+        try:
+            doc_id = self.full_doc_id()
+            if doc_id:
+                if delete:
+                    index.delete([doc_id])
+                else:
+                    sd = self.generate_search_doc()
+                    index.put(sd)
+        except search.Error, e:
+            logging.debug("Search Index Error when updating search doc: %s" % e)
 
 
 class Enterprise(db.Model):
@@ -122,6 +166,8 @@ class Enterprise(db.Model):
             return config[gateway_id].get(prop)
         return None
 
+    def get_search_index(self):
+        return search.Index(name=FTS_INDEX % self.key().id())
 
     def get_default_sensortype(self):
         st_id = None
@@ -409,6 +455,18 @@ class Target(UserAccessible):
         self.delete()
         return True
 
+    # FTS overrides
+
+    def get_doc_id(self):
+        return self.key().id()
+
+    def get_searchable_type(self):
+        return 'target'
+
+    def get_searchable_label(self):
+        '''Override'''
+        return self.name
+
     @staticmethod
     def Fetch(user, updated_since=None, group_id=None, limit=50):
         e = user.enterprise
@@ -426,7 +484,7 @@ class Target(UserAccessible):
             return filter(lambda trg : any([id in trg.group_ids for id in user.group_ids]), targets)
 
 
-class SensorGroup(db.Model):
+class SensorGroup(UserAccessible):
     '''
     Parent - Enterprise
     Key - ID
@@ -458,6 +516,18 @@ class SensorGroup(db.Model):
     def clean_delete(self):
         self.delete()
         return True
+
+    # FTS overrides
+
+    def get_doc_id(self):
+        return self.key().id()
+
+    def get_searchable_type(self):
+        return 'group'
+
+    def get_searchable_label(self):
+        '''Override'''
+        return self.name
 
 class SensorType(UserAccessible):
     """
@@ -529,7 +599,7 @@ class SensorType(UserAccessible):
     def Fetch(e, limit=50):
         return SensorType.all().ancestor(e).fetch(limit=limit)
 
-class Sensor(db.Model):
+class Sensor(UserAccessible):
     """
     Parent - Enterprise
     Key - Name
@@ -719,6 +789,17 @@ class Sensor(db.Model):
             self.delete()
             return True
         return False
+
+    # FTS overrides
+
+    def get_doc_id(self):
+        return self.key().name()
+
+    def get_searchable_type(self):
+        return 'sensor'
+
+    def get_searchable_label(self):
+        return self.name
 
 class Rule(db.Model):
     """
@@ -1479,7 +1560,7 @@ class Alarm(db.Model):
             'rule_column': self.rule.column,
             'sensor_key': tools.getKey(Alarm, 'sensor', self, asID=False),
             'sensor_kn': tools.getKey(Alarm, 'sensor', self, asID=False, asKeyName=True),
-            'first_record_kn': tools.getKey(Alarm, 'first_record', asID=False, asKeyName=True),
+            'first_record_kn': tools.getKey(Alarm, 'first_record', self, asID=False, asKeyName=True),
             'apex': self.apex
         }
         if 'sensor_name' in with_props:
