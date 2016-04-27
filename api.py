@@ -529,7 +529,10 @@ class GroupAPI(handlers.JsonRequestHandler):
 
         _max = self.request.get_range('max', max_value=500, default=100)
 
-        sgs = d['enterprise'].sensorgroup_set.fetch(_max)
+        if self.user.is_admin():
+            sgs = d['enterprise'].sensorgroup_set.fetch(_max)
+        else:
+            sgs = self.user.get_groups()
 
         data = {
             'groups': [sg.json() for sg in sgs]

@@ -79,7 +79,7 @@ var EntityMap = React.createClass({displayName: 'EntityMap',
   },
   initMap: function() {
     var that = this;
-    var mapDiv = this.refs.map.getDOMNode();
+    var mapDiv = this.refs.map;
     var myOptions = {
         scrollwheel: false,
         zoom: this.props.defaultZoom,

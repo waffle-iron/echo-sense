@@ -106,7 +106,8 @@ export default class Manage extends React.Component {
                     return "/admin/sensortype/"+item.key;
                 },
                 getListFromJSON: function(data) { return data.data.sensortypes; },
-                getObjectFromJSON: function(data) { return data.data.sensortype; }
+                getObjectFromJSON: function(data) { return data.data.sensortype; },
+                onItemCreated: function(item) { SensorTypeActions.manualUpdate(item); }
             }
         } else if (tab == "rules") {
             var plimit_type_opts = [];
@@ -159,7 +160,8 @@ export default class Manage extends React.Component {
                 'unique_key': 'key',
                 'max': 50,
                 getListFromJSON: function(data) { return data.data.groups; },
-                getObjectFromJSON: function(data) { return data.data.group; }
+                getObjectFromJSON: function(data) { return data.data.group; },
+                onItemCreated: function(item) { GroupActions.manualUpdate(item); }
             }
 
         } else if (tab == "targets") {
@@ -181,7 +183,8 @@ export default class Manage extends React.Component {
                 'unique_key': 'key',
                 'max': 50,
                 getListFromJSON: function(data) { return data.data.targets; },
-                getObjectFromJSON: function(data) { return data.data.target; }
+                getObjectFromJSON: function(data) { return data.data.target; },
+                onItemCreated: function(item) { TargetActions.manualUpdate(item); }
             }
 
         } else if (tab == "processes") {

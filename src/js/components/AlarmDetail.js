@@ -106,8 +106,8 @@ var AlarmDetail = React.createClass({displayName: 'AlarmDetail',
           <div>
             <b>Started:</b> <span>{ util.printDate(a.ts_start, true) }</span> <span data-ts={a.ts_start}></span><br/>
             <b>Ended:</b> <span>{ util.printDate(a.ts_end, true) }</span> <span data-ts={a.ts_end}></span><br/>
+            <b>Sensor:</b> <span><Link to={`/app/sensors/${a.sensor_kn}`}>{ a.sensor_kn }</Link></span><br/>
             { first_record }
-            <b>Sensor:</b> <span><Link to={`/app/sensors/${a.sensor_kn}`}>{ a.sensor_kn }</Link></span>
             <b>Apex:</b> <span>{ a.apex }</span>
           </div>
 

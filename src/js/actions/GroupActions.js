@@ -7,7 +7,7 @@ class GroupActions {
 
 	constructor() {
 		// Automatic action
-		// this.generateActions('loadLocalUser', 'manualUpdate');
+		this.generateActions('manualUpdate');
 	}
 
 	// Manual actions

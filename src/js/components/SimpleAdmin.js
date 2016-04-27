@@ -9,27 +9,24 @@ var bootbox = require('bootbox');
 var Select = require('react-select');
 var RefreshIndicator = mui.RefreshIndicator;
 
-var EditForm = React.createClass({
-  displayName: 'EditForm',
-  componentDidMount: function() {
-  },
-  handleSubmit: function() {
+class EditForm extends React.Component {
+  handleSubmit() {
     var that = this;
-    var data = util.serializeObject($(this.refs.form.getDOMNode()));
+    var data = util.serializeObject($(this.refs.form));
     this.props.onFormSubmit(data);
     return false;
 
-  },
-  handleCancel: function(event) {
+  }
+  handleCancel(event) {
     this.props.onFormCancel();
-  },
-  handleDelete: function(event) {
+  }
+  handleDelete(event) {
     var that = this;
     bootbox.confirm("Really delete?", function(ok) {
       if (ok) that.props.onFormDelete();
     });
-  },
-  handleChange: function(att, event) {
+  }
+  handleChange(att, event) {
     var item = clone(this.props.item) || {};
     var targ = event.target;
     var prop = $(targ).attr('name');
@@ -38,8 +35,8 @@ var EditForm = React.createClass({
     else valueForDB = att.toValue ? att.toValue(targ.value) : targ.value;
     item[prop] = valueForDB;
     this.props.onFormChange(item, this.props.creating_new);
-  },
-  handleSelectChange: function(att, value) {
+  }
+  handleSelectChange(att, value) {
     var item = clone(this.props.item) || {};
     var valueForDB = value;
     console.log(valueForDB);
@@ -47,8 +44,8 @@ var EditForm = React.createClass({
       item[att.name] = valueForDB;
       this.props.onFormChange(item, this.props.creating_new);
     }
-  },
-  render: function() {
+  }
+  render() {
     var item = this.props.item;
     var btn_text = this.props.creating_new ? 'Create' : 'Update';
     var kn_disabled = !this.props.creating_new;
@@ -67,7 +64,7 @@ var EditForm = React.createClass({
         if (att.dataType == 'boolean') {
           var checked = value_out;
           return (
-            <div className="form-group">
+            <div className="form-group" key={key}>
               <label htmlFor={key}>{ label }</label>
               { _hint }
                 <input
@@ -87,7 +84,7 @@ var EditForm = React.createClass({
         } else {
           if (att.inputType == 'textarea') {
             return (
-            <div className="form-group">
+            <div className="form-group" key={key}>
               <label htmlFor={key}>{ label }</label>
               { _hint }
 
@@ -106,7 +103,7 @@ var EditForm = React.createClass({
             label += " (JSON)";
             value_out = value_out ? JSON.stringify(value_out) : "";
             return (
-            <div className="form-group">
+            <div className="form-group" key={key}>
               <label htmlFor={key}>{ label }</label>
               { _hint }
                 <textarea className={classes}
@@ -125,7 +122,7 @@ var EditForm = React.createClass({
               return {value: opt.val, label: opt.lab}
             });
             return (
-              <div className="form-group">
+              <div className="form-group" key={key}>
                 <label htmlFor={key}>{ label }</label>
                 { _hint }
                 <Select
@@ -141,7 +138,7 @@ var EditForm = React.createClass({
             );
           } else {
             return (
-              <div className="form-group">
+              <div className="form-group" key={key}>
                 <label htmlFor={key}>{ label }</label>
                 { _hint }
                 <input type="text" className={classes}
@@ -169,32 +166,29 @@ var EditForm = React.createClass({
         { inputs }
         <input type="hidden" name={this.props.unique_key} value={itemkey} />
         <div className="btn-group" role="group">
-          <button type="button" onClick={this.handleSubmit} className='btn btn-success btn-lg'>{btn_text}</button>
-          <a href="javascript:void(0)" onClick={this.handleCancel} className="btn btn-default btn-lg"><i className="fa fa-close"></i> Cancel</a>
-          <a href="javascript:void(0)" onClick={this.handleDelete} className={deleteClasses}><i className="fa fa-trash"></i> Delete</a>
+          <button type="button" onClick={this.handleSubmit.bind(this)} className='btn btn-success btn-lg'>{btn_text}</button>
+          <a href="javascript:void(0)" onClick={this.handleCancel.bind(this)} className="btn btn-default btn-lg"><i className="fa fa-close"></i> Cancel</a>
+          <a href="javascript:void(0)" onClick={this.handleDelete.bind(this)} className={deleteClasses}><i className="fa fa-trash"></i> Delete</a>
         </div>
       </form>
     );
   }
-});
+}
 
-var Item = React.createClass({
-  displayName: 'Item',
-  handleEdit: function () {
-    this.props.onEdit(function () {
-      //
-    }.bind(this));
-  },
-  handleGotoDetail: function(item) {
+class Item extends React.Component {
+  handleEdit() {
+    this.props.onEdit();
+  }
+  handleGotoDetail(item) {
     if (this.props.onGotoDetail) this.props.onGotoDetail(item);
-  },
-  renderCell: function(content, key, _classes) {
+  }
+  renderCell(content, key, _classes) {
     var classes = _classes || "";
     var style = this.props.style;
     if (style == 'table') return <td key={key} className={classes}>{ content }</td>;
     else if (style == 'list') return <span key={key} className={classes}>{ content }</span>;
-  },
-  render: function() {
+  }
+  render() {
     var item = this.props.item;
     var unique_key = this.props.unique_key;
     var tableAtts = this.props.attributes.filter(function(att) {return !att.editOnly});
@@ -234,7 +228,7 @@ var Item = React.createClass({
     }
     var _actions = this.renderCell(
         <span className="pull-right">
-          <a href="javascript:void(0)" onClick={this.handleEdit}><i className="fa fa-pencil"></i></a>
+          <a href="javascript:void(0)" onClick={this.handleEdit.bind(this)}><i className="fa fa-pencil"></i></a>
           <span hidden={!(typeof(this.props.detail_url) === "function")}><a href="javascript:void(0)" onClick={this.handleGotoDetail.bind(this, item)}><i className="fa fa-binoculars"></i></a></span>
           { additionalActions }
         </span>, item[unique_key]);
@@ -256,11 +250,10 @@ var Item = React.createClass({
       );
     }
   }
-});
+}
 
-var SimpleAdmin = React.createClass({displayName: 'SimpleAdmin',
-  getDefaultProps: function() {
-    return {
+export default class SimpleAdmin extends React.Component {
+    static defaultProps = {
       entity_name: "Entity",
       attributes: [],
       unique_key: 'key',
@@ -275,38 +268,39 @@ var SimpleAdmin = React.createClass({displayName: 'SimpleAdmin',
       form_display: 'below',
       redirect_url: null,
       pagingEnabled: false
-    };
-  },
-  getInitialState: function() {
-    return {
-      items: [],
-      page: 0,
-      isMore: true, // Whether there are additional items to list (not yet fetched)
-      selected: null,
-      status: 'closed',
-      loading: false
-    };
-  },
-  componentWillMount: function() {
+    }
+    constructor(props) {
+        super(props);
+        this.state = {
+          items: [],
+          page: 0,
+          isMore: true, // Whether there are additional items to list (not yet fetched)
+          selected: null,
+          status: 'closed',
+          loading: false
+        };
+    }
+
+  componentWillMount() {
     this.fetchItems();
-  },
-  componentDidMount: function() {
-  },
-  componentDidUpdate: function(prevProps, prevState) {
+  }
+  componentDidMount() {
+  }
+  componentDidUpdate(prevProps, prevState) {
     var param_change = prevProps.url != this.props.url;
     if (param_change) this.clearAndFetch();
-  },
-  clearAndFetch: function() {
+  }
+  clearAndFetch() {
     var that = this;
     this.setState({items: [], status: 'closed', selected: null}, function() {
       that.fetchItems();
     });
-  },
-  fetchMore: function() {
+  }
+  fetchMore() {
     // Ajax fetch with page
     this.fetchItems();
-  },
-  fetchItems: function() {
+  }
+  fetchItems() {
     var that = this;
     this.setState({loading: true});
     var nextPage = this.state.page;
@@ -327,18 +321,18 @@ var SimpleAdmin = React.createClass({displayName: 'SimpleAdmin',
         this.setState({loading: false});
       }.bind(this)
     });
-  },
-  gotoDetail: function(item) {
+  }
+  gotoDetail(item) {
     if (this.props.detail_url) {
       var url = this.props.detail_url(item);
       if (url) window.location = url;
     }
-  },
-  cancel: function() {
+  }
+  cancel() {
     this.setState({status: 'closed', selected: null});
     if (this.refs.dialog) this.refs.dialog.hide();
-  },
-  edit: function(item, creating_new, callback) {
+  }
+  edit(item, creating_new, callback) {
     this.setState({selected: item, status: creating_new ? 'new' : 'edit'}, function() {
       if (callback) callback();
        var that=this;
@@ -347,8 +341,8 @@ var SimpleAdmin = React.createClass({displayName: 'SimpleAdmin',
        }
 
     });
-  },
-  delete: function() {
+  }
+  delete() {
     var item = this.state.selected;
     var that = this;
     if (item) {
@@ -370,8 +364,8 @@ var SimpleAdmin = React.createClass({displayName: 'SimpleAdmin',
         }.bind(this)
       });
     }
-  },
-  save: function(item) {
+  }
+  save(item) {
     var that = this;
     var items = this.state.items;
     var creating_new = this.state.status == 'new';
@@ -401,6 +395,7 @@ var SimpleAdmin = React.createClass({displayName: 'SimpleAdmin',
               var url = this.props.redirect_url(item);
               if (url) window.location.replace(url);
             }
+            if (typeof that.props.onItemCreated === 'function') that.props.onItemCreated(item);
             items.push(item);
           } else {
             var index = util.findIndexById(items, item[that.props.unique_key], that.props.unique_key);
@@ -414,14 +409,14 @@ var SimpleAdmin = React.createClass({displayName: 'SimpleAdmin',
         }
       }.bind(this)
     });
-  },
-  startNew: function() {
+  }
+  startNew() {
     this.setState({status: 'new'});
       if (this.props.form_display == 'popup') {
         this.refs.dialog.show();
       }
-  },
-  render: function() {
+  }
+  render() {
     var list, more, _empty;
     var items = this.state.items;
     var headers = this.props.attributes.filter(function(x) { return !x.editOnly; } );
@@ -470,10 +465,10 @@ var SimpleAdmin = React.createClass({displayName: 'SimpleAdmin',
           hidden={this.state.status == 'closed'}
           item={this.state.selected}
           attributes={this.props.attributes}
-          onFormDelete={this.delete}
-          onFormSubmit={this.save}
-          onFormChange={this.edit}
-          onFormCancel={this.cancel}
+          onFormDelete={this.delete.bind(this)}
+          onFormSubmit={this.save.bind(this)}
+          onFormChange={this.edit.bind(this)}
+          onFormCancel={this.cancel.bind(this)}
           unpad_form = {this.props.form_display == 'popup'}
           creating_new={this.state.status=='new'}/>
     if (this.props.form_display == 'popup'){
@@ -484,7 +479,7 @@ var SimpleAdmin = React.createClass({displayName: 'SimpleAdmin',
     else {
       var formtoshow= editform
     }
-    if (this.state.isMore && !this.state.loading) more = <button className="btn btn-default btn-sm center-block" onClick={this.fetchMore}><i className="fa fa-sort-down"></i> Show More</button>
+    if (this.state.isMore && !this.state.loading) more = <button className="btn btn-default btn-sm center-block" onClick={this.fetchMore.bind(this)}><i className="fa fa-sort-down"></i> Show More</button>
       var loadStatus = this.state.loading ? "loading" : "hide";
     return (
       <div className="Activity">
@@ -501,6 +496,4 @@ var SimpleAdmin = React.createClass({displayName: 'SimpleAdmin',
       </div>
     );
   }
-});
-
-module.exports = SimpleAdmin;
+}

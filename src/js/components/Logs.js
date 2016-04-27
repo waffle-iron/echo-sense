@@ -91,11 +91,11 @@ var Logs = React.createClass({displayName: 'Logs',
     var sensor_update_cutoff = util.nowTimestamp() - 1000*60*30; // last 30 mins
     var content;
     var sec = this.state.section;
-    if (sec == "sensors") content = <FetchedList key="sensor" url="/api/sensor" params={{updated_since: sensor_update_cutoff}} listProp="sensors" renderItem={this.renderSensor} autofetch={true}/>
-    else if (sec == "process_tasks") content = <FetchedList key="pt" url="/api/sensorprocesstask" listProp="sensorprocesstasks" renderItem={this.renderProcesser} autofetch={true}/>
-    else if (sec == "alarms") content = <FetchedList key="alarm" url="/api/alarm" params={{ with_props: "sensor_name" }} listProp="alarms" renderItem={this.renderAlarm} autofetch={true} />
-    else if (sec == "apilogs") content = <FetchedList key="apilog" url="/api/apilog" ref="fl_logs" listProp="logs" renderItem={this.renderAPILog} autofetch={true} />
-    else if (sec == "payments") content = <FetchedList key="payment" url="/api/payment" params={{with_user: 1}} listProp="payments" renderItem={this.renderPayment} autofetch={true} />
+    if (sec == "sensors") content = <FetchedList key="sensor" url="/api/sensor" params={{updated_since: sensor_update_cutoff}} listProp="sensors" renderItem={this.renderSensor.bind(this)} autofetch={true}/>
+    else if (sec == "process_tasks") content = <FetchedList key="pt" url="/api/sensorprocesstask" listProp="sensorprocesstasks" renderItem={this.renderProcesser.bind(this)} autofetch={true}/>
+    else if (sec == "alarms") content = <FetchedList key="alarm" url="/api/alarm" params={{ with_props: "sensor_name" }} listProp="alarms" renderItem={this.renderAlarm.bind(this)} autofetch={true} />
+    else if (sec == "apilogs") content = <FetchedList key="apilog" url="/api/apilog" ref="fl_logs" listProp="logs" renderItem={this.renderAPILog.bind(this)} autofetch={true} />
+    else if (sec == "payments") content = <FetchedList key="payment" url="/api/payment" params={{with_user: 1}} listProp="payments" renderItem={this.renderPayment.bind(this)} autofetch={true} />
     else if (sec == "analyses") content = <FetchedList key="analysis" url="/api/analysis" params={{with_props: 1}} listProp="analyses" renderItem={this.renderAnalysis.bind(this)} autofetch={true} />
     return (
         <div>

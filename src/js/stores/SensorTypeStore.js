@@ -17,6 +17,12 @@ class SensorTypeStore {
         }
     }
 
+    // Automatic
+
+    manualUpdate(st) {
+    	this.sensor_types[st.id] = st;
+    }
+
 }
 
 module.exports = alt.createStore(SensorTypeStore, 'SensorTypeStore');

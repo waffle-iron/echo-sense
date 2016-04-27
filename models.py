@@ -379,6 +379,12 @@ class User(db.Model):
             atts = {}
         return atts
 
+    def get_groups(self):
+        if self.group_ids:
+            return SensorGroup.get_by_id(self.group_ids)
+        else:
+            return []
+
 class Target(UserAccessible):
     '''
     Parent - Enterprise
