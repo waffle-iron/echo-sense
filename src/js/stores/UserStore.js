@@ -9,12 +9,18 @@ const USER_STORAGE_KEY = 'echosenseUser';
 class UserStore {
     constructor() {
         this.bindActions(UserActions);
+        this.users = {}; // uid -> User
         this.user = null;
         this.error = null;
+
+        this.exportPublicMethods({
+            get_user: this.get_user
+        });
     }
 
     storeUser(user) {
         this.user = user;
+        this.users[user.id] = user;
         this.error = null;
         console.log("Stored user "+user.email);
         // api.updateToken(user.token);
@@ -67,6 +73,13 @@ class UserStore {
 
     manualUpdate(user) {
         this.storeUser(user);
+    }
+
+    // Automatic
+
+    get_user(uid) {
+        var u = this.getState().users[uid];
+        return u;
     }
 }
 
