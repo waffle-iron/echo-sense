@@ -463,6 +463,7 @@ class Target(UserAccessible):
 
     def clean_delete(self, **params):
         if self.can_delete():
+            self.updateSearchDoc(delete=True)
             self.delete()
             return True
         return False
@@ -805,6 +806,7 @@ class Sensor(UserAccessible):
             db.delete(self.record_set.fetch(limit=None))
             db.delete(self.analysis_set.fetch(limit=None))
             db.delete(self.sensorprocesstask_set.fetch(limit=None))
+            self.updateSearchDoc(delete=True)
             self.delete()
             return True
         return False
