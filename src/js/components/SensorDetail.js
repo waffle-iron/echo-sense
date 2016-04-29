@@ -5,10 +5,12 @@ var DialogChooser = require('components/DialogChooser');
 var LoadStatus = require('components/LoadStatus');
 var AppConstants = require('constants/AppConstants');
 var mui = require('material-ui');
+var SensorContactEditor = require('components/SensorContactEditor');
 var RefreshIndicator = mui.RefreshIndicator;
 var RaisedButton = mui.RaisedButton;
 var FlatButton = mui.FlatButton;
 var IconButton = mui.IconButton;
+var SaveStatus = require('components/shared/SaveStatus');
 var util = require('utils/util');
 var toastr = require('toastr');
 var bootbox = require('bootbox');
@@ -18,10 +20,12 @@ var MenuItem = require('material-ui/lib/menus/menu-item');
 var api = require('utils/api');
 import connectToStores from 'alt/utils/connectToStores';
 import history from 'config/history'
+import {changeHandler} from 'utils/component-utils';
 
 var Link = Router.Link;
 
 @connectToStores
+@changeHandler
 export default class SensorDetail extends React.Component {
 
   static defaultProps = { user: null };
@@ -35,6 +39,7 @@ export default class SensorDetail extends React.Component {
       alarms: [],
       analyses: [],
       processers: [],
+      last_save: util.nowTimestamp(),
       dialogs: {
         chooser_open: false,
         rule_chooser_open: false
@@ -62,6 +67,10 @@ export default class SensorDetail extends React.Component {
     }
   }
 
+  unsaved() {
+    return this.state.lastChange > this.state.last_save;
+  }
+
   hide_show_dialog(id, open) {
     var dialogs = this.state.dialogs;
     dialogs[id] = open;
@@ -70,6 +79,21 @@ export default class SensorDetail extends React.Component {
 
   prepareSensor(skn) {
     this.fetchData(skn);
+  }
+
+  save_sensor() {
+    var that = this;
+    var s = this.state.sensor;
+    var data = {
+      key: s.key,
+      contacts: s.contacts
+    };
+    api.post("/api/sensor", data, function(res) {
+      if (res.success) {
+
+        that.setState({last_save: util.nowTimestamp(), sensor: res.data.sensor});
+      }
+    });
   }
 
   fetchData(_skn) {
@@ -198,6 +222,12 @@ export default class SensorDetail extends React.Component {
     });
   }
 
+  handle_contacts_change(contacts_json) {
+    var s = this.state.sensor;
+    var contacts = JSON.stringify(contacts_json);
+    this.changeHandlerVal('sensor', 'contacts', contacts);
+  }
+
   render() {
     var s = this.state.sensor;
     var user = this.props.user;
@@ -241,10 +271,16 @@ export default class SensorDetail extends React.Component {
       var _charging_icon;
       var batt_level_icon = parseInt(s.batt_level * 4);
       if (s.batt_charging) _charging_icon = <i className="fa fa-bolt"></i>
+      var contacts_json = {};
+      if (s.contacts != null) contacts_json = JSON.parse(s.contacts);
       content = (
         <div>
           <Link to="/app/sensors" className='close'><i className="fa fa-close"></i></Link>
-          <h2>{ s.name } <IconButton iconClassName="fa fa-refresh" tooltip="Refresh" onClick={this.fetchData.bind(this, null)}/></h2>
+          <h2>{ s.name }&nbsp;
+            <IconButton iconClassName="fa fa-refresh" tooltip="Refresh" onClick={this.fetchData.bind(this, null)}/>&nbsp;
+            <IconButton iconClassName="fa fa-save" tooltip="Save" onClick={this.save_sensor.bind(this)} disabled={!this.unsaved()}/>
+          </h2>
+          <SaveStatus saved={!this.unsaved()} visible={true} />
           <div className="row">
             <div className="col-sm-6">
               <small>
@@ -253,12 +289,15 @@ export default class SensorDetail extends React.Component {
                 <span hidden={true}><b>Battery:</b> <span title={s.batt_charging ? "Charging" : "Not Charging"}><i className={"fa fa-battery-"+batt_level_icon}></i> { util.printPercent(s.batt_level) } { _charging_icon }</span></span>
               </small>
             </div>
-            <div className="col-sm-6">
+            <div className="col-sm-3">
               <div hidden={_action_items.length == 0}>
                 <IconMenu iconButtonElement={ <FlatButton label="Actions" /> } openDirection="bottom-right">
                   { _action_items }
                 </IconMenu>
               </div>
+            </div>
+            <div className="col-sm-3">
+              <RaisedButton secondary={true} linkButton={true} containerElement={ <Link to={`/app/data/${s.kn}`} /> } label="Data Viewer" />
             </div>
           </div>
 
@@ -288,8 +327,11 @@ export default class SensorDetail extends React.Component {
             </div>
 
             <div className="col-sm-6">
-              <RaisedButton secondary={true} linkButton={true} containerElement={ <Link to={`/app/data/${s.kn}`} /> } label="Data Viewer" />
+              <h3>Contacts</h3>
+
+              <SensorContactEditor contacts={contacts_json} onChange={this.handle_contacts_change.bind(this)} />
             </div>
+
           </div>
 
           <DialogChooser prompt="Choose a processer to associate with this sensor" url="/api/processtask" listProp="processtasks" ref="chooser" onItemChosen={this.associateProcesser.bind(this)} open={this.state.dialogs.chooser_open} onRequestClose={this.hide_show_dialog.bind(this, 'chooser_open', false)} />

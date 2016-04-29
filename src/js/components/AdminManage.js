@@ -54,7 +54,7 @@ export default class AdminManage extends React.Component {
                     { name: 'level', label: "Level", editable: true, editOnly: true, inputType: "select", opts: level_opts },
                     { name: 'password', label: "Password", editable: true, editOnly: true },
                     { name: 'group_ids', label: "Groups", editable: true, editOnly: true },
-                    { name: 'alert_channel', label: "Alert Channel", editable: true, editOnly: true, inputType: "select", opts: [
+                    { name: 'alert_channel', label: "Alert Channel", editable: true, editOnly: true, inputType: "select", defaultValue: 0, opts: [
                        { lab: "Disabled", val: 0 },
                        { lab: "Email", val: 1 },
                        { lab: "SMS", val: 2 },
