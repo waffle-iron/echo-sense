@@ -72,7 +72,7 @@ export default class Groups extends React.Component {
 
         <h1>Groups</h1>
 
-        <p className="lead">Groups are a way to organize sensors and targets. Users can access objects in a group they have been given permission for.</p>
+        <p className="lead">Groups are a way to organize sensors and targets. Users can access items in a group they have been given permission for.</p>
         { this.props.children }
 
         <FetchedList renderItem={this.render_group.bind(this)} url="/api/group" listProp="groups" autofetch={true} />

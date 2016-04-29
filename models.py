@@ -457,9 +457,15 @@ class Target(UserAccessible):
             if int(val) in range(360):
                 self.bearing = int(val)
 
+    def can_delete(self):
+        any_linked_sensor = self.sensor_set.get() is not None
+        return not any_linked_sensor
+
     def clean_delete(self, **params):
-        self.delete()
-        return True
+        if self.can_delete():
+            self.delete()
+            return True
+        return False
 
     # FTS overrides
 
@@ -519,9 +525,16 @@ class SensorGroup(UserAccessible):
         if 'name' in params:
             self.name = params['name']
 
+    def can_delete(self):
+        any_linked_sensor = Sensor.all().filter("group_ids =", self.key().id()).get() is not None
+        any_linked_target = Target.all().filter("group_ids =", self.key().id()).get() is not None
+        return not any([any_linked_sensor, any_linked_target])
+
     def clean_delete(self):
-        self.delete()
-        return True
+        if self.can_delete():
+            self.delete()
+            return True
+        return False
 
     # FTS overrides
 
