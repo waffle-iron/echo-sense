@@ -59,7 +59,7 @@ export default class SensorContactEditor extends React.Component {
   }
 
   remove_contact(role) {
-    var contacts = this.props.contacts;
+    var contacts = this.props.contacts || {};
     delete contacts[role];
     this.props.onChange(contacts);
   }
@@ -70,10 +70,10 @@ export default class SensorContactEditor extends React.Component {
 
   select_user(u) {
     var that = this;
-    var contacts = this.props.contacts;
+    var contacts = this.props.contacts || {};
     var form = this.state.form;
     if (form.role.length > 0) {
-      delete contacts[form.original_role];
+      if (form.original_role.length > 0) delete contacts[form.original_role];
       var uid = u != null ? u.id : form.uid;
       contacts[form.role] = uid;
       this.setState({editing: false}, function() {
