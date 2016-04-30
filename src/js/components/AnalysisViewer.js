@@ -76,7 +76,7 @@ export default class AnalysisViewer extends React.Component {
                 'with_props': 1,
                 'max': form.limit,
             };
-            if (skn) data['skn'] = skn;
+            if (skn) data['sensor_kn'] = skn;
             api.get("/api/analysis", data, function(res) {
                 if (res.success) {
                     var analyses = res.data.analyses;
