@@ -5,3 +5,4 @@
 * Upgrade to React Router 2.0
 * Rollbar for client-side error notifications
 * Add sensortype to Analysis() for cleaner type-specific reporting
+* Ability to export to CSV analysis viewed in analysis history (client-side?)

@@ -68,13 +68,15 @@ export default class AnalysisViewer extends React.Component {
     fetchData() {
         var form = this.state.form;
         var that = this;
-        if (form.sensortype_id) {
+        var skn = this.props.location.query.skn;
+        if (form.sensortype_id || skn) {
             this.setState({loading: true});
             var data = {
                 'sensortype_id': form.sensortype_id,
                 'with_props': 1,
-                'max': form.limit
+                'max': form.limit,
             };
+            if (skn) data['skn'] = skn;
             api.get("/api/analysis", data, function(res) {
                 if (res.success) {
                     var analyses = res.data.analyses;
@@ -90,10 +92,10 @@ export default class AnalysisViewer extends React.Component {
                                 }
                             });
                         }
-                        that.setState({analyses: analyses, loading: false, suggested_columns: suggested_columns }, function() {
-                            // that.refreshChart();
-                        });
                     }
+                    that.setState({analyses: analyses, loading: false, suggested_columns: suggested_columns }, function() {
+                        // that.refreshChart();
+                    });
                 } else that.setState({loading: false});
             });
         }
@@ -111,6 +113,7 @@ export default class AnalysisViewer extends React.Component {
         var _visualization;
         var form = this.state.form;
         var analyses = this.state.analyses;
+        var skn = this.props.location.query.skn;
         if (analyses.length > 0) {
             var chartColumns = [
                 {type: 'string', label: 'Sensor Key', id: 'sensor'},
@@ -155,7 +158,12 @@ export default class AnalysisViewer extends React.Component {
                     <div className="row">
                         <div className="col-sm-6">
 
-                            <div className="form-group">
+                            <div className="form-group" hidden={skn==null}>
+                                <label>Sensor</label><br/>
+                                <span>{ skn }</span>
+                            </div>
+
+                            <div className="form-group" hidden={skn!=null}>
                                 <label>Sensor Type</label>
                                 <Select
                                     value={form.sensortype_id}

@@ -728,8 +728,12 @@ class AnalysisAPI(handlers.JsonRequestHandler):
         with_props = self.request.get_range('with_props') == 1
         _max = self.request.get_range('max', max_value=500, default=50)
         sensortype_id = self.request.get_range('sensortype_id')
+        sensor_kn = self.request.get('sensor_kn')
 
-        analyses = Analysis.Fetch(d['enterprise'], sensortype_id=sensortype_id, limit=_max)
+        sensor = None
+        if sensor_kn:
+            sensor = Sensor.get_by_key_name(sensor_kn, parent=self.enterprise)
+        analyses = Analysis.Fetch(d['enterprise'], sensortype_id=sensortype_id, sensor=sensor, limit=_max)
         success = True
 
         data = {
