@@ -1070,7 +1070,8 @@ class Analysis(db.Expando):
             ('%SID', sensor.key().name() if sensor else ""),
             ('%Y', datetime.strftime(now, '%Y')),
             ('%M', datetime.strftime(now, '%m')),
-            ('%D', datetime.strftime(now, '%d'))
+            ('%D', datetime.strftime(now, '%d')),
+            ('%W', datetime.strftime(now, '%W')) # Python style week number (0-53)
         ]
         for rep in REPL:
             analysis_key_pattern = analysis_key_pattern.replace(rep[0], rep[1])
