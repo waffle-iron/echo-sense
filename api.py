@@ -562,7 +562,10 @@ class GroupAPI(handlers.JsonRequestHandler):
             sg = SensorGroup.get(key)
         elif d['enterprise']:
             # Create
-            sg = SensorGroup.Create(d['enterprise'])
+            if params.get('name'):
+                sg = SensorGroup.Create(d['enterprise'])
+            else:
+                message = "Name required"
         else:
             message = "Malformed"
         if sg:
@@ -642,8 +645,11 @@ class TargetAPI(handlers.JsonRequestHandler):
         if key:
             target = Target.get(key)
         elif d['enterprise']:
-            # Create
-            target = Target.Create(d['enterprise'])
+            if params.get('name'):
+                # Create
+                target = Target.Create(d['enterprise'])
+            else:
+                message = "Name required"
         else:
             message = "Malformed"
         if target:
@@ -792,6 +798,7 @@ class RuleAPI(handlers.JsonRequestHandler):
         params = tools.gets(self,
             strings=['name','column','alert_message','payment_amount'],
             floats=['value1','value2'],
+            json=['value_complex'],
             integers=['sensortype_id','duration','buffer','plimit','plimit_type','consecutive','consecutive_limit','trigger'],
             lists=['alert_contacts','payment_contacts'])
         if key:
@@ -905,16 +912,8 @@ class ProcessTaskAPI(handlers.JsonRequestHandler):
     @authorized.role('api')
     def delete(self, d):
         success = False
-        message = None
-        s = None
+        message = "Not implemented"
         key = self.request.get('key')
-        s = ProcessTask.get(key)
-        if s:
-            success = s.clean_delete()
-            if not success:
-                message = "Couldn't delete sensor"
-        else:
-            message = "Alarm type not found"
         self.json_out({}, message=message, success=success)
 
     @authorized.role('api')

@@ -149,6 +149,7 @@ class RULE():
   DELTA_FLOOR = 6
   DELTA_CEILING = 7
   ANY_DATA = 8
+  GEOFENCE = 9
 
   TRIGGER_LABELS = {
     NO_DATA: "No Data (To Implement)",
@@ -158,7 +159,8 @@ class RULE():
     OUT_WINDOW: "Out Window",
     DELTA_FLOOR: "Delta Floor",
     DELTA_CEILING: "Delta Ceiling",
-    ANY_DATA: "Any Data"
+    ANY_DATA: "Any Data",
+    GEOFENCE: "Outside Geofence"
   }
 
   # Other Constants
