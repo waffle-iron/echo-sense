@@ -502,7 +502,7 @@ class SensorGroup(UserAccessible):
     Parent - Enterprise
     Key - ID
     '''
-    # TODO: Rename to Group so we can use for targets as well
+    # TODO: Are 'tags' a clearer concept?
     name = db.StringProperty()
     enterprise = db.ReferenceProperty(Enterprise)
     dt_created = db.DateTimeProperty(auto_now_add=True)
@@ -846,6 +846,7 @@ class Rule(db.Model):
     buffer = db.IntegerProperty(default=0)  # ms within which new alarm can't be raised
     value1 = db.FloatProperty(indexed=False)
     value2 = db.FloatProperty(indexed=False)
+    value_complex = db.TextProperty() # Require JSON?
     # Alerts
     alert_contacts = db.StringListProperty(indexed=False)  # String ID for recipients (sensor specific) to notify
     alert_message = db.TextProperty()
@@ -879,6 +880,7 @@ class Rule(db.Model):
             'consecutive_limit': self.consecutive_limit,
             'value1': self.value1,
             'value2': self.value2,
+            'value_complex': self.value_complex,
             'alert_message': self.alert_message,
             'alert_contacts': self.alert_contacts,
             'payment_contacts': self.payment_contacts,
@@ -924,6 +926,8 @@ class Rule(db.Model):
             self.value1 = float(params['value1'])
         if 'value2' in params:
             self.value2 = float(params['value2'])
+        if 'value_complex' in params:
+            self.value_complex = json.dumps(params['value_complex'])
         if 'alert_message' in params:
             self.alert_message = params['alert_message']
         if 'alert_contacts' in params:
@@ -1006,6 +1010,13 @@ class Rule(db.Model):
                 diff = delta - dceiling
         elif self.trigger == RULE.ANY_DATA:
             passed = val is not None
+        elif self.trigger == RULE.GEOFENCE:
+            geo_json = tools.getJson(self.value_complex)
+            if geo_json and val:
+                polygon = tools.polygon_from_geojson(geo_json)
+                gp = tools.safe_geopoint(val)
+                if gp:
+                    passed = not tools.point_inside_polygon(gp.lat, gp.lon, polygon)
         else:
             raise Exception("Unsupported trigger type: %s" % self.trigger)
         # logging.debug("%s %s at value: %s (diff %s)" % (self, "passed" if passed else "not passed", val, diff))

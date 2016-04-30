@@ -121,7 +121,7 @@ export default class Manage extends React.Component {
             props = {
                 'url': "/api/rule",
                 'id': 'sa',
-                'entity_name': "Rules",
+                'entity_name': "Rule",
                 'attributes': [
                     { name: 'id', label: "ID" },
                     { name: 'name', label: "Name", editable: true },
@@ -135,6 +135,7 @@ export default class Manage extends React.Component {
                     { name: 'consecutive_limit', label: "Consecutive Limit (deactivate after)", editable: true, editOnly: true },
                     { name: 'value1', label: "Value 1", editable: true, editOnly: true },
                     { name: 'value2', label: "Value 2", editable: true, editOnly: true },
+                    { name: 'value_complex', label: "Complex Value", editable: true, editOnly: true, inputType: 'textarea', hint: "JSON representation of complex rule values. See geojson.io for GeoJSON editor." },
                     { name: 'alert_contacts', label: "Alert Contacts (list of contact aliases)", editable: true, editOnly: true },
                     { name: 'alert_message', label: "Alert Message", editable: true, editOnly: true },
                     { name: 'payment_contacts', label: "Payment Contacts (list of contact aliases)", editable: true, editOnly: true },
@@ -151,7 +152,7 @@ export default class Manage extends React.Component {
             props = {
                 'url': "/api/group", // Duplicate fetch here and flux
                 'id': 'sa',
-                'entity_name': "Sensor Groups",
+                'entity_name': "Sensor Group",
                 'attributes': [
                     { name: 'id', label: "ID" },
                     { name: 'name', label: "Name", editable: true },
@@ -171,7 +172,7 @@ export default class Manage extends React.Component {
             props = {
                 'url': "/api/target",
                 'id': 'sa',
-                'entity_name': "Targets",
+                'entity_name': "Target",
                 'attributes': [
                     { name: 'id', label: "ID" },
                     { name: 'name', label: "Name", editable: true },
@@ -192,7 +193,7 @@ export default class Manage extends React.Component {
             props = {
                 'url': "/api/processtask",
                 'id': 'sa',
-                'entity_name': "Process Tasks",
+                'entity_name': "Process Task",
                 'attributes': [
                     { name: 'id', label: "ID" },
                     { name: 'label', label: "Label", editable: true },
