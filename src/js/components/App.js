@@ -97,6 +97,7 @@ export default class App extends React.Component {
               <div ><Link to="/app/sensors"><i className="fa fa-map-pin"></i></Link></div>
               <div ><Link to="/app/targets"><i className="fa fa-th-large"></i></Link></div>
               <div ><Link to="/app/groups"><i className="fa fa-folder"></i></Link></div>
+              <div ><Link to="/app/analysis/viewer"><i className="fa fa-bar-chart"></i></Link></div>
               <div hidden={!can_write}><Link to="/app/reports"><i className="fa fa-cloud-download"></i></Link></div>
               <div><a href="javascript:void(0)" onClick={this.toggle_search.bind(this, true)}><i className="fa fa-search"/></a></div>
             </nav>

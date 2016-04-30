@@ -94,7 +94,7 @@ export default class AdminSpoof extends React.Component {
                 <div>
                     <pre><b>POST</b> { this.get_post_url() }</pre>
 
-                    <label>Sensor Key Name</label>
+                    <label>Sensor</label>
                     <Select options={opts} value={this.state.form.sensor_kn} onChange={this.changeHandlerVal.bind(this, 'form', 'sensor_kn')}/>
 
                     <label>JSON body</label>

@@ -24,7 +24,12 @@ class EchoSenseApp(handlers.BaseRequestHandler):
               "name" : "visualization",
               "version" : "1",
               "language" : "en",
-              "packages": "table"
+              "packages": ["table", "timeline"]
+            },
+            {
+                "name": "maps",
+                "version": "3",
+                "language": "en"
             }
           ]
         }

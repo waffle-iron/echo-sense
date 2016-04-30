@@ -1042,6 +1042,7 @@ class Analysis(db.Expando):
     """
     enterprise = db.ReferenceProperty(Enterprise)
     sensor = db.ReferenceProperty(Sensor)
+    sensortype = db.ReferenceProperty(SensorType)
     label = db.StringProperty(indexed=False)
     dt_created = db.DateTimeProperty(auto_now_add=True)
     dt_updated = db.DateTimeProperty(auto_now_add=True)
@@ -1056,7 +1057,6 @@ class Analysis(db.Expando):
             'kn': self.key().name(),
             'ts_created': tools.unixtime(self.dt_created),
             'ts_updated': tools.unixtime(self.dt_updated),
-            'sensor_id': tools.getKey(Analysis, 'sensor', self, asID=True),
             'sensor_kn': tools.getKey(Analysis, 'sensor', self, asID=False, asKeyName=True)
         }
         if with_props:
@@ -1098,15 +1098,18 @@ class Analysis(db.Expando):
         Pass one of analysis_key_pattern or kn
         '''
         kn = Analysis._key_name(analysis_key_pattern, sensor=sensor)
-        a = Analysis.get_or_insert(kn, parent=sensor.enterprise, enterprise=sensor.enterprise, sensor=sensor)
+        a = Analysis.get_or_insert(kn, parent=sensor.enterprise, enterprise=sensor.enterprise, sensor=sensor, sensortype=sensor.sensortype)
         return a
 
     @staticmethod
-    def Fetch(enterprise=None, sensor=None, limit=50):
+    def Fetch(enterprise=None, sensor=None, sensortype_id=None, limit=50):
         if sensor:
             return sensor.analysis_set.order("-dt_created").fetch(limit=limit)
         elif enterprise:
-            return enterprise.analysis_set.order("-dt_created").fetch(limit=limit)
+            q = enterprise.analysis_set.order("-dt_created")
+            if sensortype_id:
+                q.filter("sensortype =", db.Key.from_path('SensorType', sensortype_id, parent=enterprise.key()))
+            return q.fetch(limit=limit)
         else:
             return []
 
