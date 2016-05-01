@@ -304,7 +304,7 @@ export default class SensorDetail extends React.Component {
           <div className="well">
             <div className="row">
               <div className="col-sm-6">
-                <h4>Analyses</h4>
+                <h4>Analyses (<Link to={`/app/analysis/viewer?skn=${s.kn}`}>history</Link>)</h4>
                 <ul className="list-group">
                   { _analyses }
                 </ul>

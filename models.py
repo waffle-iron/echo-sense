@@ -1056,7 +1056,7 @@ class Analysis(db.Expando):
             'key': str(self.key()),
             'kn': self.key().name(),
             'ts_created': tools.unixtime(self.dt_created),
-            'ts_updated': tools.unixtime(self.dt_updated),
+            'ts_updated': tools.unixtime(self.dt_updated) if self.dt_updated else None,
             'sensor_kn': tools.getKey(Analysis, 'sensor', self, asID=False, asKeyName=True)
         }
         if with_props:

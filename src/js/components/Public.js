@@ -61,7 +61,7 @@ class Public extends React.Component {
   }
 
   navigate_to_page(page) {
-    history.replaceState(null, page);
+    history.pushState(null, page);
   }
 
   render_menu() {

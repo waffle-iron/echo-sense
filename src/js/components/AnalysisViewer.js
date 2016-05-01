@@ -118,6 +118,7 @@ export default class AnalysisViewer extends React.Component {
             var chartColumns = [
                 {type: 'string', label: 'Sensor Key', id: 'sensor'},
                 {type: 'string', label: 'Value', id: 'value'},
+                {type: 'string', role: 'tooltip'},
                 {type: 'date', label: 'Start', id: 'start'},
                 {type: 'date', label: 'End', id: 'end'}
             ];
@@ -130,13 +131,17 @@ export default class AnalysisViewer extends React.Component {
                 var start = new Date(a.ts_created);
                 var ts_updated = a.ts_updated;
                 // Google viz can't handle same start/end
-                if (ts_updated <= a.ts_created) ts_updated = ts_updated + this.MIN_CHART_DURATION;
+                if (ts_updated == null || ts_updated <= a.ts_created) ts_updated = ts_updated + this.MIN_CHART_DURATION;
                 var end = new Date(ts_updated);
-                return [a.sensor_kn, value, start, end];
+                var akn = a.kn;
+                return [a.sensor_kn, value, akn, start, end];
             }, this);
             _visualization = (
-                <GChart title="Analysis Timeline" columns={chartColumns} data={chartData} ref="chart" type="Timeline" />
-                )
+                <div>
+                    <p>The below timeline shows sensors in rows, and bars indicate individual analysis objects. Bars span from the date of creation to the date of last update.</p>
+                    <GChart title="Analysis Timeline" columns={chartColumns} data={chartData} ref="chart" type="Timeline" height="600" />
+                </div>
+            );
         }
 
         var _sensor_types = util.flattenDict(this.props.sensor_types).map(function(st) {
