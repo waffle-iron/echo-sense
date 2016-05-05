@@ -3,8 +3,8 @@ var UserActions = require('actions/UserActions');
 import {findItemById, findIndexById} from 'utils/store-utils';
 import router from 'config/router';
 var toastr = require('toastr');
+var AppConstants = require('constants/AppConstants');
 import history from 'config/history'
-const USER_STORAGE_KEY = 'echosenseUser';
 
 class UserStore {
     constructor() {
@@ -24,13 +24,13 @@ class UserStore {
         this.error = null;
         console.log("Stored user "+user.email);
         // api.updateToken(user.token);
-        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+        localStorage.setItem(AppConstants.USER_STORAGE_KEY, JSON.stringify(user));
     }
 
     loadLocalUser() {
         var user;
         try {
-            user = JSON.parse(localStorage.getItem(USER_STORAGE_KEY));
+            user = JSON.parse(localStorage.getItem(AppConstants.USER_STORAGE_KEY));
         } finally {
             if (user) {
                 console.log("Successfully loaded user " + user.email);
@@ -42,7 +42,7 @@ class UserStore {
     clearUser() {
         this.user = null;
         // api.updateToken(null);
-        localStorage.removeItem(USER_STORAGE_KEY);
+        localStorage.removeItem(AppConstants.USER_STORAGE_KEY);
     }
 
     onLogin(data) {

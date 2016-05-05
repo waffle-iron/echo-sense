@@ -78,7 +78,8 @@ var Logs = React.createClass({displayName: 'Logs',
       <li className="list-group-item">
         <Link to={`/app/analysis/${a.kn}`} className="title">{ a.kn }</Link>
         <span className="sub">{ a.sensor_id }</span>
-        <span data-ts={a.ts_updated}></span>
+        <span className="sub">Created: <span data-ts={a.ts_created}></span></span>
+        <span className="sub">Updated: <span data-ts={a.ts_updated}></span></span>
       </li>
       );
   },
@@ -100,6 +101,8 @@ var Logs = React.createClass({displayName: 'Logs',
     return (
         <div>
           <h2><i className="fa fa-list-ul"></i> Logs</h2>
+
+          <p className="lead">Select below to change the log type</p>
 
           <DropDownMenu value={this.state.section} onChange={this.section_change.bind(this)}>
             <MenuItem value="sensors" primaryText="Sensors"/>

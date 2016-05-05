@@ -381,7 +381,7 @@ class User(db.Model):
 
     def get_groups(self):
         if self.group_ids:
-            return SensorGroup.get_by_id(self.group_ids)
+            return [sg for sg in SensorGroup.get_by_id(self.group_ids) if sg]
         else:
             return []
 

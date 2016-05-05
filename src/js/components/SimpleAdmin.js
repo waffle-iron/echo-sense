@@ -21,15 +21,14 @@ class EditForm extends React.Component {
     if (targ.type == 'checkbox') valueForDB = targ.checked;
     else valueForDB = att.toValue ? att.toValue(targ.value) : targ.value;
     item[prop] = valueForDB;
-    this.props.onFormChange(item, this.props.creating_new);
+    this.props.onFormChange(item);
   }
   handleSelectChange(att, value) {
     var item = clone(this.props.item) || {};
     var valueForDB = value;
-    console.log(valueForDB);
     if (item != null) {
       item[att.name] = valueForDB;
-      this.props.onFormChange(item, this.props.creating_new);
+      this.props.onFormChange(item);
     }
   }
   render() {
@@ -308,11 +307,29 @@ export default class SimpleAdmin extends React.Component {
   cancel() {
     this.setState({status: 'closed', selected: null});
   }
-  edit(item, creating_new, callback) {
-    this.setState({selected: item, status: creating_new ? 'new' : 'edit'}, function() {
+
+  form_change(item) {
+    this.setState({selected: item});
+  }
+
+  begin_editing(item, creating_new, callback) {
+    var form = clone(item);
+    // Update props based on formFromValue adapters, if present
+    this.props.attributes.forEach(function(att, i) {
+      if (typeof(att.formFromValue) === "function") {
+        try {
+          form[att.name] = att.formFromValue(item[att.name], item);
+        } catch (e) { console.info(e); }
+      } else if (form[att.name] == null && att.defaultValue) {
+        form[att.name] = att.defaultValue;
+      }
+    });
+    console.log(form);
+    this.setState({selected: form, status: creating_new ? 'new' : 'edit'}, function() {
       if (callback) callback();
     });
   }
+
   delete() {
     var that = this;
     this.setState({status: 'closed'}, function() {
@@ -399,7 +416,7 @@ export default class SimpleAdmin extends React.Component {
                 is_selected={is_selected}
                 attributes={this.props.attributes}
                 unique_key={this.props.unique_key}
-                onEdit={this.edit.bind(this, item, false)}
+                onEdit={this.begin_editing.bind(this, item, false)}
                 onDelete={this.delete.bind(this, item)}
                 detail_url={this.props.detail_url}
                 additionalActions={this.props.additionalActions}
@@ -440,7 +457,7 @@ export default class SimpleAdmin extends React.Component {
           hidden={this.state.status == 'closed'}
           item={this.state.selected}
           attributes={this.props.attributes}
-          onFormChange={this.edit.bind(this)}
+          onFormChange={this.form_change.bind(this)}
           creating_new={this.state.status=='new'}/>
       </Dialog>
     );

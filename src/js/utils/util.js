@@ -817,6 +817,10 @@ var util = {
         return parts.join(".");
     },
 
+    comma_join: function(list) {
+        return list.join(',');
+    },
+
     serializeObject: function(jqel) {
         var o = {};
         var a = jqel.serializeArray();
