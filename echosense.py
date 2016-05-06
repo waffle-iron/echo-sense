@@ -108,6 +108,7 @@ app = webapp2.WSGIApplication(
       webapp2.Route('/api/payment', handler=api.PaymentAPI, handler_method="list", methods=["GET"]),
       webapp2.Route('/api/upload/get_url', handler=api.GetUploadUrl, name="apiGetUploadUrl"),
       webapp2.Route('/api/search', handler=api.SearchAPI, handler_method="search", name="SearchAPI", methods=["GET"]),
+      webapp2.Route('/api/search/delete/<doc_key>', handler=api.SearchAPI, handler_method="delete_doc", name="SearchAPI", methods=["GET"]),
 
       # Communications
       webapp2.Route('/api/email/send', handler=api.SendEmail, name="apiSendEmail"),

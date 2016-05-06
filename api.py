@@ -1237,6 +1237,13 @@ class SendEmail(handlers.JsonRequestHandler):
 class SearchAPI(handlers.JsonRequestHandler):
 
     @authorized.role('user')
+    def delete_doc(self, doc_key, d):
+        index = d['enterprise'].get_search_index()
+        if index:
+            index.delete(doc_key)
+            self.response.out.write("OK")
+
+    @authorized.role('user')
     def search(self, d):
         RESULT_LIMIT = 20
         term = self.request.get('term')

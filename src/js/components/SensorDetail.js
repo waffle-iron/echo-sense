@@ -208,20 +208,6 @@ export default class SensorDetail extends React.Component {
     });
   }
 
-  showAnalysisDetail(a) {
-    bootbox.dialog({
-        title: "Analysis " + a.kn,
-        message: "<pre>"+JSON.stringify(a.columns)+"</pre>"
-    });
-  }
-
-  showRecordDetail(r) {
-    bootbox.dialog({
-        title: "Data Point at " + util.printDate(r.ts),
-        message: "<pre>"+JSON.stringify(r.columns)+"</pre>"
-    });
-  }
-
   handle_contacts_change(contacts_json) {
     var s = this.state.sensor;
     var contacts = JSON.stringify(contacts_json);
@@ -250,7 +236,7 @@ export default class SensorDetail extends React.Component {
       }, this);
       var _analyses = this.state.analyses.map(function(a, i, arr) {
         return <li className="list-group-item" key={"an"+i}>
-          <span className="title" title={ a.kn } onClick={this.showAnalysisDetail.bind(this, a)}>Analysis</span>
+          <Link className="title" title={ a.kn } to={`/app/analysis/${a.kn}`}>Analysis</Link>
           <span className="sub" data-ts={a.ts_created}></span>
         </li>
       }, this);

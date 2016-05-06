@@ -33,7 +33,8 @@ export default class SensorContactEditor extends React.Component {
         original_role: "",
         role: "",
         uid: null
-      }
+      },
+      issue: null
     };
   }
   static getStores() {
@@ -75,11 +76,17 @@ export default class SensorContactEditor extends React.Component {
     if (form.role.length > 0) {
       if (form.original_role.length > 0) delete contacts[form.original_role];
       var uid = u != null ? u.id : form.uid;
-      contacts[form.role] = uid;
-      this.setState({editing: false}, function() {
-        that.props.onChange(contacts);
-      })
-    } else this.setState({editing: false});
+      if (uid != null) {
+        contacts[form.role] = uid;
+        this.setState({editing: false, issue: null}, function() {
+          that.props.onChange(contacts);
+        });
+      } else this.setState({editing: false, issue: null});
+    } else this.setState({issue: "No Role"});
+  }
+
+  dismiss() {
+    this.setState({editing: false});
   }
 
   render_user(u) {
@@ -111,6 +118,12 @@ export default class SensorContactEditor extends React.Component {
         );
       }
     }
+    var actions = [
+      <FlatButton label="Save" onClick={this.select_user.bind(this, null)} primary={true} />,
+      <FlatButton label="Dismiss" onClick={this.dismiss.bind(this)} />,
+    ];
+    var _issue;
+    if (this.state.issue) _issue = <div className="alert alert-danger">{ this.state.issue }</div>
     return (
         <div>
           <ul className="list-group">
@@ -121,7 +134,11 @@ export default class SensorContactEditor extends React.Component {
             <button className="btn btn-default" onClick={this.new_contact.bind(this)}>Add Contact</button>
           </div>
 
-          <Dialog open={this.state.editing} onRequestClose={this.toggle_editing.bind(this, false)} actions={[<FlatButton label="Done" onClick={this.select_user.bind(this, null)} />]}>
+          <Dialog open={this.state.editing} onRequestClose={this.toggle_editing.bind(this, false)} actions={actions} autoScrollBodyContent={true} autoDetectWindowHeight={true}>
+            { _issue }
+
+            <p className="lead">Enter a role name, and choose a user below</p>
+
             <TextField floatingLabelText="ID / Role" hint="No spaces, lower case" value={form.role} onChange={this.changeHandler.bind(this, 'form', 'role')} fullWidth={true} />
 
             <h3>Users</h3>
