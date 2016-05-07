@@ -18,7 +18,7 @@ class UserActions {
 		try {
 			var _this = this;
 			var response = $.post('/api/logout', {}, function(res) {
-				_this.dispatch({ success: response.success });				
+				_this.dispatch({ success: response.success });
 			}, 'json');
 		} catch (err) {
 			console.error(err);
@@ -30,7 +30,7 @@ class UserActions {
 		try {
 			var _this = this;
 			var response = $.post('/api/login', data, function(res) {
-				_this.dispatch({ok: res.success, user: res.data.user, error: res.message});				
+				_this.dispatch({ok: res.success, user: res.data.user, error: res.message});
 			}, 'json');
 		} catch (err) {
 			console.error(err);

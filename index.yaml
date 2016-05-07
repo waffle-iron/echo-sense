@@ -52,6 +52,13 @@ indexes:
   - name: dt_created
     direction: desc
 
+- kind: Analysis
+  properties:
+  - name: enterprise
+  - name: sensortype
+  - name: dt_created
+    direction: desc
+
 - kind: Payment
   properties:
   - name: enterprise

@@ -1,10 +1,3 @@
-/*
-Author: Jeremy Gordon
-Version: 0.1
-Created: May 12, 2014
-Updated: May 12, 2014
-*/
-
 var React = require('react');
 
 var LoadStatus = React.createClass({displayName: 'LoadStatus',

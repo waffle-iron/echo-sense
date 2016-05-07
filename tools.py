@@ -568,7 +568,7 @@ def normalize_to_ascii(text):
 def safe_geopoint(geo_str):
     '''
     geo_str as lat,lon
-    returns a db.GeoPt if possible and if not 0.0,0.0
+    returns a db.GeoPt if possible and if not None
     '''
     gp = None
     if geo_str is None:
@@ -676,8 +676,13 @@ def variable_replacement(text, replacements=None, var_parens="{}"):
             key = paren_open + key + paren_close
 
             if key in text:
-                # logging.debug("%s->%s" % (key, val))
-                text = text.replace(key, val)
+                if callable(val):
+                    set_val = val()
+                    if set_val is None:
+                        set_val = "--"
+                else:
+                    set_val = val
+                text = text.replace(key, str(set_val))
 
     return text
 
@@ -754,3 +759,45 @@ def add_batched_task(callable, name_prefix, interval_mins=5, warnOnDuplicate=Tru
     taskName = "bt_%s_%s_%s" % (name_prefix, callable.__name__, unixtime(runAt))
     # logging.debug("Scheduling task for %s - %s" % (runAt, taskName))
     safe_add_task(callable, _name=taskName, _eta=runAt, *args, **kwargs)
+
+def polygon_from_geojson(geoj):
+    '''
+    Args:
+        geoj: dictionary
+
+    Returns:
+        list: coordinates as list of lists or tuples (lat,lng)
+    '''
+    if "features" in geoj:
+        features = geoj.get('features')
+        if features:
+            f = features[0]
+            if "geometry" in f:
+                if "coordinates" in f["geometry"]:
+                    return f["geometry"]["coordinates"][0]
+    return None
+
+def point_inside_polygon(x,y,poly):
+    '''Determine whether a point is within a polygon.
+
+    Args:
+        x, y: coordinates
+        poly: list of (lat, lng) tuples
+
+    Returns:
+        bool: If point is inside polygon
+    '''
+    n = len(poly)
+    inside = False
+    p1x,p1y = poly[0]
+    for i in range(n+1):
+        p2x,p2y = poly[i % n]
+        if y > min(p1y,p2y):
+            if y <= max(p1y,p2y):
+                if x <= max(p1x,p2x):
+                    if p1y != p2y:
+                        xinters = (y-p1y)*(p2x-p1x)/(p2y-p1y)+p1x
+                    if p1x == p2x or x <= xinters:
+                        inside = not inside
+        p1x,p1y = p2x,p2y
+    return inside

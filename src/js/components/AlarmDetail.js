@@ -98,12 +98,16 @@ var AlarmDetail = React.createClass({displayName: 'AlarmDetail',
           <span className="sub">{ r.columns[a.rule_column] }</span>
         </li>
       }, this);
+      var first_record;
+      if (a.first_record_kn) first_record = <span><b>First Record:</b> <Link to={`/app/data/${a.sensor_kn}/record/${a.first_record_kn}`}>{ a.first_record_kn }</Link></span>
       content = (
         <div>
           <h1><i className="fa fa-warning"></i> { a.rule_name }</h1>
           <div>
             <b>Started:</b> <span>{ util.printDate(a.ts_start, true) }</span> <span data-ts={a.ts_start}></span><br/>
             <b>Ended:</b> <span>{ util.printDate(a.ts_end, true) }</span> <span data-ts={a.ts_end}></span><br/>
+            <b>Sensor:</b> <span><Link to={`/app/sensors/${a.sensor_kn}`}>{ a.sensor_kn }</Link></span><br/>
+            { first_record }
             <b>Apex:</b> <span>{ a.apex }</span>
           </div>
 

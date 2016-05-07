@@ -21,6 +21,8 @@ class GroupStore {
         }
     }
 
+    // Public
+
     get_groups() {
 	    var groups = this.getState().groups;
 	    if (isEmpty(groups)) {
@@ -30,6 +32,14 @@ class GroupStore {
 	    	return groups;
 	    }
 	}
+
+	// Automatic
+
+    manualUpdate(grp) {
+    	console.log(grp);
+    	this.groups[grp.key] = grp;
+    }
+
 
 
 }

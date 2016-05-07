@@ -1,5 +1,5 @@
 var $ = require('jquery');
-var UserActions = require('actions/UserActions');
+var AppConstants = require('constants/AppConstants');
 
 var api = {
 
@@ -9,7 +9,10 @@ var api = {
 			if (success) success(res);
 		}, 'json').fail(function(jqxhr) {
 			var status = jqxhr.status;
-			if (status == 401) UserActions.logout();
+			if (status == 401) {
+				window.location = "/";
+				localStorage.removeItem(AppConstants.USER_STORAGE_KEY);
+			}
 		});
 	},
 
@@ -19,7 +22,10 @@ var api = {
 			if (success) success(res);
 		}).fail(function(jqxhr) {
 			var status = jqxhr.status;
-			if (status == 401) UserActions.logout();
+			if (status == 401) {
+				window.location = "/";
+				localStorage.removeItem(AppConstants.USER_STORAGE_KEY);
+			}
 		});
 	}
 

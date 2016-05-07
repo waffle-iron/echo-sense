@@ -51,7 +51,7 @@ var FetchedList = React.createClass({displayName: 'FetchedList',
       if (this.props.renderItem != null) return this.props.renderItem(item);
       else {
         var name = item[this.props.labelProp] || "Unnamed";
-        return <li className="list-group-item">
+        return <li className="list-group-item" key={i}>
           <a href="javascript:void(0)" className="title" onClick={this.handleItemClick.bind(this, item)}>{ name }</a>
           </li>
       }

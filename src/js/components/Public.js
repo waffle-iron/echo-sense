@@ -14,6 +14,7 @@ var $ = require('jquery');
 
 var mui = require('material-ui'),
   FontIcon = mui.FontIcon,
+  Dialog = mui.Dialog,
   FlatButton = mui.FlatButton;
 
 var UserActions = require('actions/UserActions');
@@ -29,8 +30,18 @@ class Public extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      ln_open: false
+      ln_open: false,
+      faqs_open: false
     };
+    this.FAQ = [
+      { q: "Who built Echo Sense?", a: "The Nairobi-based team at Echo Mobile Limited." },
+      { q: "Who can use Echo Sense? How much does it cost?", a: "Anyone. Echo Sense is free to use, customize, and deploy under the MIT open source license." },
+      { q: "What can Echo Sense be used for?", a: "A wide variety of applications may be deployed using Echo Sense. Agricultural applications include monitoring soil acidity and moisture, the temperature on drying tables, local weather patterns, etc. Other applications may leverage structural sensors to monitor the usage of assets or buildings, or location-tracking devices to monitor movement patterns and behavior of vehicles, etc. At the basic level, Echo Sense supports any usage involving the deployment of low-cost sensors to monitor one or more aspects of a program, project, or location over time." },
+      { q: "What devices can I use?", a: "Any sensor that can be configured to send data to a remove server can be used. Currently HTTP is the primary communication protocol, but Echo Sense has been used with devices communicating via TCP and UDP with the aid of a light-weight TCP/UDP server."},
+      { q: "I want to deploy an Echo Sense project, what do I do?", a: "Get in touch with the Echo Mobile deployment team by reaching out to sense@echomobile.org. Alternatively, organizations with an in-house developer can spin up an instance and customize it, or use it off-the-shelf right away."},
+      { q: "How can I get involved?",
+        a: <div>Developers can join the <a href="https://github.com/orgs/echomobi/teams/echo-contributors">Echo Contributors</a> team on Github, fork the repository, and start developing. Want to get involved in another way? Send us an email.</div> }
+    ]
   }
   static getStores() {
     return [UserStore];
@@ -61,18 +72,35 @@ class Public extends React.Component {
   }
 
   navigate_to_page(page) {
-    history.replaceState(null, page);
+    history.pushState(null, page);
   }
 
   render_menu() {
     var menu_items = [
       {title: "Documentation", link: "/docs/index.html", icon: <FontIcon className="material-icons">chrome_reader_mode</FontIcon>},
+      {title: "FAQs", onClick: this.toggle_faqs.bind(this, true), icon: <FontIcon className="material-icons">help</FontIcon>},
       {title: "React", link: "http://facebook.github.io/react/", icon: <FontIcon className="material-icons">build</FontIcon>},
       {title: "Google App Engine", link: "https://cloud.google.com/appengine/docs", icon: <FontIcon className="material-icons">cloud_circle</FontIcon>},
     ];
     return menu_items.map(function(mi) {
-      return <MenuItem onClick={this.goto_page.bind(this, mi.link)} leftIcon={mi.icon}>{ mi.title }</MenuItem>
+      var click = mi.onClick || this.goto_page.bind(this, mi.link);
+      return <MenuItem onClick={click} leftIcon={mi.icon}>{ mi.title }</MenuItem>
     }, this);
+  }
+
+  toggle_faqs(open) {
+    this.setState({faqs_open: open});
+  }
+
+  render_faqs() {
+    return this.FAQ.map(function(faq) {
+      return (
+        <div>
+          <h3>{ faq.q }</h3>
+          <div>{ faq.a }</div>
+        </div>
+        )
+    });
   }
 
   render() {
@@ -87,6 +115,10 @@ class Public extends React.Component {
           <LeftNav docked={false} open={this.state.ln_open} onRequestChange={this.handle_leftnav_change.bind(this)}>
             { this.render_menu() }
           </LeftNav>
+
+          <Dialog title="FAQs" open={this.state.faqs_open} onRequestClose={this.toggle_faqs.bind(this, false)} autoDetectWindowHeight={true} autoScrollBodyContent={true}>
+            { this.render_faqs() }
+          </Dialog>
 
           <div>
             { this.props.children }

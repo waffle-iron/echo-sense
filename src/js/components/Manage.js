@@ -106,7 +106,8 @@ export default class Manage extends React.Component {
                     return "/admin/sensortype/"+item.key;
                 },
                 getListFromJSON: function(data) { return data.data.sensortypes; },
-                getObjectFromJSON: function(data) { return data.data.sensortype; }
+                getObjectFromJSON: function(data) { return data.data.sensortype; },
+                onItemCreated: function(item) { SensorTypeActions.manualUpdate(item); }
             }
         } else if (tab == "rules") {
             var plimit_type_opts = [];
@@ -120,7 +121,7 @@ export default class Manage extends React.Component {
             props = {
                 'url': "/api/rule",
                 'id': 'sa',
-                'entity_name': "Rules",
+                'entity_name': "Rule",
                 'attributes': [
                     { name: 'id', label: "ID" },
                     { name: 'name', label: "Name", editable: true },
@@ -134,9 +135,10 @@ export default class Manage extends React.Component {
                     { name: 'consecutive_limit', label: "Consecutive Limit (deactivate after)", editable: true, editOnly: true },
                     { name: 'value1', label: "Value 1", editable: true, editOnly: true },
                     { name: 'value2', label: "Value 2", editable: true, editOnly: true },
-                    { name: 'alert_contacts', label: "Alert Contacts (list of contact aliases)", editable: true, editOnly: true },
+                    { name: 'value_complex', label: "Complex Value", editable: true, editOnly: true, inputType: 'textarea', hint: "JSON representation of complex rule values. See geojson.io for GeoJSON editor." },
+                    { name: 'alert_contacts', label: "Alert Contacts (list of contact aliases)", editable: true, editOnly: true, formFromValue: util.comma_join },
                     { name: 'alert_message', label: "Alert Message", editable: true, editOnly: true },
-                    { name: 'payment_contacts', label: "Payment Contacts (list of contact aliases)", editable: true, editOnly: true },
+                    { name: 'payment_contacts', label: "Payment Contacts (list of contact aliases)", editable: true, editOnly: true, formFromValue: util.comma_join },
                     { name: 'payment_amount', label: "Payment Amount (user currency)", editable: true, editOnly: true }
                 ],
                 'add_params': {},
@@ -150,7 +152,7 @@ export default class Manage extends React.Component {
             props = {
                 'url': "/api/group", // Duplicate fetch here and flux
                 'id': 'sa',
-                'entity_name': "Sensor Groups",
+                'entity_name': "Sensor Group",
                 'attributes': [
                     { name: 'id', label: "ID" },
                     { name: 'name', label: "Name", editable: true },
@@ -159,7 +161,8 @@ export default class Manage extends React.Component {
                 'unique_key': 'key',
                 'max': 50,
                 getListFromJSON: function(data) { return data.data.groups; },
-                getObjectFromJSON: function(data) { return data.data.group; }
+                getObjectFromJSON: function(data) { return data.data.group; },
+                onItemCreated: function(item) { GroupActions.manualUpdate(item); }
             }
 
         } else if (tab == "targets") {
@@ -169,7 +172,7 @@ export default class Manage extends React.Component {
             props = {
                 'url': "/api/target",
                 'id': 'sa',
-                'entity_name': "Targets",
+                'entity_name': "Target",
                 'attributes': [
                     { name: 'id', label: "ID" },
                     { name: 'name', label: "Name", editable: true },
@@ -181,7 +184,8 @@ export default class Manage extends React.Component {
                 'unique_key': 'key',
                 'max': 50,
                 getListFromJSON: function(data) { return data.data.targets; },
-                getObjectFromJSON: function(data) { return data.data.target; }
+                getObjectFromJSON: function(data) { return data.data.target; },
+                onItemCreated: function(item) { TargetActions.manualUpdate(item); }
             }
 
         } else if (tab == "processes") {
@@ -189,16 +193,16 @@ export default class Manage extends React.Component {
             props = {
                 'url': "/api/processtask",
                 'id': 'sa',
-                'entity_name': "Process Tasks",
+                'entity_name': "Process Task",
                 'attributes': [
                     { name: 'id', label: "ID" },
                     { name: 'label', label: "Label", editable: true },
                     { name: 'interval', label: "Interval (secs)", editable: true, hint: "Task scheduled to run up to [interval] after new data is received." },
-                    { name: 'rule_ids', label: "Rules", editable: true, editOnly: true, hint: "Comma separated list of rule IDs" },
+                    { name: 'rule_ids', label: "Rules", editable: true, editOnly: true, hint: "Comma separated list of rule IDs", formFromValue: util.comma_join },
                     { name: 'time_start', label: "Start Time", editable: true },
                     { name: 'time_end', label: "End Time", editable: true },
-                    { name: 'month_days', label: "Days of Month (1 - 31)", editOnly: true, editable: true, hint: "Task will run if day matches either month day or week day, so either or both must be set. Comma separated list of ints." },
-                    { name: 'week_days', label: "Days of Week (1:Mon - 7:Sun)", editOnly: true, editable: true },
+                    { name: 'month_days', label: "Days of Month (1 - 31)", editOnly: true, editable: true, formFromValue: util.comma_join, hint: "Task will run if day matches either month day or week day, so either or both must be set. Comma separated list of ints." },
+                    { name: 'week_days', label: "Days of Week (1:Mon - 7:Sun)", editOnly: true, formFromValue: util.comma_join, editable: true },
                     { name: 'spec', label: "Spec", inputType: "textarea", editOnly: true, editable: true, hint: "JSON object which can contain a 'processers' Array of objects with props: analysis_key_pattern, calculation, column." }
                 ],
                 'add_params': {},

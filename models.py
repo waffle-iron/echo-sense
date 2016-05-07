@@ -2,7 +2,7 @@ import logging
 from datetime import datetime, timedelta
 import webapp2
 from google.appengine.ext import db, deferred, blobstore
-from google.appengine.api import memcache, mail, images, taskqueue
+from google.appengine.api import memcache, mail, images, taskqueue, search
 import json
 import services
 import outbox
@@ -17,7 +17,10 @@ from user_defined_props import DecimalProperty
 class UserAccessible(db.Model):
     '''
     Parent class for items that have gated user access (e.g. sensor, entity)
+    Also enables full-text-search functionality
     '''
+
+    FTS_DOC_NAME = "label"
 
     @classmethod
     def GetAccessible(cls, key_or_id, acc, parent=None):
@@ -50,6 +53,47 @@ class UserAccessible(db.Model):
             return tools.getKey(None, 'enterprise', self, asID=False)
         else:
             return self.enterprise
+
+    def get_doc_id(self):
+        '''Override'''
+        return None
+
+    def get_searchable_type(self):
+        '''Override'''
+        return None
+
+    def get_searchable_label(self):
+        '''Override'''
+        return None
+
+    def get_searchable_index(self):
+        eid = tools.getKey(None, 'enterprise', self, asID=True)
+        return search.Index(name=FTS_INDEX % eid)
+
+    def full_doc_id(self):
+        doc_id = self.get_searchable_type() + ":" + str(self.get_doc_id())
+        return doc_id
+
+    def generate_search_doc(self):
+        doc_id = self.full_doc_id()
+        fields = [
+            search.TextField(name=self.FTS_DOC_NAME, value=self.get_searchable_label())
+        ]
+        sd = search.Document(doc_id=doc_id, fields=fields, language='en')
+        return sd
+
+    def updateSearchDoc(self, delete=False):
+        index = self.get_searchable_index()
+        try:
+            doc_id = self.full_doc_id()
+            if doc_id:
+                if delete:
+                    index.delete([doc_id])
+                else:
+                    sd = self.generate_search_doc()
+                    index.put(sd)
+        except search.Error, e:
+            logging.debug("Search Index Error when updating search doc: %s" % e)
 
 
 class Enterprise(db.Model):
@@ -122,6 +166,8 @@ class Enterprise(db.Model):
             return config[gateway_id].get(prop)
         return None
 
+    def get_search_index(self):
+        return search.Index(name=FTS_INDEX % self.key().id())
 
     def get_default_sensortype(self):
         st_id = None
@@ -333,6 +379,12 @@ class User(db.Model):
             atts = {}
         return atts
 
+    def get_groups(self):
+        if self.group_ids:
+            return [sg for sg in SensorGroup.get_by_id(self.group_ids) if sg]
+        else:
+            return []
+
 class Target(UserAccessible):
     '''
     Parent - Enterprise
@@ -405,9 +457,28 @@ class Target(UserAccessible):
             if int(val) in range(360):
                 self.bearing = int(val)
 
+    def can_delete(self):
+        any_linked_sensor = self.sensor_set.get() is not None
+        return not any_linked_sensor
+
     def clean_delete(self, **params):
-        self.delete()
-        return True
+        if self.can_delete():
+            self.updateSearchDoc(delete=True)
+            self.delete()
+            return True
+        return False
+
+    # FTS overrides
+
+    def get_doc_id(self):
+        return self.key().id()
+
+    def get_searchable_type(self):
+        return 'target'
+
+    def get_searchable_label(self):
+        '''Override'''
+        return self.name
 
     @staticmethod
     def Fetch(user, updated_since=None, group_id=None, limit=50):
@@ -426,12 +497,12 @@ class Target(UserAccessible):
             return filter(lambda trg : any([id in trg.group_ids for id in user.group_ids]), targets)
 
 
-class SensorGroup(db.Model):
+class SensorGroup(UserAccessible):
     '''
     Parent - Enterprise
     Key - ID
     '''
-    # TODO: Rename to Group so we can use for targets as well
+    # TODO: Are 'tags' a clearer concept?
     name = db.StringProperty()
     enterprise = db.ReferenceProperty(Enterprise)
     dt_created = db.DateTimeProperty(auto_now_add=True)
@@ -455,9 +526,28 @@ class SensorGroup(db.Model):
         if 'name' in params:
             self.name = params['name']
 
+    def can_delete(self):
+        any_linked_sensor = Sensor.all().filter("group_ids =", self.key().id()).get() is not None
+        any_linked_target = Target.all().filter("group_ids =", self.key().id()).get() is not None
+        return not any([any_linked_sensor, any_linked_target])
+
     def clean_delete(self):
-        self.delete()
-        return True
+        if self.can_delete():
+            self.delete()
+            return True
+        return False
+
+    # FTS overrides
+
+    def get_doc_id(self):
+        return self.key().id()
+
+    def get_searchable_type(self):
+        return 'group'
+
+    def get_searchable_label(self):
+        '''Override'''
+        return self.name
 
 class SensorType(UserAccessible):
     """
@@ -529,7 +619,7 @@ class SensorType(UserAccessible):
     def Fetch(e, limit=50):
         return SensorType.all().ancestor(e).fetch(limit=limit)
 
-class Sensor(db.Model):
+class Sensor(UserAccessible):
     """
     Parent - Enterprise
     Key - Name
@@ -716,9 +806,21 @@ class Sensor(db.Model):
             db.delete(self.record_set.fetch(limit=None))
             db.delete(self.analysis_set.fetch(limit=None))
             db.delete(self.sensorprocesstask_set.fetch(limit=None))
+            self.updateSearchDoc(delete=True)
             self.delete()
             return True
         return False
+
+    # FTS overrides
+
+    def get_doc_id(self):
+        return self.key().name()
+
+    def get_searchable_type(self):
+        return 'sensor'
+
+    def get_searchable_label(self):
+        return self.name
 
 class Rule(db.Model):
     """
@@ -744,6 +846,7 @@ class Rule(db.Model):
     buffer = db.IntegerProperty(default=0)  # ms within which new alarm can't be raised
     value1 = db.FloatProperty(indexed=False)
     value2 = db.FloatProperty(indexed=False)
+    value_complex = db.TextProperty() # Require JSON?
     # Alerts
     alert_contacts = db.StringListProperty(indexed=False)  # String ID for recipients (sensor specific) to notify
     alert_message = db.TextProperty()
@@ -777,6 +880,7 @@ class Rule(db.Model):
             'consecutive_limit': self.consecutive_limit,
             'value1': self.value1,
             'value2': self.value2,
+            'value_complex': self.value_complex,
             'alert_message': self.alert_message,
             'alert_contacts': self.alert_contacts,
             'payment_contacts': self.payment_contacts,
@@ -822,6 +926,8 @@ class Rule(db.Model):
             self.value1 = float(params['value1'])
         if 'value2' in params:
             self.value2 = float(params['value2'])
+        if 'value_complex' in params:
+            self.value_complex = json.dumps(params['value_complex'])
         if 'alert_message' in params:
             self.alert_message = params['alert_message']
         if 'alert_contacts' in params:
@@ -904,6 +1010,13 @@ class Rule(db.Model):
                 diff = delta - dceiling
         elif self.trigger == RULE.ANY_DATA:
             passed = val is not None
+        elif self.trigger == RULE.GEOFENCE:
+            geo_json = tools.getJson(self.value_complex)
+            if geo_json and val:
+                polygon = tools.polygon_from_geojson(geo_json)
+                gp = tools.safe_geopoint(val)
+                if gp:
+                    passed = not tools.point_inside_polygon(gp.lat, gp.lon, polygon)
         else:
             raise Exception("Unsupported trigger type: %s" % self.trigger)
         # logging.debug("%s %s at value: %s (diff %s)" % (self, "passed" if passed else "not passed", val, diff))
@@ -920,146 +1033,6 @@ class Rule(db.Model):
         db.delete(self.alarm_set.fetch(limit=None))
         self.delete()
 
-class Alarm(db.Model):
-    """
-    Parent - Sensor
-    Key - ID
-    Single alarm event for a sensor
-    """
-    enterprise = db.ReferenceProperty(Enterprise)
-    sensor = db.ReferenceProperty(Sensor)
-    target = db.ReferenceProperty(Target)
-    rule = db.ReferenceProperty(Rule)
-    apex = db.FloatProperty()  # Most extreme value during alarm period
-    dt_start = db.DateTimeProperty() # Activation
-    dt_end = db.DateTimeProperty() # Deactivation
-
-    def __repr__(self):
-        return "<Alarm dt_start=%s rule=%s >" % (tools.sdatetime(self.dt_start), self.rule)
-
-    def __str__(self):
-        return self.rule.name
-
-    def json(self, with_props=None):
-        if not with_props:
-            with_props = []
-        res = {
-            'key': str(self.key()),
-            'id': self.key().id(),
-            'ts_start': tools.unixtime(self.dt_start),
-            'ts_end': tools.unixtime(self.dt_end),
-            'rule_name': self.rule.name,
-            'rule_id': tools.getKey(Alarm, 'rule', self, asID=True),
-            'rule_column': self.rule.column,
-            'sensor_key': tools.getKey(Alarm, 'sensor', self, asID=False),
-            'sensor_kn': tools.getKey(Alarm, 'sensor', self, asID=False, asKeyName=True),
-            'apex': self.apex
-        }
-        if 'sensor_name' in with_props:
-            res['sensor_name'] = self.sensor.name
-        return res
-
-
-    @staticmethod
-    def Create(sensor, rule, record, notify=True):
-        start = record.dt_recorded
-        a = Alarm(parent=sensor, sensor=sensor, target=sensor.target, rule=rule, enterprise=sensor.enterprise, dt_start=start, dt_end=start)
-        value = record.columnValue(rule.column)
-        a.set_apex(value)
-        if notify:
-            a.notify_contacts()
-        if rule.payments_enabled():
-            a.request_payments()
-        logging.debug("### Creating alarm '%s'! ###" % a)
-        return a
-
-    @staticmethod
-    def Delete(sensor=None, rule_id=None, limit=300):
-        to_delete = []
-        if sensor:
-            q = Alarm.all(keys_only=True).filter("sensor =", sensor)
-            if rule_id:
-                q.filter("rule =", db.Key.from_path('Rule', rule_id, parent=tools.getKey(Sensor, 'enterprise', sensor, asID=False, keyObj=True)))
-            to_delete = q.fetch(limit=limit)
-        if to_delete:
-            db.delete(to_delete)
-        return len(to_delete)
-
-    @staticmethod
-    def Fetch(sensor=None, enterprise=None, rule=None, limit=50):
-        if sensor:
-            q = sensor.alarm_set.order("-dt_start")
-        elif enterprise:
-            q = enterprise.alarm_set.order("-dt_start")
-        else:
-            return []
-        if rule:
-            q.filter("rule =", rule)
-        return q.fetch(limit=limit)
-
-    # TODO: is this used?
-    def deactivate(self, end):
-        self.dt_end = end
-
-    def set_apex(self, value):
-        '''
-        Value is a pure Record() property
-        '''
-        try:
-            self.apex = float(value)
-        except:
-            logging.warning("Failed to set apex to %s" % value)
-
-    def duration(self):
-        '''
-        Returns timedelta or None
-        '''
-        if self.dt_end and self.dt_start:
-            return self.dt_end - self.dt_start
-        return None
-
-    def render_alert_message(self, recipient=None):
-        '''
-        Converts message with variables to sendable format, e.g.:
-        'Hello {to.name}, device {sensor.name} was above normal limits at {start.datetime}'
-        ->
-        'Hello John, device 00-100 was above normal limits at 2015-08-02 12:34'
-        recipient is either a dict of contact info, or a User() object
-        '''
-        message = self.rule.get_message()
-        sensor = self.sensor
-        rule = self.rule
-        tz = self.enterprise.get_timezone()
-        recipient_name = ""
-        if type(recipient) is User:
-            if recipient.name:
-                recipient_name = recipient.name
-        elif type(recipient) is dict:
-            recipient_name = recipient.get('name', '') if recipient else ''
-        replacements = {
-            'to.name': recipient_name,
-            'rule.name': rule.name,
-            'sensor.name': sensor.name,
-            'sensor.id': sensor.key().name(),
-            'start.date': tools.sdatetime(self.dt_start, fmt="%Y-%m-%d", tz=tz),
-            'start.datetime': tools.sdatetime(self.dt_start, fmt="%Y-%m-%d %H:%M", tz=tz),
-            'start.time': tools.sdatetime(self.dt_start, fmt="%H:%M", tz=tz)
-        }
-        return tools.variable_replacement(message, replacements)
-
-    def notify_contacts(self):
-        if self.rule.alert_contacts and self.rule.get_message():
-            recipients = User.UsersFromSensorContactIDs(self.sensor, self.rule.alert_contacts)
-            for recipient in recipients:
-                rendered_message = self.render_alert_message(recipient=recipient)
-                outbox.send_message(recipient, rendered_message)
-        return self.rule.alert_contacts
-
-    def request_payments(self):
-        recipients = User.UsersFromSensorContactIDs(self.sensor, self.rule.payment_contacts)
-        for recipient in recipients:
-            Payment.Request(self.rule.enterprise, recipient, self.rule.payment_amount)
-        return self.rule.payment_contacts
 
 class Analysis(db.Expando):
     """
@@ -1069,6 +1042,7 @@ class Analysis(db.Expando):
     """
     enterprise = db.ReferenceProperty(Enterprise)
     sensor = db.ReferenceProperty(Sensor)
+    sensortype = db.ReferenceProperty(SensorType)
     label = db.StringProperty(indexed=False)
     dt_created = db.DateTimeProperty(auto_now_add=True)
     dt_updated = db.DateTimeProperty(auto_now_add=True)
@@ -1082,8 +1056,7 @@ class Analysis(db.Expando):
             'key': str(self.key()),
             'kn': self.key().name(),
             'ts_created': tools.unixtime(self.dt_created),
-            'ts_updated': tools.unixtime(self.dt_updated),
-            'sensor_id': tools.getKey(Analysis, 'sensor', self, asID=True),
+            'ts_updated': tools.unixtime(self.dt_updated) if self.dt_updated else None,
             'sensor_kn': tools.getKey(Analysis, 'sensor', self, asID=False, asKeyName=True)
         }
         if with_props:
@@ -1108,7 +1081,8 @@ class Analysis(db.Expando):
             ('%SID', sensor.key().name() if sensor else ""),
             ('%Y', datetime.strftime(now, '%Y')),
             ('%M', datetime.strftime(now, '%m')),
-            ('%D', datetime.strftime(now, '%d'))
+            ('%D', datetime.strftime(now, '%d')),
+            ('%W', datetime.strftime(now, '%W')) # Python style week number (0-53)
         ]
         for rep in REPL:
             analysis_key_pattern = analysis_key_pattern.replace(rep[0], rep[1])
@@ -1124,15 +1098,18 @@ class Analysis(db.Expando):
         Pass one of analysis_key_pattern or kn
         '''
         kn = Analysis._key_name(analysis_key_pattern, sensor=sensor)
-        a = Analysis.get_or_insert(kn, parent=sensor.enterprise, enterprise=sensor.enterprise, sensor=sensor)
+        a = Analysis.get_or_insert(kn, parent=sensor.enterprise, enterprise=sensor.enterprise, sensor=sensor, sensortype=sensor.sensortype)
         return a
 
     @staticmethod
-    def Fetch(enterprise=None, sensor=None, limit=50):
+    def Fetch(enterprise=None, sensor=None, sensortype_id=None, limit=50):
         if sensor:
             return sensor.analysis_set.order("-dt_created").fetch(limit=limit)
         elif enterprise:
-            return enterprise.analysis_set.order("-dt_created").fetch(limit=limit)
+            q = enterprise.analysis_set.order("-dt_created")
+            if sensortype_id:
+                q.filter("sensortype =", db.Key.from_path('SensorType', sensortype_id, parent=enterprise.key()))
+            return q.fetch(limit=limit)
         else:
             return []
 
@@ -1584,6 +1561,156 @@ class Record(db.Expando):
                 if put:
                     r.put()
         return r
+
+class Alarm(db.Model):
+    """
+    Parent - Sensor
+    Key - ID
+    Single alarm event for a sensor
+    """
+    enterprise = db.ReferenceProperty(Enterprise)
+    sensor = db.ReferenceProperty(Sensor)
+    target = db.ReferenceProperty(Target)
+    rule = db.ReferenceProperty(Rule)
+    first_record = db.ReferenceProperty(Record)
+    apex = db.FloatProperty()  # Most extreme value during alarm period
+    dt_start = db.DateTimeProperty() # Activation
+    dt_end = db.DateTimeProperty() # Deactivation
+
+    def __repr__(self):
+        return "<Alarm dt_start=%s rule=%s >" % (tools.sdatetime(self.dt_start), self.rule)
+
+    def __str__(self):
+        return self.rule.name
+
+    def json(self, with_props=None):
+        if not with_props:
+            with_props = []
+        res = {
+            'key': str(self.key()),
+            'id': self.key().id(),
+            'ts_start': tools.unixtime(self.dt_start),
+            'ts_end': tools.unixtime(self.dt_end),
+            'rule_name': self.rule.name,
+            'rule_id': tools.getKey(Alarm, 'rule', self, asID=True),
+            'rule_column': self.rule.column,
+            'sensor_key': tools.getKey(Alarm, 'sensor', self, asID=False),
+            'sensor_kn': tools.getKey(Alarm, 'sensor', self, asID=False, asKeyName=True),
+            'first_record_kn': tools.getKey(Alarm, 'first_record', self, asID=False, asKeyName=True),
+            'apex': self.apex
+        }
+        if 'sensor_name' in with_props:
+            res['sensor_name'] = self.sensor.name
+        return res
+
+
+    @staticmethod
+    def Create(sensor, rule, record, notify=True):
+        start = record.dt_recorded
+        a = Alarm(parent=sensor, sensor=sensor, target=sensor.target, rule=rule, enterprise=sensor.enterprise, dt_start=start, dt_end=start, first_record=record)
+        value = record.columnValue(rule.column)
+        a.set_apex(value)
+        if notify:
+            a.notify_contacts()
+        if rule.payments_enabled():
+            a.request_payments()
+        logging.debug("### Creating alarm '%s'! ###" % a)
+        return a
+
+    @staticmethod
+    def Delete(sensor=None, rule_id=None, limit=300):
+        to_delete = []
+        if sensor:
+            q = Alarm.all(keys_only=True).filter("sensor =", sensor)
+            if rule_id:
+                q.filter("rule =", db.Key.from_path('Rule', rule_id, parent=tools.getKey(Sensor, 'enterprise', sensor, asID=False, keyObj=True)))
+            to_delete = q.fetch(limit=limit)
+        if to_delete:
+            db.delete(to_delete)
+        return len(to_delete)
+
+    @staticmethod
+    def Fetch(sensor=None, enterprise=None, rule=None, limit=50):
+        if sensor:
+            q = sensor.alarm_set.order("-dt_start")
+        elif enterprise:
+            q = enterprise.alarm_set.order("-dt_start")
+        else:
+            return []
+        if rule:
+            q.filter("rule =", rule)
+        return q.fetch(limit=limit)
+
+    # TODO: is this used?
+    def deactivate(self, end):
+        self.dt_end = end
+
+    def set_apex(self, value):
+        '''
+        Value is a pure Record() property
+        '''
+        try:
+            self.apex = float(value)
+        except:
+            logging.warning("Failed to set apex to %s" % value)
+
+    def duration(self):
+        '''
+        Returns timedelta or None
+        '''
+        if self.dt_end and self.dt_start:
+            return self.dt_end - self.dt_start
+        return None
+
+    def render_alert_message(self, recipient=None):
+        '''
+        Converts message with variables to sendable format, e.g.:
+        'Hello {to.name}, device {sensor.name} was above normal limits at {start.datetime}'
+        ->
+        'Hello John, device 00-100 was above normal limits at 2015-08-02 12:34'
+        recipient is either a dict of contact info, or a User() object
+        '''
+        message = self.rule.get_message()
+        sensor = self.sensor
+        rule = self.rule
+        tz = self.enterprise.get_timezone()
+        recipient_name = ""
+        if type(recipient) is User:
+            if recipient.name:
+                recipient_name = recipient.name
+        elif type(recipient) is dict:
+            recipient_name = recipient.get('name', '') if recipient else ''
+        replacements = {
+            'to.name': recipient_name,
+            'rule.name': rule.name,
+            'sensor.name': sensor.name,
+            'sensor.id': sensor.key().name(),
+            'start.date': tools.sdatetime(self.dt_start, fmt="%Y-%m-%d", tz=tz),
+            'start.datetime': tools.sdatetime(self.dt_start, fmt="%Y-%m-%d %H:%M", tz=tz),
+            'start.time': tools.sdatetime(self.dt_start, fmt="%H:%M", tz=tz),
+            'record.first.alarm_value': self.first_record_value
+        }
+        return tools.variable_replacement(message, replacements)
+
+    def first_record_value(self):
+        if self.first_record:
+            return self.first_record.columnValue(self.rule.column)
+        return None
+
+    def notify_contacts(self):
+        if self.rule.alert_contacts and self.rule.get_message():
+            recipients = User.UsersFromSensorContactIDs(self.sensor, self.rule.alert_contacts)
+            for recipient in recipients:
+                rendered_message = self.render_alert_message(recipient=recipient)
+                outbox.send_message(recipient, rendered_message)
+        return self.rule.alert_contacts
+
+    def request_payments(self):
+        recipients = User.UsersFromSensorContactIDs(self.sensor, self.rule.payment_contacts)
+        for recipient in recipients:
+            Payment.Request(self.rule.enterprise, recipient, self.rule.payment_amount)
+        return self.rule.payment_contacts
+
 
 class Report(UserAccessible):
     """

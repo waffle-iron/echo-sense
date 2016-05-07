@@ -17,6 +17,13 @@ class TargetStore {
         }
     }
 
+	// Automatic
+
+    manualUpdate(tgt) {
+    	this.targets[tgt.id] = tgt;
+    }
+
+
 }
 
 module.exports = alt.createStore(TargetStore, 'TargetStore');

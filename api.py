@@ -3,7 +3,7 @@ from datetime import datetime,timedelta
 import webapp2
 from google.appengine.ext import db, blobstore, deferred
 from google.appengine.ext.webapp import blobstore_handlers
-from google.appengine.api import images, taskqueue, users, mail
+from google.appengine.api import images, taskqueue, users, mail, search
 import logging
 from models import *
 import cloudstorage as gcs
@@ -39,6 +39,7 @@ class PublicAPI(handlers.JsonRequestHandler):
     @authorized.role()
     def forgot_password(self, email_or_phone, d):
         success = False
+        override_sitename = self.request.get('override_sitename')
         if email_or_phone:
             user = User.FuzzyGet(email_or_phone)
             if user:
@@ -49,7 +50,8 @@ class PublicAPI(handlers.JsonRequestHandler):
                     if tools.on_dev_server():
                         logging.debug(new_password)
                     message = "Password reset successful - check your email"
-                    deferred.defer(mail.send_mail, SENDER_EMAIL, user.email, EMAIL_PREFIX + "Password Reset", "Your password has been reset: %s" % new_password)
+                    prefix = EMAIL_PREFIX if not override_sitename else "[ %s ] " % override_sitename
+                    deferred.defer(mail.send_mail, SENDER_EMAIL, user.email, prefix + "Password Reset", "Your password has been reset: %s. You can change this upon signing in." % new_password)
                 else:
                     message = "No email address on file for that user. Please contact support."
             else:
@@ -392,6 +394,7 @@ class SensorAPI(handlers.JsonRequestHandler):
             # Update
             s.Update(**params)
             s.put()
+            s.updateSearchDoc()
             if 'process_task_id' in params:
                 # Associate with processer
                 pt = ProcessTask.GetAccessible(params['process_task_id'], d['user'], parent=d['enterprise'])
@@ -521,12 +524,15 @@ class SensorTypeAPI(handlers.JsonRequestHandler):
 class GroupAPI(handlers.JsonRequestHandler):
     @authorized.role('api')
     def list(self, d):
-        success = False
+        success = True
         message = None
 
         _max = self.request.get_range('max', max_value=500, default=100)
 
-        sgs = d['enterprise'].sensorgroup_set.fetch(_max)
+        if self.user.is_admin():
+            sgs = d['enterprise'].sensorgroup_set.fetch(_max)
+        else:
+            sgs = self.user.get_groups()
 
         data = {
             'groups': [sg.json() for sg in sgs]
@@ -534,8 +540,13 @@ class GroupAPI(handlers.JsonRequestHandler):
         self.json_out(data, success=success, message=message)
 
     @authorized.role('api')
-    def detail(self, cid, id, d):
-        pass
+    def detail(self, id, d):
+        g = SensorGroup.GetAccessible(long(id), d['user'], parent=self.enterprise)
+        success = False
+        message = None
+        if g:
+            success = True
+        self.json_out({'group': g.json() if g else None}, success=success, message=message)
 
     @authorized.role('api')
     def update(self, d):
@@ -551,13 +562,17 @@ class GroupAPI(handlers.JsonRequestHandler):
             sg = SensorGroup.get(key)
         elif d['enterprise']:
             # Create
-            sg = SensorGroup.Create(d['enterprise'])
+            if params.get('name'):
+                sg = SensorGroup.Create(d['enterprise'])
+            else:
+                message = "Name required"
         else:
             message = "Malformed"
         if sg:
             # Update
             sg.Update(**params)
             sg.put()
+            sg.updateSearchDoc()
             success = True
         data = {
             'group': sg.json() if sg else None
@@ -630,14 +645,18 @@ class TargetAPI(handlers.JsonRequestHandler):
         if key:
             target = Target.get(key)
         elif d['enterprise']:
-            # Create
-            target = Target.Create(d['enterprise'])
+            if params.get('name'):
+                # Create
+                target = Target.Create(d['enterprise'])
+            else:
+                message = "Name required"
         else:
             message = "Malformed"
         if target:
             # Update
             target.Update(**params)
             target.put()
+            target.updateSearchDoc()
             success = True
         data = {
             'target': target.json() if target else None
@@ -708,8 +727,13 @@ class AnalysisAPI(handlers.JsonRequestHandler):
 
         with_props = self.request.get_range('with_props') == 1
         _max = self.request.get_range('max', max_value=500, default=50)
+        sensortype_id = self.request.get_range('sensortype_id')
+        sensor_kn = self.request.get('sensor_kn')
 
-        analyses = Analysis.Fetch(d['enterprise'], limit=_max)
+        sensor = None
+        if sensor_kn:
+            sensor = Sensor.get_by_key_name(sensor_kn, parent=self.enterprise)
+        analyses = Analysis.Fetch(d['enterprise'], sensortype_id=sensortype_id, sensor=sensor, limit=_max)
         success = True
 
         data = {
@@ -779,6 +803,7 @@ class RuleAPI(handlers.JsonRequestHandler):
         params = tools.gets(self,
             strings=['name','column','alert_message','payment_amount'],
             floats=['value1','value2'],
+            json=['value_complex'],
             integers=['sensortype_id','duration','buffer','plimit','plimit_type','consecutive','consecutive_limit','trigger'],
             lists=['alert_contacts','payment_contacts'])
         if key:
@@ -892,16 +917,8 @@ class ProcessTaskAPI(handlers.JsonRequestHandler):
     @authorized.role('api')
     def delete(self, d):
         success = False
-        message = None
-        s = None
+        message = "Not implemented"
         key = self.request.get('key')
-        s = ProcessTask.get(key)
-        if s:
-            success = s.clean_delete()
-            if not success:
-                message = "Couldn't delete sensor"
-        else:
-            message = "Alarm type not found"
         self.json_out({}, message=message, success=success)
 
     @authorized.role('api')
@@ -1216,3 +1233,40 @@ class SendEmail(handlers.JsonRequestHandler):
     @authorized.role('api')
     def get(self):
         self.post()
+
+class SearchAPI(handlers.JsonRequestHandler):
+
+    @authorized.role('user')
+    def delete_doc(self, doc_key, d):
+        index = d['enterprise'].get_search_index()
+        if index:
+            index.delete(doc_key)
+            self.response.out.write("OK")
+
+    @authorized.role('user')
+    def search(self, d):
+        RESULT_LIMIT = 20
+        term = self.request.get('term')
+        results = []
+        success = False
+        message = None
+        index = d['enterprise'].get_search_index()
+        try:
+            query_options = search.QueryOptions(limit=RESULT_LIMIT)
+            query = search.Query(query_string=term, options=query_options)
+            search_results = index.search(query)
+        except Exception, e:
+            logging.error("Error in search api: %s" % e)
+        else:
+            success = True
+            for sd in search_results.results:
+                fields = sd.fields
+                name = type = None
+                for f in fields:
+                    if f.name == UserAccessible.FTS_DOC_NAME:
+                        name = f.value
+                if name:
+                    type, doc_id = sd.doc_id.split(':')
+                    results.append({'type': type, 'id': doc_id, 'label': name})
+
+        self.json_out({"results": results}, success=success, message=message)

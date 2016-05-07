@@ -9,13 +9,16 @@ var Root = require('components/Root');
 var Login = require('components/Login');
 var Splash = require('components/Splash');
 var Targets = require('components/Targets');
+var Groups = require('components/Groups');
 var Sensors = require('components/Sensors');
 var Reports = require('components/Reports');
 var SensorDetail = require('components/SensorDetail');
 var AlarmDetail = require('components/AlarmDetail');
 var RecordDetail = require('components/RecordDetail');
 var AnalysisDetail = require('components/AnalysisDetail');
+var AnalysisViewer = require('components/AnalysisViewer');
 var TargetDetail = require('components/TargetDetail');
+var GroupDetail = require('components/GroupDetail');
 var Manage = require('components/Manage');
 var DataViewer = require('components/DataViewer');
 var ProfileEditor = require('components/ProfileEditor');
@@ -43,8 +46,12 @@ module.exports = (
       <Route path="targets" component={Targets}>
         <Route path=":targetID" component={TargetDetail} />
       </Route>
+      <Route path="groups" component={Groups}>
+        <Route path=":groupID" component={GroupDetail} />
+      </Route>
       <Route path="reports" component={Reports} />
       <Route path="alarms/:sensorKn/:aid" component={AlarmDetail} />
+      <Route path="analysis/viewer" component={AnalysisViewer} />
       <Route path="analysis/:analysisKn" component={AnalysisDetail} />
       <Route path="data/:sensorKn" component={DataViewer} />
       <Route path="data/:sensorKn/record/:recordKn" component={RecordDetail} />

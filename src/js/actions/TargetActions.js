@@ -7,7 +7,7 @@ class TargetActions {
 
 	constructor() {
 		// Automatic action
-		// this.generateActions('loadLocalUser', 'manualUpdate');
+		this.generateActions('manualUpdate');
 	}
 
 	// Manual actions

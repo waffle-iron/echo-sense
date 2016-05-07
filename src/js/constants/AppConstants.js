@@ -14,7 +14,8 @@ var AppConstants = {
     { value: 5, label: "Out of Window" },
     { value: 6, label: "Delta Floor" },
     { value: 7, label: "Delta Ceiling" },
-    { value: 8, label: "Any Data" }
+    { value: 8, label: "Any Data" },
+    { value: 9, label: "Outside Geofence" }
   ],
   RULE_PLIMIT_TYPES: [
     { value: -2, label: "Disabled" },
@@ -39,7 +40,8 @@ var AppConstants = {
   USER_RW: 2,
   USER_ACCOUNT_ADMIN: 3,
   USER_ADMIN: 4,
-  USER_LABELS: [ "Read", "Read-Write", "Account Admin", "Admin" ]
+  USER_LABELS: [ "Read", "Read-Write", "Account Admin", "Admin" ],
+  USER_STORAGE_KEY: 'echosenseUser'
 };
 
 module.exports = AppConstants;

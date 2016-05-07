@@ -62,8 +62,12 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
 		read -p "This looks like a production version ($version), Are you really sure? (y/n) " -n 1 -r
 		echo
 		if [[ $REPLY =~ ^[Yy]$ ]]; then
-			#deploy production version
+			# if no tag yet create it, then push tags
+			git tag -a -m "New production version by $(whoami) on $(date)" "v$version"
+			git push --tags
+			# deploy production version
 			deploy
+			echo -e "\n\nDeploy to production Successful!\n"
 		else
 			cancel_deploy
 		fi

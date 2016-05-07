@@ -3,28 +3,34 @@ var UserActions = require('actions/UserActions');
 import {findItemById, findIndexById} from 'utils/store-utils';
 import router from 'config/router';
 var toastr = require('toastr');
+var AppConstants = require('constants/AppConstants');
 import history from 'config/history'
-const USER_STORAGE_KEY = 'echosenseUser';
 
 class UserStore {
     constructor() {
         this.bindActions(UserActions);
+        this.users = {}; // uid -> User
         this.user = null;
         this.error = null;
+
+        this.exportPublicMethods({
+            get_user: this.get_user
+        });
     }
 
     storeUser(user) {
         this.user = user;
+        this.users[user.id] = user;
         this.error = null;
         console.log("Stored user "+user.email);
         // api.updateToken(user.token);
-        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+        localStorage.setItem(AppConstants.USER_STORAGE_KEY, JSON.stringify(user));
     }
 
     loadLocalUser() {
         var user;
         try {
-            user = JSON.parse(localStorage.getItem(USER_STORAGE_KEY));
+            user = JSON.parse(localStorage.getItem(AppConstants.USER_STORAGE_KEY));
         } finally {
             if (user) {
                 console.log("Successfully loaded user " + user.email);
@@ -36,7 +42,7 @@ class UserStore {
     clearUser() {
         this.user = null;
         // api.updateToken(null);
-        localStorage.removeItem(USER_STORAGE_KEY);
+        localStorage.removeItem(AppConstants.USER_STORAGE_KEY);
     }
 
     onLogin(data) {
@@ -67,6 +73,13 @@ class UserStore {
 
     manualUpdate(user) {
         this.storeUser(user);
+    }
+
+    // Automatic
+
+    get_user(uid) {
+        var u = this.getState().users[uid];
+        return u;
     }
 }
 

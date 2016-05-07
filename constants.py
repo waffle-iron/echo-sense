@@ -36,6 +36,8 @@ DEBUG_API = False
 # Memkeys
 MC_FOREX = "FOREX"
 
+FTS_INDEX = "FTS_EID:%s"
+
 # Google OAuth
 ANDROID_CLIENT_ID = ""
 ANDROID_CLIENT_ID_DEBUG = ""
@@ -147,6 +149,7 @@ class RULE():
   DELTA_FLOOR = 6
   DELTA_CEILING = 7
   ANY_DATA = 8
+  GEOFENCE = 9
 
   TRIGGER_LABELS = {
     NO_DATA: "No Data (To Implement)",
@@ -156,7 +159,8 @@ class RULE():
     OUT_WINDOW: "Out Window",
     DELTA_FLOOR: "Delta Floor",
     DELTA_CEILING: "Delta Ceiling",
-    ANY_DATA: "Any Data"
+    ANY_DATA: "Any Data",
+    GEOFENCE: "Outside Geofence"
   }
 
   # Other Constants

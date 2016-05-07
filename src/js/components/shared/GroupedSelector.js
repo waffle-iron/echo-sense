@@ -114,13 +114,15 @@ export default class GroupedSelector extends React.Component {
 
   render_item_list() {
     var g = this.state.group_selected;
+    if (!g) return <div className="empty"><i className="fa fa-arrow-left"/> Select a group</div>
     var items = clone(this.state.items);
     if (this.props.sortProp) {
       var sp = this.props.sortProp;
       items.sort(function(a, b) { return a[sp] - b[sp]; });
     }
     var title = this.props.type == "targets" ? "Targets" : "Sensors";
-    var subtitle = g == null ? "Select a group" : title + " in " + g.name;
+    var subtitle = title + " in " + g.name;
+    var icon = this.props.type == "targets" ? <FontIcon className="fa fa-th-large"/> : <FontIcon className="fa fa-map-pin"/>;
     return (
       <Card>
         <CardHeader
@@ -128,7 +130,7 @@ export default class GroupedSelector extends React.Component {
           subtitle={subtitle} />
         <List>{ items.map(function(item, i) {
             var subhead = this.props.subhead != null ? this.props.subhead(item) : null;
-            return <ListItem primaryText={item.name} secondaryText={subhead} onClick={this.props.onItemClick.bind(this, item)} />
+            return <ListItem primaryText={item.name} iconLeft={icon} secondaryText={subhead} onClick={this.props.onItemClick.bind(this, item)} />
           }, this) }
         </List>
       </Card>

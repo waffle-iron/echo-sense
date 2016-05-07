@@ -80,7 +80,8 @@ export default class AnalysisDetail extends React.Component {
           <h1>Analysis - { a.kn }</h1>
           <div>
             <b>Created:</b> <span>{ util.printDate(a.ts_created, true) }</span><br/>
-            <b>Updated:</b> <span>{ util.printDate(a.ts_updated, true) }</span>
+            <b>Updated:</b> <span>{ util.printDate(a.ts_updated, true) }</span><br/>
+            <b>Sensor:</b> <span><Link to={`/app/sensors/${a.sensor_kn}`}>{ a.sensor_kn }</Link></span>
 
             <h2>Data Columns</h2>
             <ul className="list-group">
