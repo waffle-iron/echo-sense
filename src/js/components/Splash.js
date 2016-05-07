@@ -66,8 +66,8 @@ class Splash extends React.Component {
         <div>
           <label>Partners</label>
           <ul>
-          { c.partners.map(function(p) {
-            return <li>{ p }</li>
+          { c.partners.map(function(p, i) {
+            return <li key={i}>{ p }</li>
           }) }
           </ul>
         </div>
@@ -75,8 +75,8 @@ class Splash extends React.Component {
         <div>
           <label>Links</label>
           <ul>
-          { c.links.map(function(link) {
-            return <li><a href={link} target="_blank">{link}</a></li>
+          { c.links.map(function(link, i) {
+            return <li key={i}><a href={link} target="_blank">{link}</a></li>
           }) }
           </ul>
         </div>
