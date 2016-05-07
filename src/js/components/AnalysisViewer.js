@@ -69,6 +69,7 @@ export default class AnalysisViewer extends React.Component {
         var form = this.state.form;
         var that = this;
         var skn = this.props.location.query.skn;
+        this.refreshChart();
         if (form.sensortype_id || skn) {
             this.setState({loading: true});
             var data = {

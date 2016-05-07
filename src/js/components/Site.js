@@ -39,7 +39,7 @@ class Site extends React.Component {
 
           <div id="footer">
             &copy; { AppConstants.YEAR } - { YEAR } { AppConstants.SITENAME }<br/>
-            <small>A project of <a href="https://www.echomobile.org">Echo Mobile</a></small>
+            <small>A project of <a href="https://www.echomobile.org">Echo Mobile</a>. Built in Kenya.</small>
           </div>
         </div>
     )

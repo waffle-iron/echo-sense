@@ -5,6 +5,7 @@ var mui = require('material-ui'),
   RaisedButton = mui.RaisedButton,
   Paper = mui.Paper,
   FontIcon = mui.FontIcon,
+  Dialog = mui.Dialog,
   TextField = mui.TextField;
 
 var util = require('utils/util');
@@ -14,25 +15,89 @@ class Splash extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      case: null
     };
+    this.CASES = {
+      "smartmatatu": {
+        title: "Smart Matatu - Driver Safety",
+        photo: "/images/public/cases/smartmatatu_image.png",
+        partners: ["UC Berkeley"],
+        links: ["http://www.smartmatatu.com"],
+        text: (
+          <div>
+            <p>Road traffic accidents cause 1.24 million deaths annually, many involving informal public transport. SmartMatatu aims to improve the safety of semi-formal public transport sectors globally, by providing a vehicle tracking system to align incentives between minibus owners and drivers.</p>
+            <p>SmartMatatu leverages smart, dedicated vehicle tracking and driver quality measuring devices, connected to the Echo Sense cloud, to feed back real-time information from Nairobi&rsquo;s roads. Owners are notified of unsafe events, and vehicle productivity data, enabling them to make better decisions for their business, realign incentives for drivers, and ultimately improve public safety.</p>
+          </div>
+        )
+      },
+      "raincatcher": {
+        title: "Water Tank Monitoring & Reporting",
+        partners: ["Harvey Mudd College", "Raincatcher.org"],
+        links: [],
+        text: (
+          <div>
+            <p>Coming soon...</p>
+          </div>
+        )
+      }
+    }
+  }
+
+  goto_case(case_id) {
+    this.setState({case: case_id});
   }
 
   render() {
     let iconStyles = {
       fontSize: '64px'
     };
+    var case_title;
+    var case_content;
+    if (this.state.case) {
+      var c = this.CASES[this.state.case];
+      case_title = c.title;
+      case_content = (<div>
+
+        <img src={ c.photo } hidden={!c.photo} />
+
+        <label>Project Overview</label>
+        { c.text }
+
+        <div>
+          <label>Partners</label>
+          <ul>
+          { c.partners.map(function(p) {
+            return <li>{ p }</li>
+          }) }
+          </ul>
+        </div>
+
+        <div>
+          <label>Links</label>
+          <ul>
+          { c.links.map(function(link) {
+            return <li><a href={link} target="_blank">{link}</a></li>
+          }) }
+          </ul>
+        </div>
+      </div>);
+    }
     return (
         <div id="splash" >
+
+          <Dialog title={case_title} open={this.state.case != null} onRequestClose={this.goto_case.bind(this, null)} autoDetectWindowHeight={true} autoScrollBodyContent={true}>
+            { case_content }
+          </Dialog>
 
             <div className="camp">
               <div className="container-fluid">
                 <div className="row" style={{paddingTop: "45px"}}>
-                  <div className="col-sm-6">
-                    <div className="text-center">
-                      <img src="/images/logos/echo_sense_white_512.png" width="300" />
+                  <div className="col-sm-3 col-sm-offset-1">
+                    <div className="center-block">
+                      <img src="/images/logos/echo_sense_white_512.png" className="img-responsive" />
                     </div>
                   </div>
-                  <div className="col-sm-6">
+                  <div className="col-sm-7">
                     <h1>A sensor data analysis platform built for quick deployment in the Google cloud</h1>
                     <h2>Get up and running today, or start developing.</h2>
 
@@ -114,6 +179,32 @@ class Splash extends React.Component {
               <div className="col-md-5">
                 <img src='/images/public/screenshots/map.png' width="100%" />
               </div>
+            </div>
+
+            <div className="cases row">
+              <div className="col">
+                <a className="illust" title="Case: Smart Matatu - Driver Safety" onClick={this.goto_case.bind(this, 'smartmatatu')}>
+                  <span className="s1"></span>
+                </a>
+              </div>
+              <div className="col">
+                <a className="illust" title="Case: Water Tank Reporting" onClick={this.goto_case.bind(this, 'raincatcher')}>
+                  <span className="s2"></span>
+                </a>
+              </div>
+            </div>
+
+            <div className="row">
+
+              <div className="text-center col-md-12">
+
+                <div style={{paddingTop: "20px", paddingBottom: "20px"}}>
+                  <h2>Ready to Deploy an Echo Sense Solution?</h2>
+
+                  <RaisedButton label="Contact Us" linkButton={true} href="mailto:sense@echomobile.org" primary={true} />
+                </div>
+              </div>
+
             </div>
 
         </div>
