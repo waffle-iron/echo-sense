@@ -83,7 +83,7 @@ class Splash extends React.Component {
       </div>);
     }
     return (
-        <div id="splash" >
+        <div id="splash">
 
           <Dialog title={case_title} open={this.state.case != null} onRequestClose={this.goto_case.bind(this, null)} autoDetectWindowHeight={true} autoScrollBodyContent={true}>
             { case_content }
