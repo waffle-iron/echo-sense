@@ -239,14 +239,6 @@ body.public #footer a {
 }
 
 
-ul.robOptions {
-	list-style-type: none;
-}
-
-.materials {
-
-}
-
 .info {
     margin: 10px 0;
 }
@@ -389,3 +381,29 @@ aside.lnav {
     color: white;
 }
 
+.nav-subhead {
+  color: gray;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 13px;
+  padding: 9px;
+  margin-bottom: 2px;
+}
+
+.full-image {
+  display: block;
+  height: 400px;
+  background-size: cover;
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  margin: 0;
+  padding: 0;
+}
+
+.full-image h1 {
+  color: white;
+  text-align: center;
+  padding-top: 165px;
+  font-weight: 100;
+  font-size: 40px;
+}

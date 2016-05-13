@@ -8,6 +8,7 @@ var Root = require('components/Root');
 
 var Login = require('components/Login');
 var Splash = require('components/Splash');
+var Press = require('components/Press');
 var Targets = require('components/Targets');
 var Groups = require('components/Groups');
 var Sensors = require('components/Sensors');
@@ -67,6 +68,7 @@ module.exports = (
     </Route>
     <Route path="public" component={Public}>
       <Route path="splash" component={Splash}/>
+      <Route path="press" component={Press}/>
       <Route path="login" component={Login}/>
       <IndexRoute component={Splash} />
     </Route>

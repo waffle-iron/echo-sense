@@ -65,27 +65,18 @@ class Public extends React.Component {
 
   handle_toggle_leftnav = () => this.setState({ln_open: !this.state.ln_open});
 
-  handle_leftnav_change = (open) => this.setState({ln_open: open});
+  handle_leftnav_change = (open, cb) => this.setState({ln_open: open}, function() {
+    if (cb) cb();
+  });
 
   goto_page(link) {
     window.location = link;
   }
 
   navigate_to_page(page) {
-    history.pushState(null, page);
-  }
-
-  render_menu() {
-    var menu_items = [
-      {title: "Documentation", link: "/docs/index.html", icon: <FontIcon className="material-icons">chrome_reader_mode</FontIcon>},
-      {title: "FAQs", onClick: this.toggle_faqs.bind(this, true), icon: <FontIcon className="material-icons">help</FontIcon>},
-      {title: "React", link: "http://facebook.github.io/react/", icon: <FontIcon className="material-icons">build</FontIcon>},
-      {title: "Google App Engine", link: "https://cloud.google.com/appengine/docs", icon: <FontIcon className="material-icons">cloud_circle</FontIcon>},
-    ];
-    return menu_items.map(function(mi) {
-      var click = mi.onClick || this.goto_page.bind(this, mi.link);
-      return <MenuItem onClick={click} leftIcon={mi.icon}>{ mi.title }</MenuItem>
-    }, this);
+    this.handle_leftnav_change(false, function() {
+      history.pushState(null, page);
+    })
   }
 
   toggle_faqs(open) {
@@ -113,7 +104,14 @@ class Public extends React.Component {
             iconElementRight={<FlatButton onClick={this.navigate_to_page.bind(this, '/public/login')}  label="Sign In" />} />
 
           <LeftNav docked={false} open={this.state.ln_open} onRequestChange={this.handle_leftnav_change.bind(this)}>
-            { this.render_menu() }
+            <h2 className="nav-subhead">Echo Sense</h2>
+            <MenuItem onClick={this.navigate_to_page.bind(this, "/public/splash")} leftIcon={<FontIcon className="material-icons">home</FontIcon>}>Home</MenuItem>
+            <MenuItem onClick={this.toggle_faqs.bind(this, true)} leftIcon={<FontIcon className="material-icons">help</FontIcon>}>FAQs</MenuItem>
+            <MenuItem onClick={this.navigate_to_page.bind(this, "/public/press")} leftIcon={<FontIcon className="material-icons">radio</FontIcon>}>Press</MenuItem>
+            <MenuItem onClick={this.goto_page.bind(this, "/docs/index.html")} leftIcon={<FontIcon className="material-icons">chrome_reader_mode</FontIcon>}>Documentation</MenuItem>
+            <h2 className="nav-subhead">Technical Links</h2>
+            <MenuItem onClick={this.goto_page.bind(this, "http://facebook.github.io/react/")} leftIcon={<FontIcon className="material-icons">build</FontIcon>}>Documentation</MenuItem>
+            <MenuItem onClick={this.goto_page.bind(this, "https://cloud.google.com/appengine/docs")} leftIcon={<FontIcon className="material-icons">cloud_circle</FontIcon>}>Google App Engine</MenuItem>
           </LeftNav>
 
           <Dialog title="FAQs" open={this.state.faqs_open} onRequestClose={this.toggle_faqs.bind(this, false)} autoDetectWindowHeight={true} autoScrollBodyContent={true}>
