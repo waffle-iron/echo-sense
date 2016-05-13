@@ -54,7 +54,7 @@ Create a new project and choose a unique project ID. You will not need a billing
 Take the ID from the previous step and update the 'application:' parameter in app.yaml
 echo-sense is the project ID for the central Echo Sense project, and needs to be replaced with your new instance's project ID.
 
-Update the APP_OWNER variable in constants.py. This should match the Google account you logged into the console with. This will enable the application to send emails.
+Update the APP_OWNER and INSTALL_PW variable in constants.py. Owner should match the Google account you logged into the console with. This will enable the application to send emails.
 
 Update the GA_ID variable in constants.py to enable Google Analytics tracking. Visit Google Analytics to set up a new tracking ID for your project.
 
@@ -69,7 +69,7 @@ The login page for Echo Sense should appear in the browser.
 To speed up creation of your first user account, use the admin init handler with parameters to create the user account.
 
 ```
-http://localhost:PORT/admin/gauth/init?enterprise=1&user=1&email=you@example.com&password=PASSWORD
+http://localhost:PORT/admin/gauth/init?enterprise=1&user=1&email=you@example.com&password=PASSWORD&pw=INSTALL_PW
 ```
 
 This will create the user account. If the email matches the APP_OWNER config variable, the new user will be created as a full admin.
@@ -175,13 +175,13 @@ Intermittent batch processing task that runs at intervals and can check for rule
 
 To enable processing, you must assign a process task for each sensor you wish to run continuous processing for.  This assignment process creates a SensorProcessTask() object, which is unique for every combination of sensor & process task.
 
-This model holds the state of a particular process task for a particular sensor, including timestamp and status of last run, etc. 
+This model holds the state of a particular process task for a particular sensor, including timestamp and status of last run, etc.
 
 Quickly on nomenclature: tasks are GAE objects that run in predefined queues. https://cloud.google.com/appengine/docs/python/taskqueue/ This lets us schedule a task to run in the background at a certain time. ProcessTask() and SensorProcessTask() are Echo Sense models that use GAE tasks for scheduling.
 
-A daily cron job (see 'schedule first processtask' in cron.yaml) runs at end of day to schedule a task to run tomorrow (at time_start), for each processtask that is going to be active. 
+A daily cron job (see 'schedule first processtask' in cron.yaml) runs at end of day to schedule a task to run tomorrow (at time_start), for each processtask that is going to be active.
 
-Tomorrow, when these process tasks run (tasks.py:RunProcessTask), they get a list of all SensorProcessTasks(), one for each sensor that's been assigned this task, and run each. They then create a new GAE task to run after the interval defined in the ProcessTask() object, via the eta parameter.  
+Tomorrow, when these process tasks run (tasks.py:RunProcessTask), they get a list of all SensorProcessTasks(), one for each sensor that's been assigned this task, and run each. They then create a new GAE task to run after the interval defined in the ProcessTask() object, via the eta parameter.
 
 ### SensorProcessTask
 
