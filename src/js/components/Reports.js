@@ -18,8 +18,8 @@ var mui = require('material-ui'),
   // IconMenu = mui.IconMenu,
   // MenuItem = mui.MenuItem;
 
-var IconMenu = require('material-ui/lib/menus/icon-menu');
-var MenuItem = require('material-ui/lib/menus/menu-item');
+var IconMenu = mui.IconMenu;
+var MenuItem = mui.MenuItem;
 
 var Link = Router.Link;
 
@@ -83,7 +83,7 @@ var Sensors = React.createClass({displayName: 'Sensors',
         <h1>Reports</h1>
         <FetchedList url="/api/report" listProp="reports" renderItem={this.renderReport} autofetch={true}/>
 
-        <IconMenu iconButtonElement={ <FlatButton label="Other Reports" /> } openDirection="bottom-right">
+        <IconMenu iconButtonElement={ <FlatButton label="Other Reports" /> }>
           { _other_reports }
         </IconMenu>
       </div>

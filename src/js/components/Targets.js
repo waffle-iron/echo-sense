@@ -19,8 +19,8 @@ var mui = require('material-ui'),
   // MenuItem = mui.MenuItem;
 var GroupedSelector = require('components/shared/GroupedSelector');
 
-var IconMenu = require('material-ui/lib/menus/icon-menu');
-var MenuItem = require('material-ui/lib/menus/menu-item');
+var IconMenu = mui.IconMenu;
+
 
 var Link = Router.Link;
 import history from 'config/history'

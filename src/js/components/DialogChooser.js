@@ -1,7 +1,6 @@
 var React = require('react');
 
 var FetchedList = require('components/FetchedList');
-var MyDialog = require('components/MyDialog');
 var mui = require('material-ui'),
   Dialog = mui.Dialog;
 

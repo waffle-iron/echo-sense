@@ -7,9 +7,10 @@ var bootstrap = require('bootstrap');
 var toastr = require('toastr');
 import history from 'config/history'
 
-import LeftNav from 'material-ui/lib/left-nav';
-import AppBar from 'material-ui/lib/app-bar';
-import MenuItem from 'material-ui/lib/menus/menu-item';
+import Drawer from 'material-ui/Drawer';
+import AppBar from 'material-ui/AppBar';
+import MenuItem from 'material-ui/MenuItem';
+
 var $ = require('jquery');
 
 var mui = require('material-ui'),
@@ -63,7 +64,7 @@ class Public extends React.Component {
   }
 
 
-  handle_toggle_leftnav = () => this.setState({ln_open: !this.state.ln_open});
+  handle_toggle_drawer = () => this.setState({ln_open: !this.state.ln_open});
 
   handle_leftnav_change = (open, cb) => this.setState({ln_open: open}, function() {
     if (cb) cb();
@@ -100,10 +101,10 @@ class Public extends React.Component {
           <AppBar
             title={AppConstants.SITENAME}
             onTitleTouchTap={this.navigate_to_page.bind(this, '/public/splash')}
-            onLeftIconButtonTouchTap={this.handle_toggle_leftnav.bind(this)}
+            onLeftIconButtonTouchTap={this.handle_toggle_drawer.bind(this)}
             iconElementRight={<FlatButton onClick={this.navigate_to_page.bind(this, '/public/login')}  label="Sign In" />} />
 
-          <LeftNav docked={false} open={this.state.ln_open} onRequestChange={this.handle_leftnav_change.bind(this)}>
+          <Drawer docked={false} open={this.state.ln_open} onRequestChange={this.handle_leftnav_change.bind(this)}>
             <h2 className="nav-subhead">Echo Sense</h2>
             <MenuItem onClick={this.navigate_to_page.bind(this, "/public/splash")} leftIcon={<FontIcon className="material-icons">home</FontIcon>}>Home</MenuItem>
             <MenuItem onClick={this.toggle_faqs.bind(this, true)} leftIcon={<FontIcon className="material-icons">help</FontIcon>}>FAQs</MenuItem>
@@ -112,7 +113,7 @@ class Public extends React.Component {
             <h2 className="nav-subhead">Technical Links</h2>
             <MenuItem onClick={this.goto_page.bind(this, "http://facebook.github.io/react/")} leftIcon={<FontIcon className="material-icons">build</FontIcon>}>React.js Documentation</MenuItem>
             <MenuItem onClick={this.goto_page.bind(this, "https://cloud.google.com/appengine/docs")} leftIcon={<FontIcon className="material-icons">cloud_circle</FontIcon>}>Google App Engine</MenuItem>
-          </LeftNav>
+          </Drawer>
 
           <Dialog title="FAQs" open={this.state.faqs_open} onRequestClose={this.toggle_faqs.bind(this, false)} autoDetectWindowHeight={true} autoScrollBodyContent={true}>
             { this.render_faqs() }

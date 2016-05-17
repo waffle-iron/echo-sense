@@ -31,6 +31,7 @@ export default class AdminManage extends React.Component {
     }
 
     render() {
+        var that = this;
         var props;
         var tab = this.state.tab;
         var tabs = [
@@ -103,7 +104,7 @@ export default class AdminManage extends React.Component {
         var _tabs = tabs.map(function(t, i, arr) {
             var here = this.state.tab == t.id;
             var cn = here ? "active" : "";
-            return <li role="presentation" data-t={t.id} className={cn}><a href="javascript:void(0)" onClick={this.gotoTab.bind(this, t.id)}>{t.label}</a></li>
+            return <li role="presentation" key={i} data-t={t.id} className={cn}><a href="javascript:void(0)" onClick={this.gotoTab.bind(this, t.id)}>{t.label}</a></li>
         }, this);
         return (
             <div>

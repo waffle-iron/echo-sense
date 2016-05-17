@@ -13,8 +13,8 @@ var mui = require('material-ui');
 var FlatButton = mui.FlatButton;
 var Dialog = mui.Dialog;
 var AppConstants = require('../constants/AppConstants');
-var IconMenu = require('material-ui/lib/menus/icon-menu');
-var MenuItem = require('material-ui/lib/menus/menu-item');
+var IconMenu = mui.IconMenu;
+var MenuItem = mui.MenuItem;
 var toastr = require('toastr');
 
 export default class DataViewer extends React.Component {
@@ -296,6 +296,7 @@ export default class DataViewer extends React.Component {
                         <div className="col-sm-6">
                             <label>Visualize Column</label>
                             <Select
+                                simpleValue
                                 value={colname}
                                 options={_columns}
                                 onChange={this.changeColumn.bind(this)}
@@ -303,6 +304,7 @@ export default class DataViewer extends React.Component {
 
                             <label>List Data</label>
                             <Select
+                                simpleValue
                                 value={listcols}
                                 options={_columns}
                                 onChange={this.changeListColumns.bind(this)}
@@ -311,6 +313,7 @@ export default class DataViewer extends React.Component {
 
                             <label>Granularity (downsample)</label>
                             <Select
+                                simpleValue
                                 value={downsample}
                                 options={_downsamples}
                                 onChange={this.changeDownsample.bind(this)}
@@ -323,7 +326,7 @@ export default class DataViewer extends React.Component {
                             <DateTimeField inputFormat={this.DATE_FMT} format="X" dateTime={this._ts_end()/1000} ref="end" onChange={this.changeWindow.bind(this, 'end')}/>
                             <br/>
                             <FlatButton secondary={true} onClick={this.fetchData.bind(this)} label="Update" />
-                            <IconMenu iconButtonElement={ <FlatButton label="Advanced" /> } openDirection="bottom-right">
+                            <IconMenu iconButtonElement={ <FlatButton label="Advanced" /> }>
                               { _advanced_items }
                             </IconMenu>
 
