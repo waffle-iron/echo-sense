@@ -18,8 +18,8 @@ var Dialog = mui.Dialog;
 var AutoComplete = mui.AutoComplete;
 var RaisedButton = mui.RaisedButton;
 var AppConstants = require('../constants/AppConstants');
-var IconMenu = require('material-ui/lib/menus/icon-menu');
-var MenuItem = require('material-ui/lib/menus/menu-item');
+var IconMenu = mui.IconMenu;
+var MenuItem = mui.MenuItem;
 var toastr = require('toastr');
 import {changeHandler} from 'utils/component-utils';
 import connectToStores from 'alt/utils/connectToStores';
@@ -172,6 +172,7 @@ export default class AnalysisViewer extends React.Component {
                             <div className="form-group" hidden={skn!=null}>
                                 <label>Sensor Type</label>
                                 <Select
+                                    simpleValue
                                     value={form.sensortype_id}
                                     options={_sensor_types}
                                     onChange={this.changeHandlerVal.bind(this, 'form', 'sensortype_id')} />
@@ -180,6 +181,7 @@ export default class AnalysisViewer extends React.Component {
                             <div className="form-group">
                                 <label>Limit</label>
                                 <Select
+                                    simpleValue
                                     value={form.limit}
                                     options={_limits}
                                     onChange={this.changeHandlerVal.bind(this, 'form', 'limit')} />

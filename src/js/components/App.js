@@ -9,8 +9,6 @@ var toastr = require('toastr');
 import history from 'config/history'
 
 var mui = require('material-ui'),
-  ThemeManager = mui.Styles.ThemeManager,
-  Colors = mui.Styles.Colors,
   FlatButton = mui.FlatButton,
   IconButton = mui.IconButton;
 
@@ -18,8 +16,8 @@ var AppConstants = require('constants/AppConstants');
 var Link = Router.Link;
 var RouteHandler = Router.RouteHandler;
 
-var IconMenu = require('material-ui/lib/menus/icon-menu');
-var MenuItem = require('material-ui/lib/menus/menu-item');
+var IconMenu = mui.IconMenu;
+var MenuItem = mui.MenuItem;
 
 var UserActions = require('actions/UserActions');
 var UserStore = require('stores/UserStore');
