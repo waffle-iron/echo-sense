@@ -50,7 +50,11 @@ var AppConstants = {
   USER_ACCOUNT_ADMIN: 3,
   USER_ADMIN: 4,
   USER_LABELS: [ "Read", "Read-Write", "Account Admin", "Admin" ],
-  USER_STORAGE_KEY: 'echosenseUser'
+  USER_STORAGE_KEY: 'echosenseUser',
+  OBJECT_TIPS: {
+    TARGET: "Targets are physical structures, objects, vehicles or locations that you want to track over time. Targets may have one or more associated sensors, which may measure different metrics related to the target.",
+
+  }
 };
 
 module.exports = AppConstants;

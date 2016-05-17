@@ -13,6 +13,7 @@ var Targets = require('components/Targets');
 var Groups = require('components/Groups');
 var Sensors = require('components/Sensors');
 var Reports = require('components/Reports');
+var SetupWizard = require('components/SetupWizard');
 var SensorDetail = require('components/SensorDetail');
 var AlarmDetail = require('components/AlarmDetail');
 var RecordDetail = require('components/RecordDetail');
@@ -51,6 +52,7 @@ module.exports = (
         <Route path=":groupID" component={GroupDetail} />
       </Route>
       <Route path="reports" component={Reports} />
+      <Route path="setup" component={SetupWizard} />
       <Route path="alarms/:sensorKn/:aid" component={AlarmDetail} />
       <Route path="analysis/viewer" component={AnalysisViewer} />
       <Route path="analysis/:analysisKn" component={AnalysisDetail} />
