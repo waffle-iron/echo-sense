@@ -1323,6 +1323,10 @@ class SensorProcessTask(db.Model):
             logging.debug("No need to run %s" % self)
             return False
 
+    def clean_delete(self):
+        self.delete()
+        return True
+
 class Payment(UserAccessible):
     """
     Payment to or from a user (e.g. for incentives)

@@ -856,6 +856,19 @@ class SensorProcessTaskAPI(handlers.JsonRequestHandler):
             }
         self.json_out(data, success=success, message=message)
 
+    @authorized.role('api')
+    def delete(self, d):
+        key = self.request.get('key')
+        success = False
+        if key:
+            spt = SensorProcessTask.get(key)
+            if spt:
+                success = spt.clean_delete()
+                if success:
+                    message = "Task deleted"
+        self.json_out({}, message=message, success=success)
+
+
 class ProcessTaskAPI(handlers.JsonRequestHandler):
     @authorized.role('api')
     def list(self, d):
