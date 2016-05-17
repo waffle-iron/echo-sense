@@ -32,11 +32,12 @@ class Splash extends React.Component {
       },
       "raincatcher": {
         title: "Water Tank Monitoring & Reporting",
+        photo: "/images/public/cases/hmc_field.jpeg",
         partners: ["Harvey Mudd College", "Raincatcher.org"],
-        links: [],
+        links: ["http://raincatcher.org/"],
         text: (
           <div>
-            <p>Coming soon...</p>
+            <p>The Global Clinic Team at Harvey Mudd College has designed and constructed a monitoring device that can remotely report the water level inside a tank, the presence of water in the gutter, and whether the tank site is currently experiencing rain. These data can help RainCatcher determine whether their systems are functioning as expected, and detect maintenance issues such as broken taps, clogged gutters, and other potential problems. The monitoring device is powered by solar energy so as to be self ­sustaining and usable in any geographical location. The team has designed the system to last for ten years, the lifetime of RainCatcher’s systems.</p>
           </div>
         )
       }
