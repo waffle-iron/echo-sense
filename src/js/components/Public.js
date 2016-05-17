@@ -110,7 +110,7 @@ class Public extends React.Component {
             <MenuItem onClick={this.navigate_to_page.bind(this, "/public/press")} leftIcon={<FontIcon className="material-icons">radio</FontIcon>}>Press</MenuItem>
             <MenuItem onClick={this.goto_page.bind(this, "/docs/index.html")} leftIcon={<FontIcon className="material-icons">chrome_reader_mode</FontIcon>}>Documentation</MenuItem>
             <h2 className="nav-subhead">Technical Links</h2>
-            <MenuItem onClick={this.goto_page.bind(this, "http://facebook.github.io/react/")} leftIcon={<FontIcon className="material-icons">build</FontIcon>}>Documentation</MenuItem>
+            <MenuItem onClick={this.goto_page.bind(this, "http://facebook.github.io/react/")} leftIcon={<FontIcon className="material-icons">build</FontIcon>}>React.js Documentation</MenuItem>
             <MenuItem onClick={this.goto_page.bind(this, "https://cloud.google.com/appengine/docs")} leftIcon={<FontIcon className="material-icons">cloud_circle</FontIcon>}>Google App Engine</MenuItem>
           </LeftNav>
 

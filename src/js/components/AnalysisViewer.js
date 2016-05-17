@@ -103,7 +103,7 @@ export default class AnalysisViewer extends React.Component {
     }
 
     refreshChart() {
-        this.refs.chart.fullInitialize();
+        if (this.refs.chart != null) this.refs.chart.fullInitialize();
     }
 
     _column() {
