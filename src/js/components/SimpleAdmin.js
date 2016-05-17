@@ -105,7 +105,7 @@ class EditForm extends React.Component {
           );
         } else if (att.inputType == 'select') {
           var opts = att.opts.map(function(opt,i,arr) {
-            return {value: opt.val, label: opt.lab}
+            return {value: opt.val || opt.value, label: opt.lab || opt.label}
           });
           _input = (
             <div className="form-group" key={key}>
@@ -324,7 +324,6 @@ export default class SimpleAdmin extends React.Component {
         form[att.name] = att.defaultValue;
       }
     });
-    console.log(form);
     this.setState({selected: form, status: creating_new ? 'new' : 'edit'}, function() {
       if (callback) callback();
     });
@@ -365,6 +364,9 @@ export default class SimpleAdmin extends React.Component {
     var st = {};
     var data = this.state.selected;
     util.mergeObject(data, this.props.add_params);
+    this.props.attributes.forEach(function(att, i) {
+      if (att.multiple && data[att.name] instanceof Array) data[att.name] = data[att.name].join(',');
+    });
     $.ajax({
       url: this.props.url,
       dataType: 'json',
