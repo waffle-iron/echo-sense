@@ -14,8 +14,8 @@ var util = require('utils/util');
 var toastr = require('toastr');
 var bootbox = require('bootbox');
 var UserStore = require('stores/UserStore');
-var IconMenu = require('material-ui/lib/menus/icon-menu');
-var MenuItem = require('material-ui/lib/menus/menu-item');
+var IconMenu = mui.IconMenu;
+var MenuItem = mui.MenuItem;
 var api = require('utils/api');
 import connectToStores from 'alt/utils/connectToStores';
 import history from 'config/history'
@@ -110,7 +110,7 @@ export default class TargetDetail extends React.Component {
             </div>
             <div className="col-sm-6">
               <div hidden={_action_items.length == 0}>
-                <IconMenu iconButtonElement={ <FlatButton label="Actions" /> } openDirection="bottom-right">
+                <IconMenu iconButtonElement={ <FlatButton label="Actions" /> }>
                   { _action_items }
                 </IconMenu>
               </div>

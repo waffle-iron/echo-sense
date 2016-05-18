@@ -6,40 +6,40 @@ var LoadStatus = require('components/LoadStatus');
 var util = require('utils/util');
 var AppConstants = require('constants/AppConstants');
 
-import DropDownMenu from 'material-ui/lib/DropDownMenu';
-import MenuItem from 'material-ui/lib/menus/menu-item';
+var mui = require('material-ui'),
+  DropDownMenu = mui.DropDownMenu,
+  MenuItem = mui.MenuItem;
+
 var Link = Router.Link;
 
-var Logs = React.createClass({displayName: 'Logs',
-  getDefaultProps: function() {
-    return {
-    };
-  },
-  getInitialState: function() {
-    return {
+export default class Logs extends React.Component {
+  static defaultProps = {}
+  constructor(props) {
+    super(props);
+    this.state = {
       section: "sensors"
     };
-  },
-  componentDidMount: function() {
+  }
 
-  },
-  renderSensor: function(s) {
+  renderSensor(s) {
     return (
       <li className="list-group-item">
         <Link to={`/app/sensors/${s.kn}`} className="title">{ s.name }</Link>
         <span className="sub">Last Update: <span data-ts={s.ts_updated}></span></span>
       </li>
       );
-  },
-  renderProcesser: function(p) {
+  }
+
+  renderProcesser(p) {
     return (
       <li className="list-group-item">
         <span className="title">{ p.label }</span>
         <span className="sub">Last Run: <span data-ts={p.ts_last_run}></span></span>
       </li>
       );
-  },
-  renderAlarm: function(a) {
+  }
+
+  renderAlarm(a) {
     return (
       <li className="list-group-item">
         <Link to={`/app/alarms/${a.sensor_kn}/${a.id}`} className="title">{ a.rule_name }</Link>
@@ -47,8 +47,9 @@ var Logs = React.createClass({displayName: 'Logs',
         <span className="sub" data-ts={a.ts_start}></span>
       </li>
       );
-  },
-  renderAPILog: function(al) {
+  }
+
+  renderAPILog(al) {
     return (
       <li className="list-group-item">
         <span className="title">{ al.path }</span>
@@ -57,9 +58,9 @@ var Logs = React.createClass({displayName: 'Logs',
         <span data-ts={al.ts}></span>
       </li>
       );
-  },
+  }
 
-  renderPayment: function(pmnt) {
+  renderPayment(pmnt) {
     var title = pmnt.amount + " " + pmnt.currency
     var status_text = util.findItemById(AppConstants.PAYMENT_STATUSES, pmnt.status, 'value').label;
     var user_text = pmnt.user ? (pmnt.user.name || pmnt.user.phone) : "--";
@@ -71,9 +72,9 @@ var Logs = React.createClass({displayName: 'Logs',
         <span data-ts={pmnt.ts_created}></span>
       </li>
       );
-  },
+  }
 
-  renderAnalysis: function(a) {
+  renderAnalysis(a) {
     return (
       <li className="list-group-item">
         <Link to={`/app/analysis/${a.kn}`} className="title">{ a.kn }</Link>
@@ -82,13 +83,13 @@ var Logs = React.createClass({displayName: 'Logs',
         <span className="sub">Updated: <span data-ts={a.ts_updated}></span></span>
       </li>
       );
-  },
+  }
 
   section_change(e, index, section) {
     this.setState({section: section});
-  },
+  }
 
-  render: function() {
+  render() {
     var sensor_update_cutoff = util.nowTimestamp() - 1000*60*30; // last 30 mins
     var content;
     var sec = this.state.section;
@@ -120,6 +121,4 @@ var Logs = React.createClass({displayName: 'Logs',
         </div>
     );
   }
-});
-
-module.exports = Logs;
+}

@@ -7,6 +7,8 @@ var SimpleAdmin = require('components/SimpleAdmin');
 var LoadStatus = require('components/LoadStatus');
 var GroupActions = require('actions/GroupActions');
 var GroupStore = require('stores/GroupStore');
+var RuleActions = require('actions/RuleActions');
+var RuleStore = require('stores/RuleStore');
 var TargetActions = require('actions/TargetActions');
 var TargetStore = require('stores/TargetStore');
 var SensorTypeActions = require('actions/SensorTypeActions');
@@ -24,13 +26,14 @@ export default class Manage extends React.Component {
     }
 
     static getStores() {
-        return [GroupStore, SensorTypeStore, TargetStore];
+        return [GroupStore, SensorTypeStore, TargetStore, RuleStore];
     }
 
     static getPropsFromStores() {
         var st = GroupStore.getState();
         st.sensor_types = SensorTypeStore.getState().sensor_types;
         st.targets = TargetStore.getState().targets;
+        st.rules = RuleStore.getState().rules;
         return st;
     }
 
@@ -38,6 +41,7 @@ export default class Manage extends React.Component {
         GroupActions.fetchGroups();
         SensorTypeActions.fetchTypes();
         TargetActions.fetchTargets();
+        RuleActions.fetchRules();
     }
 
     gotoTab(tab) {
@@ -145,7 +149,8 @@ export default class Manage extends React.Component {
                 'unique_key': 'key',
                 'max': 50,
                 getListFromJSON: function(data) { return data.data.rules; },
-                getObjectFromJSON: function(data) { return data.data.rule; }
+                getObjectFromJSON: function(data) { return data.data.rule; },
+                onItemCreated: function(item) { RuleActions.manualUpdate(item); }
             }
         } else if (tab == "groups") {
 
@@ -189,7 +194,10 @@ export default class Manage extends React.Component {
             }
 
         } else if (tab == "processes") {
-
+            var rule_opts = util.flattenDict(this.props.rules).map(function(rule, i, arr) {
+                return { val: rule.id, lab: rule.name };
+            });
+            console.log(rule_opts);
             props = {
                 'url': "/api/processtask",
                 'id': 'sa',
@@ -198,11 +206,11 @@ export default class Manage extends React.Component {
                     { name: 'id', label: "ID" },
                     { name: 'label', label: "Label", editable: true },
                     { name: 'interval', label: "Interval (secs)", editable: true, hint: "Task scheduled to run up to [interval] after new data is received." },
-                    { name: 'rule_ids', label: "Rules", editable: true, editOnly: true, hint: "Comma separated list of rule IDs", formFromValue: util.comma_join },
+                    { name: 'rule_ids', label: "Rules", editable: true, editOnly: true, hint: "Comma separated list of rule IDs", inputType: "select", multiple: true, opts: rule_opts },
                     { name: 'time_start', label: "Start Time", editable: true },
                     { name: 'time_end', label: "End Time", editable: true },
                     { name: 'month_days', label: "Days of Month (1 - 31)", editOnly: true, editable: true, formFromValue: util.comma_join, hint: "Task will run if day matches either month day or week day, so either or both must be set. Comma separated list of ints." },
-                    { name: 'week_days', label: "Days of Week (1:Mon - 7:Sun)", editOnly: true, formFromValue: util.comma_join, editable: true },
+                    { name: 'week_days', label: "Days of Week", editOnly: true, editable: true, multiple: true, opts: AppConstants.WEEKDAYS, inputType: "select" },
                     { name: 'spec', label: "Spec", inputType: "textarea", editOnly: true, editable: true, hint: "JSON object which can contain a 'processers' Array of objects with props: analysis_key_pattern, calculation, column." }
                 ],
                 'add_params': {},

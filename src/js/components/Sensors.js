@@ -19,8 +19,8 @@ var mui = require('material-ui'),
   // IconMenu = mui.IconMenu,
   // MenuItem = mui.MenuItem;
 
-var IconMenu = require('material-ui/lib/menus/icon-menu');
-var MenuItem = require('material-ui/lib/menus/menu-item');
+var IconMenu = mui.IconMenu;
+var MenuItem = mui.MenuItem;
 
 var Link = Router.Link;
 import history from 'config/history'

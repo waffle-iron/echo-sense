@@ -23,14 +23,25 @@ class EditForm extends React.Component {
     item[prop] = valueForDB;
     this.props.onFormChange(item);
   }
-  handleSelectChange(att, value) {
+
+  handleSelectChange(prop, value) {
     var item = clone(this.props.item) || {};
-    var valueForDB = value;
     if (item != null) {
-      item[att.name] = valueForDB;
+      item[prop] = value;
       this.props.onFormChange(item);
     }
   }
+
+  handleMultiValChange(prop, option_array) {
+    var i = this.props.item || {};
+    var final_value = [];
+    if (option_array != null) final_value = option_array.map(function(op) {
+      return op.value;
+    });
+    i[prop] = final_value;
+    this.props.onFormChange(i, this.props.creating_new);
+  }
+
   render() {
     var item = this.props.item;
     var kn_disabled = !this.props.creating_new;
@@ -105,8 +116,9 @@ class EditForm extends React.Component {
           );
         } else if (att.inputType == 'select') {
           var opts = att.opts.map(function(opt,i,arr) {
-            return {value: opt.val, label: opt.lab}
+            return {value: opt.val || opt.value, label: opt.lab || opt.label}
           });
+          var boundOnChange = att.multiple ? this.handleMultiValChange.bind(this, att.name) : this.handleSelectChange.bind(this, att.name);
           _input = (
             <div className="form-group" key={key}>
               <label htmlFor={key}>{ label }</label>
@@ -117,9 +129,10 @@ class EditForm extends React.Component {
                 id={key}
                 name={att.name}
                 value={value_out}
-                onChange={this.handleSelectChange.bind(this,att)}
+                onChange={boundOnChange}
                 ref={att.name}
-                options={opts} />
+                options={opts}
+                simpleValue={!att.multiple} />
             </div>
           );
         } else {
@@ -140,7 +153,7 @@ class EditForm extends React.Component {
           );
         }
       }
-      return <div className="col-sm-6">{ _input }</div>
+      return <div className="col-sm-6" key={i}>{ _input }</div>
     }, this);
     var itemkey = item ? item[this.props.unique_key] : "";
     var formClass= "editForm";
@@ -324,7 +337,6 @@ export default class SimpleAdmin extends React.Component {
         form[att.name] = att.defaultValue;
       }
     });
-    console.log(form);
     this.setState({selected: form, status: creating_new ? 'new' : 'edit'}, function() {
       if (callback) callback();
     });
@@ -365,6 +377,9 @@ export default class SimpleAdmin extends React.Component {
     var st = {};
     var data = this.state.selected;
     util.mergeObject(data, this.props.add_params);
+    this.props.attributes.forEach(function(att, i) {
+      if (att.multiple && data[att.name] instanceof Array) data[att.name] = data[att.name].join(',');
+    });
     $.ajax({
       url: this.props.url,
       dataType: 'json',
@@ -469,9 +484,9 @@ export default class SimpleAdmin extends React.Component {
         { _empty }
         { more }
         <RefreshIndicator size={40} left={80} top={50} status={loadStatus} />
-        <p hidden={this.state.status != 'closed'}>
+        <div hidden={this.state.status != 'closed'}>
           <RaisedButton primary={true} label="New" onClick={this.startNew.bind(this)} />
-        </p>
+        </div>
 
         { _form }
 

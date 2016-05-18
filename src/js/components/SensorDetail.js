@@ -15,12 +15,13 @@ var util = require('utils/util');
 var toastr = require('toastr');
 var bootbox = require('bootbox');
 var UserStore = require('stores/UserStore');
-var IconMenu = require('material-ui/lib/menus/icon-menu');
-var MenuItem = require('material-ui/lib/menus/menu-item');
+var IconMenu = mui.IconMenu;
+var MenuItem = mui.MenuItem;
 var api = require('utils/api');
 import connectToStores from 'alt/utils/connectToStores';
 import history from 'config/history'
 import {changeHandler} from 'utils/component-utils';
+import {removeItemsById} from 'utils/store-utils';
 
 var Link = Router.Link;
 
@@ -161,9 +162,9 @@ export default class SensorDetail extends React.Component {
   }
 
   runProcesser(spt) {
+    var that = this;
     bootbox.confirm('Really run '+spt.label+'?', function(result){
       if (result) {
-        var that = this;
         var data = {
           'sptkey': spt.key
         }
@@ -172,6 +173,27 @@ export default class SensorDetail extends React.Component {
             toastr.info("Running...");
           }
         }, 'json');
+      } else {
+
+      }
+    });
+  }
+
+  deleteProcesser(spt) {
+    var that = this;
+    bootbox.confirm('Really delete '+spt.label+'? This cannot be undone', function(result){
+      if (result) {
+        var data = {
+          'key': spt.key
+        }
+        api.post("/api/sensorprocesstask/delete", data, function(res) {
+          if (res.message) toastr.success(res.message);
+          if (res.success) {
+            var processers = that.state.processers;
+            processers = removeItemsById(processers, spt.key, 'key');
+            that.setState({processers: processers});
+          }
+        });
       } else {
 
       }
@@ -243,11 +265,14 @@ export default class SensorDetail extends React.Component {
       var _processers = this.state.processers.map(function(p, i, arr) {
         var detail = "Last run: " + util.printDate(p.ts_last_run);
         if (p.narrative_last_run) detail += " Narrative: " + p.narrative_last_run;
-        return <li className="list-group-item" title={detail} key={"p"+i}>
+        return (
+        <li className="list-group-item" title={detail} key={"p"+i}>
           <span className="title">{ p.label }</span>
           <span className="sub">{ this.PROCESS_STATUS_LABELS[p.status_last_run] }</span>
-          <a href="javascript:void(0)" className="right" hidden={!can_write} onClick={this.runProcesser.bind(this, p)}>Run</a>
-          </li>
+          <a href="javascript:void(0)" className="right" hidden={!can_write} onClick={this.runProcesser.bind(this, p)}><i className="fa fa-play"/></a>
+          <a href="javascript:void(0)" className="right red" hidden={!can_write} onClick={this.deleteProcesser.bind(this, p)} style={{marginRight: "5px"}}><i className="fa fa-trash"/></a>
+        </li>
+        );
       }, this);
       var _action_items = [];
       if (can_write) _action_items.push(<MenuItem key="cl_alarms" primaryText="Clear Alarms" onClick={this.handle_clear_alarms.bind(this)} />);
@@ -277,7 +302,7 @@ export default class SensorDetail extends React.Component {
             </div>
             <div className="col-sm-3">
               <div hidden={_action_items.length == 0}>
-                <IconMenu iconButtonElement={ <FlatButton label="Actions" /> } openDirection="bottom-right">
+                <IconMenu iconButtonElement={ <FlatButton label="Actions" /> }>
                   { _action_items }
                 </IconMenu>
               </div>

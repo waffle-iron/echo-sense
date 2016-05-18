@@ -22,8 +22,8 @@ var toastr = require('toastr');
 var bootbox = require('bootbox');
 var UserStore = require('stores/UserStore');
 var GroupStore = require('stores/GroupStore');
-var IconMenu = require('material-ui/lib/menus/icon-menu');
-var MenuItem = require('material-ui/lib/menus/menu-item');
+var IconMenu = mui.IconMenu;
+var MenuItem = mui.MenuItem;
 var api = require('utils/api');
 import connectToStores from 'alt/utils/connectToStores';
 import history from 'config/history'
@@ -105,7 +105,7 @@ export default class GroupedSelector extends React.Component {
           subtitle="Choose a group" />
         <List>
           { groups.map(function(g, i) {
-            return <ListItem primaryText={g.name} onClick={this.handle_group_click.bind(this, g)} leftIcon={<FontIcon className="material-icons">folder</FontIcon>} />
+            return <ListItem key={i} primaryText={g.name} onClick={this.handle_group_click.bind(this, g)} leftIcon={<FontIcon className="material-icons">folder</FontIcon>} />
           }, this) }
         </List>
       </Card>
@@ -130,7 +130,7 @@ export default class GroupedSelector extends React.Component {
           subtitle={subtitle} />
         <List>{ items.map(function(item, i) {
             var subhead = this.props.subhead != null ? this.props.subhead(item) : null;
-            return <ListItem primaryText={item.name} iconLeft={icon} secondaryText={subhead} onClick={this.props.onItemClick.bind(this, item)} />
+            return <ListItem key={i} primaryText={item.name} iconLeft={icon} secondaryText={subhead} onClick={this.props.onItemClick.bind(this, item)} />
           }, this) }
         </List>
       </Card>

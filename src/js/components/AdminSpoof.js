@@ -95,7 +95,7 @@ export default class AdminSpoof extends React.Component {
                     <pre><b>POST</b> { this.get_post_url() }</pre>
 
                     <label>Sensor</label>
-                    <Select options={opts} value={this.state.form.sensor_kn} onChange={this.changeHandlerVal.bind(this, 'form', 'sensor_kn')}/>
+                    <Select options={opts} value={this.state.form.sensor_kn} onChange={this.changeHandlerVal.bind(this, 'form', 'sensor_kn')} simpleValue/>
 
                     <label>JSON body</label>
                     <textarea value={this.get_post_body()} className="form-control" placeholder="JSON Body" disabled/>
