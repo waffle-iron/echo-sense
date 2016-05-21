@@ -44,8 +44,8 @@ var GChart = React.createClass({displayName: 'GChart',
       // Add columns and data from props
       for (var i in this.props.columns) {
         var c = this.props.columns[i];
-        if (typeof c === 'object') dt.addColumn(c);
-        else dt.addColumn(c[0], c[1]); // Assume list
+        if (Array.isArray(c)) dt.addColumn(c[0], c[1]);
+        else dt.addColumn(c); // Cols as objects
       }
       if (this.props.data.length > 0) {
         console.log("Adding "+this.props.data.length+" rows.");

@@ -7,7 +7,6 @@ var LoadStatus = require('./LoadStatus');
 var EntityMap = require('./EntityMap');
 var api = require('utils/api');
 var GChart = require('./GChart');
-var DateTimeField = require('react-bootstrap-datetimepicker');
 var moment = require('moment');
 var SensorTypeActions = require('actions/SensorTypeActions');
 var SensorTypeStore = require('stores/SensorTypeStore');

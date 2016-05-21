@@ -43,7 +43,7 @@ app = webapp2.WSGIApplication(
       webapp2.Route('/users/<id>', handler=views.UserDetail, name="vUserDetail"),
 
       # Admin Actions
-      webapp2.Route('/admin/gauth/init', handler=adminActions.Init, name="aInit"),
+      webapp2.Route('/admin/gauth/install', handler=adminActions.Install, name="adminInstall"),
       webapp2.Route('/admin/actions/clean_delete/<key>', handler=adminActions.CleanDelete, name="CleanDelete"),
       webapp2.Route('/admin/actions/users/create', handler=adminActions.CreateUser, name="aCreateCustomer"),
       webapp2.Route('/admin/actions/gcm/manual', handler=adminActions.ManualGCM, name="ManualGCM"),

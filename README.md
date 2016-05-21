@@ -66,15 +66,13 @@ In a browser, visit http://localhost:[port]
 You can find the dev server's admin interface using the admin port specified in the app's settings.
 
 The login page for Echo Sense should appear in the browser.
-To speed up creation of your first user account, use the admin init handler with parameters to create the user account.
+To speed up creation of your first user account, use the admin install handler: visit http://localhost:PORT/admin/gauth/install.
 
-```
-http://localhost:PORT/admin/gauth/init?enterprise=1&user=1&email=you@example.com&password=PASSWORD&pw=INSTALL_PW
-```
+Fill out all parameters (including the installation password defined in constants.py) to create the initial models needed to login.
 
 This will create the user account. If the email matches the APP_OWNER config variable, the new user will be created as a full admin.
 
-YOu can now login to Echo Sense on the dev server.
+You can now login to Echo Sense on the dev server.
 
 ### Deploy to production
 
@@ -90,9 +88,9 @@ This script:
 
 Once completed, you should be able to visit http://your-project-id.appspot.com to view the app in production.
 
-You can use the same initialization handler as used on the dev server to initialize the first user account on production.
+You can use the same install handler as used on the dev server to initialize the first user account on production.
 
-http://your-project-id.appspot.com/admin/gauth/init?enterprise=1&user=1&email=you@example.com&password=PASSWORD
+http://your-project-id.appspot.com/admin/gauth/install
 
 Routes at /admin/gauth* are protected for admins/owners of the project, so authentication will be required for this step.
 
