@@ -50,7 +50,6 @@ export default class App extends React.Component {
     if (!this.props.user) {
       UserActions.logout();
     } else {
-      console.log(this.props.user.timezone);
       util.startAutomaticTimestamps(this.props.user.timezone, 5);
     }
     $('link[title=app_css]').prop('disabled',false);

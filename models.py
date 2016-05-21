@@ -772,26 +772,27 @@ class Sensor(UserAccessible):
             else:
                 if self.sensortype:
                     schema = self.sensortype.get_schema()
-                    expression_parser_by_col = {}
-                    for column, colschema in schema.items():
-                        if 'calculation' in colschema:
-                            calc = colschema.get('calculation')
-                            if calc:
-                                expression_parser_by_col[column] = ExpressionParser(calc, column)
-                                continue
-                    # Sort with newest records last
-                    for i, r in enumerate(sorted(records, key=lambda r : r.get('timestamp'))):
-                        ts = int(r.get('timestamp'))
-                        if ts:
-                            last = i == len(records) - 1
-                            try:
-                                _r = Record.Create(ts, self, r, apply_roles=last, schema=schema, expression_parser_by_col=expression_parser_by_col)
-                            except Exception, e:
-                                logging.error("Error creating record: %s" % e)
-                                _r = None
-                            if _r:
-                                put_records.append(_r)
-                    db.put(put_records)
+                    if schema:
+                        expression_parser_by_col = {}
+                        for column, colschema in schema.items():
+                            if 'calculation' in colschema:
+                                calc = colschema.get('calculation')
+                                if calc:
+                                    expression_parser_by_col[column] = ExpressionParser(calc, column)
+                                    continue
+                        # Sort with newest records last
+                        for i, r in enumerate(sorted(records, key=lambda r : r.get('timestamp'))):
+                            ts = int(r.get('timestamp'))
+                            if ts:
+                                last = i == len(records) - 1
+                                try:
+                                    _r = Record.Create(ts, self, r, apply_roles=last, schema=schema, expression_parser_by_col=expression_parser_by_col)
+                                except Exception, e:
+                                    logging.error("Error creating record: %s" % e)
+                                    _r = None
+                                if _r:
+                                    put_records.append(_r)
+                        db.put(put_records)
                 else:
                     logging.warning("Can't save records - no type for %s" % self)
         return len(put_records)
@@ -1564,6 +1565,8 @@ class Record(db.Expando):
                         r.setColumnValue(column, res)
                 if put:
                     r.put()
+            else:
+                logging.warning("Missing kn or schema")
         return r
 
 class Alarm(db.Model):
