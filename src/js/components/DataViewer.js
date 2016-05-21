@@ -6,7 +6,6 @@ var util = require('../utils/util');
 var LoadStatus = require('./LoadStatus');
 var EntityMap = require('./EntityMap');
 var GChart = require('./GChart');
-var DateTimeField = require('react-bootstrap-datetimepicker');
 var moment = require('moment');
 var Select = require('react-select');
 var mui = require('material-ui');
@@ -15,6 +14,8 @@ var Dialog = mui.Dialog;
 var AppConstants = require('../constants/AppConstants');
 var IconMenu = mui.IconMenu;
 var MenuItem = mui.MenuItem;
+var DatePicker = mui.DatePicker;
+var TimePicker = mui.TimePicker;
 var toastr = require('toastr');
 
 export default class DataViewer extends React.Component {
@@ -25,7 +26,6 @@ export default class DataViewer extends React.Component {
 
     constructor(props) {
         super(props);
-        this.DATE_FMT = "YYYY-MM-DD HH:mm A";
         this.state = {
             sensor: null,
             records: [],
@@ -68,6 +68,19 @@ export default class DataViewer extends React.Component {
         var ts_now = util.nowTimestamp();
         var ts_end = parseInt(this.props.location.query.end) || (ts_now);
         return ts_end;
+    }
+    _start_date() {
+        return new Date(this._ts_start());
+    }
+    _end_date() {
+        return new Date(this._ts_end());
+    }
+    _date_time_value(start_or_end, date_or_time) {
+        var ts;
+        if (start_or_end == 'end') ts = this._ts_end();
+        else ts = this._ts_start();
+        if (date_or_time == 'time') return 0;
+        else return 0;
     }
     noData() {
         return this.state.records.length == 0;
@@ -145,17 +158,34 @@ export default class DataViewer extends React.Component {
         util.mergeObject(query, _query);
         this.props.history.replaceState(null, `/app/data/${this.props.params.sensorKn}`, query);
     }
-    changeWindow(start_end, dt) {
+    changeWindow(start_end, date_or_time, null_e, date_obj) {
+        console.log(date_obj);
         var values = {};
-        var ms = dt*1000;
-        if (start_end == 'start') values['sta'] = ms;
-        else if (start_end == 'end') values['end'] = ms;
+        var param_prop;
+        if (start_end == 'start') {
+            var current_date = this._start_date();
+            param_prop = 'sta';
+        } else if (start_end == 'end') {
+            var current_date = this._end_date();
+            param_prop = 'end';
+        }
+        // Adjust date or time
+        if (date_or_time == 'time' || date_or_time == 'both') {
+            current_date.setHours(date_obj.getHours());
+            current_date.setMinutes(date_obj.getMinutes());
+        }
+        if (date_or_time == 'date' || date_or_time == 'both') {
+            current_date.setFullYear(date_obj.getFullYear());
+            current_date.setMonth(date_obj.getMonth());
+            current_date.setDate(date_obj.getDate());
+        }
+        values[param_prop] = current_date.getTime(); // ms
         this.update_params(values);
     }
     edit_window_from_record(start_end) {
         var record = this.state.selected_record;
         if (record) {
-            this.changeWindow(start_end, record.ts / 1000);
+            this.changeWindow(start_end, 'both', null, new Date(record.ts));
         }
         this.toggle_datapoint_dlg();
         this.fetchData();
@@ -270,9 +300,9 @@ export default class DataViewer extends React.Component {
                     var value = util.type_check(r.columns[colname], type);
                     return [new Date(r.ts), value];
                 });
-                _visualization = (
+                if (chartColumns.length > 0 && chartData.length > 0) _visualization = (
                     <GChart title={label} columns={chartColumns} data={chartData} ref="chart" />
-                    )
+                )
             }
         }
         var _advanced_items = [
@@ -321,9 +351,12 @@ export default class DataViewer extends React.Component {
                         </div>
                         <div className="col-sm-6">
                             <label>Start</label>
-                            <DateTimeField inputFormat={this.DATE_FMT} format="X" dateTime={this._ts_start()/1000} ref="start" onChange={this.changeWindow.bind(this, 'start')}/>
+                            <DatePicker onChange={this.changeWindow.bind(this, 'start', 'date')} value={this._start_date()} autoOk={true} />
+                            <TimePicker format='24hr' onChange={this.changeWindow.bind(this, 'start', 'time')} value={this._start_date()} autoOk={true} />
                             <label>End</label>
-                            <DateTimeField inputFormat={this.DATE_FMT} format="X" dateTime={this._ts_end()/1000} ref="end" onChange={this.changeWindow.bind(this, 'end')}/>
+                            <DatePicker onChange={this.changeWindow.bind(this, 'end', 'date')} value={this._end_date()} autoOk={true} />
+                            <TimePicker format='24hr' onChange={this.changeWindow.bind(this, 'end', 'time')} value={this._end_date()} autoOk={true} />
+
                             <br/>
                             <FlatButton secondary={true} onClick={this.fetchData.bind(this)} label="Update" />
                             <IconMenu iconButtonElement={ <FlatButton label="Advanced" /> }>
