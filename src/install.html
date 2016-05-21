@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Echo Sense | Install</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicons/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="An open source sensor framework for development and realtime monitoring.">
+    <meta name="keywords" content="IOT4D,S4D,Internet of Things,Development Technology,Sensors,Sense,M2M,Machine to Machine,Echo">
+    <meta name="author" content="Echo Mobile Limited">
+  </head>
+
+  <body>
+
+    <div style="display: block; background: white; width: 500px; margin: 50px auto; padding: 20px; ">
+    {% if installed %}
+      <div class="alert alert-info">Sense is installed!</div>
+    {% else %}
+      {% if issue %}
+      <p style="color: red;">{{ issue }}</p>
+      {% endif %}
+      <form action="/admin/gauth/install" method="POST">
+        <h1>Install Echo Sense</h1>
+        <h2>Org Name</h2>
+        <input type="text" name="enterprise_name" placeholder="Organization name" required /><br/>
+
+        <h2>Admin User</h2>
+        <input type="email" name="email" placeholder="User email" required /><br/>
+        <input type="text" name="phone" placeholder="Phone (optional)" /><br/>
+        <input type="password" name="password" placeholder="User password" required /><br/>
+
+        <h2>Install Password</h2>
+        <input type="password" name="pw" placeholder="Install password" required /><br/>
+
+        <button type="submit">Install</button>
+
+      </form>
+    {% endif %}
+    </div>
+
+    <link type="text/css" rel="stylesheet" href="/static/echosense.css" />
+    <link type="text/css" rel="stylesheet" href="/static/common.css" />
+
+  </body>
+</html>

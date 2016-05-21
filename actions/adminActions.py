@@ -16,45 +16,56 @@ import authorized
 import outbox
 import handlers
 
-class Init(handlers.BaseRequestHandler):
+class Install(handlers.BaseRequestHandler):
     '''Initialize / Install Echo Sense with first account / user
 
     Params:
-        enterprise (int): 1 to create Enterprise
-        user (int): 1 to create admin User
+        enterprise_name (string): Enterprise name
         email (string): If creating user
         password (string): If creating user
         phone (string): If creating user
+        pw (string): install pw defined in constants.py
     '''
-    def get(self):
+    def post(self):
         e = None
-        create_ent = self.request.get_range('enterprise') == 1
-        create_user = self.request.get_range('user') == 1
         pw = self.request.get('pw')
-
+        email = self.request.get('email')
+        password = self.request.get('password')
+        phone = self.request.get('phone')
+        issue = ""
+        logging.debug("Installing...")
         if pw == INSTALL_PW:
 
             empty_db = Enterprise.all().get() is None
 
             if empty_db:
 
-                if create_ent:
+                if email and password:
                     e = Enterprise.Create()
-                    e.Update(name="Test Enterprise")
+                    enterprise_name = self.request.get("enterprise_name", default_value="Test Enterprise")
+                    e.Update(name=enterprise_name)
                     e.put()
 
-                if e and create_user:
-                    email = self.request.get('email')
-                    password = self.request.get('password')
-                    phone = self.request.get('phone')
-                    u = User.Create(e, email=email)
-                    u.Update(password=password, level=USER.ADMIN, phone=phone)
-                    u.put()
+                    if e:
+                        u = User.Create(e, email=email)
+                        u.Update(password=password, level=USER.ADMIN, phone=phone)
+                        u.put()
+                else:
+                    issue = "Email or password missing"
 
-                self.response.out.write("OK")
             else:
-                self.response.out.write("App already installed")
+                issue = "Already installed"
+        else:
+            issue = "Invalid installation password"
+        self.redirect_to("adminInstall", issue=issue)
 
+    def get(self):
+        issue = self.request.get('issue')
+        d = {
+            'installed': Enterprise.all().get() is not None,
+            'issue': issue
+        }
+        self.render_template("install.html", **d)
 
 
 class CleanDelete(handlers.BaseRequestHandler):
