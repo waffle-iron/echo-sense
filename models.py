@@ -1548,13 +1548,13 @@ class Record(db.Expando):
                     if column in data:
                         val = data[column]
                         r.setColumnValue(column, val, colschema.get('type'))
-                    if apply_roles:
-                        roles = colschema.get('role', [])
-                        if roles:
-                            for role in roles:
-                                sensor.update_state(role, val)
-                                if sensor.target:
-                                    sensor.target.update_state(role, val)
+                        if apply_roles:
+                            roles = colschema.get('role', [])
+                            if roles:
+                                for role in roles:
+                                    sensor.update_state(role, val)
+                                    if sensor.target:
+                                        sensor.target.update_state(role, val)
                 if calculations:
                     for column, calc in calculations.items():
                         # Faster to build each parser once and pass in
