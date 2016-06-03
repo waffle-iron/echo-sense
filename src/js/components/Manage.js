@@ -13,6 +13,10 @@ var TargetActions = require('actions/TargetActions');
 var TargetStore = require('stores/TargetStore');
 var SensorTypeActions = require('actions/SensorTypeActions');
 var SensorTypeStore = require('stores/SensorTypeStore');
+var mui = require('material-ui'),
+  FlatButton = mui.FlatButton,
+  FontIcon = mui.FontIcon;
+
 import connectToStores from 'alt/utils/connectToStores';
 
 @connectToStores
@@ -232,7 +236,7 @@ export default class Manage extends React.Component {
         return (
             <div>
 
-                <h2><i className="fa fa-wrench"></i> Manage</h2>
+                <h2><FontIcon className="material-icons">settings_applications</FontIcon> Manage</h2>
 
                 <ul className="nav nav-pills">
                     { _tabs }

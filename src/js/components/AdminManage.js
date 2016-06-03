@@ -7,6 +7,9 @@ var SensorTypeActions = require('actions/SensorTypeActions');
 var SensorTypeStore = require('stores/SensorTypeStore');
 var util = require('utils/util');
 import connectToStores from 'alt/utils/connectToStores';
+var mui = require('material-ui'),
+  FlatButton = mui.FlatButton,
+  FontIcon = mui.FontIcon;
 
 @connectToStores
 export default class AdminManage extends React.Component {
@@ -109,7 +112,7 @@ export default class AdminManage extends React.Component {
         return (
             <div>
 
-                <h1><i className="fa fa-wrench"></i> Admin Manage</h1>
+                <h1><FontIcon className="material-icons">settings</FontIcon> Admin Manage</h1>
 
                 <ul className="nav nav-pills">
                     { _tabs }

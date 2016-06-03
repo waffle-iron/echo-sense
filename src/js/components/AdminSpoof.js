@@ -8,6 +8,10 @@ var util = require('utils/util');
 var api = require('utils/api');
 var Select = require('react-select');
 var bootbox = require('bootbox');
+var mui = require('material-ui'),
+  FlatButton = mui.FlatButton,
+  FontIcon = mui.FontIcon;
+
 import connectToStores from 'alt/utils/connectToStores';
 import {changeHandler} from 'utils/component-utils';
 
@@ -89,7 +93,7 @@ export default class AdminSpoof extends React.Component {
         return (
             <div>
 
-                <h1><i className="fa fa-bolt"></i> Spoof Data</h1>
+                <h1><FontIcon className="material-icons">redo</FontIcon> Spoof Data</h1>
 
                 <div>
                     <pre><b>POST</b> { this.get_post_url() }</pre>

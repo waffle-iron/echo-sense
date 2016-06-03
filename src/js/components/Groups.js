@@ -14,6 +14,7 @@ var mui = require('material-ui'),
   List = mui.List,
   Card = mui.Card,
   CardTitle = mui.CardTitle,
+  FontIcon = mui.FontIcon,
   ListItem = mui.ListItem;
   // IconMenu = mui.IconMenu,
   // MenuItem = mui.MenuItem;
@@ -70,7 +71,7 @@ export default class Groups extends React.Component {
     return (
       <div>
 
-        <h1>Groups</h1>
+        <h1><FontIcon className="material-icons">folder</FontIcon> Groups</h1>
 
         <p className="lead">Groups are a way to organize sensors and targets. Users can access items in a group they have been given permission for.</p>
         { this.props.children }

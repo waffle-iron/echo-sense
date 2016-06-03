@@ -37,6 +37,12 @@ export default class App extends React.Component {
     this.state = {
       search_open: false
     };
+    this.iSt = {
+      color: '#EEE'
+    }
+    this.ibSt = {
+      margin: '0px'
+    }
   }
   static getStores() {
     return [UserStore];
@@ -87,16 +93,16 @@ export default class App extends React.Component {
         <div>
           <aside className="lnav">
             <nav>
-              <div hidden={!is_admin}><Link to="/app/admin/manage" title="Admin Manage"><i className="fa fa-cogs"></i></Link></div>
-              <div hidden={!is_admin}><Link to="/app/admin/spoof" title="Spoof Data"><i className="fa fa-bolt"></i></Link></div>
-              <div hidden={!can_write}><Link to="/app/manage" title="Manage"><i className="fa fa-wrench"></i></Link></div>
-              <div hidden={!can_write}><Link to="/app/logs" title="Logs"><i className="fa fa-list-ul"></i></Link></div>
-              <div ><Link to="/app/sensors"><i className="fa fa-map-pin"></i></Link></div>
-              <div ><Link to="/app/targets"><i className="fa fa-th-large"></i></Link></div>
-              <div ><Link to="/app/groups"><i className="fa fa-folder"></i></Link></div>
-              <div ><Link to="/app/analysis/viewer"><i className="fa fa-bar-chart"></i></Link></div>
-              <div hidden={!can_write}><Link to="/app/reports"><i className="fa fa-cloud-download"></i></Link></div>
-              <div><a href="javascript:void(0)" onClick={this.toggle_search.bind(this, true)}><i className="fa fa-search"/></a></div>
+              <div hidden={!is_admin}><Link to="/app/admin/manage"><IconButton iconClassName="material-icons" iconStyle={this.iSt} style={this.ibSt} tooltipPosition="bottom-right" tooltip="Admin Manage">settings</IconButton></Link></div>
+              <div hidden={!is_admin}><Link to="/app/admin/spoof" title="Spoof Data"><IconButton iconClassName="material-icons" iconStyle={this.iSt} style={this.ibSt} tooltipPosition="bottom-right" tooltip="Spoof">redo</IconButton></Link></div>
+              <div hidden={!can_write}><Link to="/app/manage" title="Manage"><IconButton iconClassName="material-icons" iconStyle={this.iSt} style={this.ibSt} tooltipPosition="bottom-right" tooltip="Manage">settings_applications</IconButton></Link></div>
+              <div hidden={!can_write}><Link to="/app/logs" title="Logs"><IconButton iconClassName="material-icons" iconStyle={this.iSt} style={this.ibSt} tooltipPosition="bottom-right" tooltip="Logs">list</IconButton></Link></div>
+              <div ><Link to="/app/sensors"><IconButton iconClassName="material-icons" iconStyle={this.iSt} style={this.ibSt} tooltipPosition="bottom-right" tooltip="Sensors">fiber_smart_record</IconButton></Link></div>
+              <div ><Link to="/app/targets"><IconButton iconClassName="material-icons" iconStyle={this.iSt} style={this.ibSt} tooltipPosition="bottom-right" tooltip="Targets">view_module</IconButton></Link></div>
+              <div ><Link to="/app/groups"><IconButton iconClassName="material-icons" iconStyle={this.iSt} style={this.ibSt} tooltipPosition="bottom-right" tooltip="Groups">folder</IconButton></Link></div>
+              <div ><Link to="/app/analysis/viewer"><IconButton iconClassName="material-icons" iconStyle={this.iSt} style={this.ibSt} tooltipPosition="bottom-right" tooltip="Analysis Viewer">show_chart</IconButton></Link></div>
+              <div hidden={!can_write}><Link to="/app/reports"><IconButton iconClassName="material-icons" iconStyle={this.iSt} style={this.ibSt} tooltipPosition="bottom-right" tooltip="Reports">cloud_download</IconButton></Link></div>
+              <div><a href="javascript:void(0)" onClick={this.toggle_search.bind(this, true)}><IconButton iconClassName="material-icons" iconStyle={this.iSt} style={this.ibSt} tooltipPosition="bottom-right" tooltip="Search">search</IconButton></a></div>
             </nav>
           </aside>
 
