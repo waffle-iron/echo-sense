@@ -100,7 +100,7 @@ class EnterpriseAPI(handlers.JsonRequestHandler):
         params = tools.gets(self, strings=['name','country','timezone','alias'], integers=['default_sensortype'], json=['gateway_config'], ignoreMissing=True)
         if key:
             ent = Enterprise.get(key)
-        elif name:
+        elif params.get('name'):
             ent = Enterprise.Create()
         if ent:
             ent.Update(**params)
