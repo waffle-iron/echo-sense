@@ -314,6 +314,7 @@ class SensorAPI(handlers.JsonRequestHandler):
         success = False
         message = None
 
+        key_names = self.request.get('key_names') # comma sep
         _max = self.request.get_range('max', max_value=500, default=100)
         with_records = self.request.get_range('with_records', default=0)
         ms_updated_since = self.request.get_range('updated_since', default=0) # ms
@@ -321,7 +322,11 @@ class SensorAPI(handlers.JsonRequestHandler):
         group_id = self.request.get_range('group_id')
 
         updated_since = tools.dt_from_ts(ms_updated_since) if ms_updated_since else None
-        sensors = Sensor.Fetch(d['user'], updated_since=updated_since, target_id=target_id, group_id=group_id, limit=_max)
+
+        if key_names:
+            sensors = Sensor.get_by_key_name(key_names.split(','), parent=self.enterprise)
+        else:
+            sensors = Sensor.Fetch(d['user'], updated_since=updated_since, target_id=target_id, group_id=group_id, limit=_max)
         success = True
 
         data = {
