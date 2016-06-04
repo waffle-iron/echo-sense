@@ -320,9 +320,7 @@ aside.lnav {
 
 .lnav nav a {
     display: block;
-    color: gray;
     text-align: center;
-    margin: 8px 0px;
 }
 
 .lnav nav a:hover {

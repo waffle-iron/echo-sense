@@ -13,6 +13,12 @@ var TargetActions = require('actions/TargetActions');
 var TargetStore = require('stores/TargetStore');
 var SensorTypeActions = require('actions/SensorTypeActions');
 var SensorTypeStore = require('stores/SensorTypeStore');
+var SensorActions = require('actions/SensorActions');
+var SensorStore = require('stores/SensorStore');
+var mui = require('material-ui'),
+  FlatButton = mui.FlatButton,
+  FontIcon = mui.FontIcon;
+
 import connectToStores from 'alt/utils/connectToStores';
 
 @connectToStores
@@ -26,12 +32,13 @@ export default class Manage extends React.Component {
     }
 
     static getStores() {
-        return [GroupStore, SensorTypeStore, TargetStore, RuleStore];
+        return [GroupStore, SensorStore, SensorTypeStore, TargetStore, RuleStore];
     }
 
     static getPropsFromStores() {
         var st = GroupStore.getState();
         st.sensor_types = SensorTypeStore.getState().sensor_types;
+        st.sensors = SensorStore.getState().sensors;
         st.targets = TargetStore.getState().targets;
         st.rules = RuleStore.getState().rules;
         return st;
@@ -100,7 +107,7 @@ export default class Manage extends React.Component {
                     { name: 'name', label: "Name", editable: true },
                     { name: 'alias', label: "Alias", editable: true },
                     { name: 'schema', label: "Schema", editable: true,
-                        hint: "JSON object, e.g. {'length': {'unit': 'm', 'type': 'number'}}",
+                        hint: "JSON object, e.g. {\"length\": {\"unit\": \"m\", \"type\": \"number\"}}",
                         editOnly: true, inputType: "textarea" }
                 ],
                 'add_params': {},
@@ -232,7 +239,7 @@ export default class Manage extends React.Component {
         return (
             <div>
 
-                <h2><i className="fa fa-wrench"></i> Manage</h2>
+                <h2><FontIcon className="material-icons">settings_applications</FontIcon> Manage</h2>
 
                 <ul className="nav nav-pills">
                     { _tabs }

@@ -31,6 +31,11 @@ var GChart = React.createClass({displayName: 'GChart',
   componentDidMount: function() {
     this.fullInitialize();
   },
+  getChart: function() {
+    var cw = this.state.wrapper;
+    if (cw) return cw.getChart();
+    return null;
+  },
   fullInitialize: function() {
     var that = this;
     this.initializeDataTable(function() {
@@ -125,6 +130,7 @@ var GChart = React.createClass({displayName: 'GChart',
       if (this.props.allow_download){
         google.visualization.events.addListener(this.state.wrapper, 'ready', this.addDownloadLink);
       }
+      if (this.props.afterDraw) this.props.afterDraw();
     } else console.log("No data to draw");
   },
 

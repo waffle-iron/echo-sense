@@ -144,10 +144,10 @@ export default class GroupedSelector extends React.Component {
       <div className="groupedSelector">
         { ri }
         <div className="row">
-          <div className="col-md-6">
+          <div className="col-sm-6">
             { this.render_group_list() }
           </div>
-          <div className="col-md-6">
+          <div className="col-sm-6">
             { this.render_item_list() }
           </div>
         </div>

@@ -14,6 +14,7 @@ var mui = require('material-ui'),
   FlatButton = mui.FlatButton,
   List = mui.List,
   Card = mui.Card,
+  FontIcon = mui.FontIcon,
   CardTitle = mui.CardTitle,
   ListItem = mui.ListItem;
   // IconMenu = mui.IconMenu,
@@ -98,7 +99,7 @@ export default class Sensors extends React.Component {
     return (
       <div>
 
-        <h1><i className="fa fa-map-pin"/> Sensors</h1>
+        <h1><FontIcon className="material-icons">fiber_smart_record</FontIcon> Sensors</h1>
 
         <p className="lead">Sensors measure one or more properties of their environment, and can be optionally linked to a target.</p>
 
