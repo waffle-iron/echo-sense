@@ -13,6 +13,8 @@ var TargetActions = require('actions/TargetActions');
 var TargetStore = require('stores/TargetStore');
 var SensorTypeActions = require('actions/SensorTypeActions');
 var SensorTypeStore = require('stores/SensorTypeStore');
+var SensorActions = require('actions/SensorActions');
+var SensorStore = require('stores/SensorStore');
 var mui = require('material-ui'),
   FlatButton = mui.FlatButton,
   FontIcon = mui.FontIcon;
@@ -30,12 +32,13 @@ export default class Manage extends React.Component {
     }
 
     static getStores() {
-        return [GroupStore, SensorTypeStore, TargetStore, RuleStore];
+        return [GroupStore, SensorStore, SensorTypeStore, TargetStore, RuleStore];
     }
 
     static getPropsFromStores() {
         var st = GroupStore.getState();
         st.sensor_types = SensorTypeStore.getState().sensor_types;
+        st.sensors = SensorStore.getState().sensors;
         st.targets = TargetStore.getState().targets;
         st.rules = RuleStore.getState().rules;
         return st;
