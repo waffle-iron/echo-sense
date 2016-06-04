@@ -20,6 +20,7 @@ var AppConstants = require('../constants/AppConstants');
 var IconMenu = mui.IconMenu;
 var MenuItem = mui.MenuItem;
 var toastr = require('toastr');
+var FontIcon = mui.FontIcon;
 import {changeHandler} from 'utils/component-utils';
 import connectToStores from 'alt/utils/connectToStores';
 
@@ -118,7 +119,7 @@ export default class AnalysisViewer extends React.Component {
             var chartColumns = [
                 {type: 'string', label: 'Sensor Key', id: 'sensor'},
                 {type: 'string', label: 'Value', id: 'value'},
-                {type: 'string', role: 'tooltip'},
+                {type: 'string', role: 'tooltip', 'p': {'html': true}},
                 {type: 'date', label: 'Start', id: 'start'},
                 {type: 'date', label: 'End', id: 'end'}
             ];
@@ -133,13 +134,16 @@ export default class AnalysisViewer extends React.Component {
                 // Google viz can't handle same start/end
                 if (ts_updated == null || ts_updated <= a.ts_created) ts_updated = ts_updated + this.MIN_CHART_DURATION;
                 var end = new Date(ts_updated);
-                var akn = a.kn;
-                return [a.sensor_kn, value, akn, start, end];
+                var tooltip = "<h1>"+a.kn+"</h1>";
+                var row = [a.sensor_kn, value, tooltip, start, end];
+                console.log(row);
+                return row;
             }, this);
+            var opts = {tooltip: {isHtml: true}}
             _visualization = (
                 <div>
                     <p>The below timeline shows sensors in rows, and bars indicate individual analysis objects. Bars span from the date of creation to the date of last update.</p>
-                    <GChart title="Analysis Timeline" columns={chartColumns} data={chartData} ref="chart" type="Timeline" height="600" />
+                    <GChart title="Analysis Timeline" columns={chartColumns} data={chartData} ref="chart" type="Timeline" height="600" options={opts} />
                 </div>
             );
         }
@@ -157,7 +161,7 @@ export default class AnalysisViewer extends React.Component {
         return (
             <div>
 
-                <h1>Analysis Viewer</h1>
+                <h1><FontIcon className="material-icons">show_chart</FontIcon> Analysis Viewer</h1>
 
                 <div className="well">
                     <div className="row">

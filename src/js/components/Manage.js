@@ -104,7 +104,7 @@ export default class Manage extends React.Component {
                     { name: 'name', label: "Name", editable: true },
                     { name: 'alias', label: "Alias", editable: true },
                     { name: 'schema', label: "Schema", editable: true,
-                        hint: "JSON object, e.g. {'length': {'unit': 'm', 'type': 'number'}}",
+                        hint: "JSON object, e.g. {\"length\": {\"unit\": \"m\", \"type\": \"number\"}}",
                         editOnly: true, inputType: "textarea" }
                 ],
                 'add_params': {},
