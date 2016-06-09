@@ -7,13 +7,17 @@ class SensorTypeActions {
 
 	constructor() {
 		// Automatic action
-		this.generateActions('manualUpdate');
+		this.generateActions('manualUpdate', 'get_sensor_type');
 	}
 
 	// Manual actions
 
 	fetchTypes() {
 	    get(this, "/api/sensortype");
+	}
+
+	fetchType(type_id) {
+	    get(this, `/api/sensortype/${type_id}`);
 	}
 }
 

@@ -6,6 +6,8 @@ var LoadStatus = require('components/LoadStatus');
 var AppConstants = require('constants/AppConstants');
 var mui = require('material-ui');
 var SensorContactEditor = require('components/SensorContactEditor');
+var SensorTypeActions = require('actions/SensorTypeActions');
+var SensorTypeStore = require('stores/SensorTypeStore');
 var RefreshIndicator = mui.RefreshIndicator;
 var RaisedButton = mui.RaisedButton;
 var FlatButton = mui.FlatButton;
@@ -22,6 +24,7 @@ import connectToStores from 'alt/utils/connectToStores';
 import history from 'config/history'
 import {changeHandler} from 'utils/component-utils';
 import {removeItemsById} from 'utils/store-utils';
+import {merge} from 'lodash';
 
 var Link = Router.Link;
 
@@ -48,10 +51,11 @@ export default class SensorDetail extends React.Component {
     };
   }
   static getStores() {
-    return [UserStore];
+    return [UserStore, SensorTypeStore];
   }
   static getPropsFromStores() {
     var st = UserStore.getState();
+    merge(st, SensorTypeStore.getState());
     return st;
   }
 
@@ -118,6 +122,7 @@ export default class SensorDetail extends React.Component {
             loading: false
           }, function() {
             util.printTimestampsNow(null, null, null, "UTC");
+            SensorTypeActions.get_sensor_type(res.data.sensor.sensortype_id);
           });
         } else that.setState({loading:false});
       }, 'json');
@@ -284,6 +289,7 @@ export default class SensorDetail extends React.Component {
       if (s.batt_charging) _charging_icon = <i className="fa fa-bolt"></i>
       var contacts_json = {};
       if (s.contacts != null) contacts_json = JSON.parse(s.contacts);
+      var sensortype = this.props.sensor_types[s.sensortype_id];
       content = (
         <div>
           <Link to="/app/sensors" className='close'><i className="fa fa-close"></i></Link>
@@ -295,6 +301,7 @@ export default class SensorDetail extends React.Component {
           <div className="row">
             <div className="col-sm-6">
               <small>
+                <b>Type:</b> { sensortype ? sensortype.name : "--" }<br/>
                 <b>Created:</b> <span data-ts={s.ts_created}></span><br/>
                 <b>Updated:</b> <span data-ts={s.ts_updated}></span><br/>
                 <span hidden={true}><b>Battery:</b> <span title={s.batt_charging ? "Charging" : "Not Charging"}><i className={"fa fa-battery-"+batt_level_icon}></i> { util.printPercent(s.batt_level) } { _charging_icon }</span></span>
