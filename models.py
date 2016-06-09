@@ -462,11 +462,15 @@ class Target(UserAccessible):
         return not any_linked_sensor
 
     def clean_delete(self, **params):
+        message = None
+        success = False
         if self.can_delete():
             self.updateSearchDoc(delete=True)
             self.delete()
-            return True
-        return False
+            success = True
+        else:
+            message = "One or more linked sensors, cannot delete target"
+        return (success, message)
 
     # FTS overrides
 

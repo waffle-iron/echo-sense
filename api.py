@@ -594,7 +594,7 @@ class GroupAPI(handlers.JsonRequestHandler):
         if grp:
             success = grp.clean_delete()
             if not success:
-                message = "Couldn't delete group"
+                message = "Couldn't delete group - not empty?"
         else:
             message = "Group not found"
         self.json_out({}, message=message, success=success)
@@ -675,9 +675,7 @@ class TargetAPI(handlers.JsonRequestHandler):
         key = self.request.get('key')
         target = Target.get(key)
         if target:
-            success = target.clean_delete()
-            if not success:
-                message = "Couldn't delete target"
+            success, message = target.clean_delete()
         else:
             message = "Target type not found"
         self.json_out({}, message=message, success=success)
