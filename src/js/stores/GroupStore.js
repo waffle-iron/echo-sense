@@ -36,7 +36,6 @@ class GroupStore {
 	// Automatic
 
     manualUpdate(grp) {
-    	console.log(grp);
     	this.groups[grp.key] = grp;
     }
 

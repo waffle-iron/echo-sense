@@ -164,7 +164,7 @@ export default class Manage extends React.Component {
             props = {
                 'url': "/api/group", // Duplicate fetch here and flux
                 'id': 'sa',
-                'entity_name': "Sensor Group",
+                'entity_name': "Group",
                 'attributes': [
                     { name: 'id', label: "ID" },
                     { name: 'name', label: "Name", editable: true },
@@ -204,7 +204,6 @@ export default class Manage extends React.Component {
             var rule_opts = util.flattenDict(this.props.rules).map(function(rule, i, arr) {
                 return { val: rule.id, lab: rule.name };
             });
-            console.log(rule_opts);
             props = {
                 'url': "/api/processtask",
                 'id': 'sa',

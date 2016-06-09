@@ -285,6 +285,7 @@ class ProcessingTestCase(BaseTestCase):
         a = Analysis.GetOrCreate(self.vehicle_1, ANALYSIS_KEY_PATTERN)
         self.assertEqual(a.columnValue('total_bearing'), sum(BATCH_1['bearing']) + sum(BATCH_2['bearing']))
         self.assertEqual(a.columnValue('count_bearing'), len(BATCH_1['bearing']) + len(BATCH_2['bearing']))
+        self.assertEqual(a.columnValue('count_alarms'), 2)
         self.assertEqual(self.sp.status_last_run, PROCESS.OK)
 
     def testAlarmBuffer(self):

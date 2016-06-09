@@ -40,9 +40,10 @@ class BaseRequestHandler(webapp2.RequestHandler):
         self.response.write(self.jinja2.render_template(filename, **template_args))
 
     def json_out(self, data=None, error=0, message=None, status=None, success=True, debug=False):
-        message = message if message else ERROR.LABELS.get(error)
-        if not message:
-            message = "Unknown"
+        if not message and error:
+            message = ERROR.LABELS.get(error)
+            if not message:
+                message = "Unknown"
         if not error and not success:
             error = ERROR.OTHER
         out = {

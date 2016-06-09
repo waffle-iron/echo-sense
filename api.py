@@ -471,8 +471,12 @@ class SensorTypeAPI(handlers.JsonRequestHandler):
         self.json_out(data, success=success, message=message)
 
     @authorized.role('api')
-    def detail(self, cid, id, d):
-        pass
+    def detail(self, id, d):
+        st = SensorType.get_by_id(int(id), parent=self.enterprise)
+        message = None
+        if not st:
+            message = "Sensor type %d not found" % id
+        self.json_out({'sensortype': st.json() if st else None}, success=st is not None, message=message)
 
     @authorized.role('api')
     def update(self, d):
@@ -594,7 +598,7 @@ class GroupAPI(handlers.JsonRequestHandler):
         if grp:
             success = grp.clean_delete()
             if not success:
-                message = "Couldn't delete group"
+                message = "Couldn't delete group - not empty?"
         else:
             message = "Group not found"
         self.json_out({}, message=message, success=success)
@@ -675,9 +679,7 @@ class TargetAPI(handlers.JsonRequestHandler):
         key = self.request.get('key')
         target = Target.get(key)
         if target:
-            success = target.clean_delete()
-            if not success:
-                message = "Couldn't delete target"
+            success, message = target.clean_delete()
         else:
             message = "Target type not found"
         self.json_out({}, message=message, success=success)

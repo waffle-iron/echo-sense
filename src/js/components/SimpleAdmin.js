@@ -9,7 +9,9 @@ var Dialog = mui.Dialog,
   RaisedButton = mui.RaisedButton,
   FlatButton = mui.FlatButton;
 var bootbox = require('bootbox');
+var api = require('utils/api');
 var Select = require('react-select');
+import {removeItemsById} from 'utils/store-utils';
 var RefreshIndicator = mui.RefreshIndicator;
 
 class EditForm extends React.Component {
@@ -345,25 +347,16 @@ export default class SimpleAdmin extends React.Component {
   delete() {
     var that = this;
     this.setState({status: 'closed'}, function() {
-      bootbox.confirm("Really delete?", function(ok) {
+      bootbox.confirm("Really delete?", (ok) => {
         if (ok) {
           var item = that.state.selected;
           if (item) {
             that.setState({selected: null, status: 'closed'});
-            $.ajax({
-              url: that.props.url+'/delete',
-              dataType: 'json',
-              type: 'POST',
-              data: item,
-              success: function(resp) {
-                if (resp.success) {
-                  var items = that.state.items.filter(function (candidate) {
-                    return candidate != item;
-                  });
-                  that.setState({items: items });
-                  toastr.success(that.props.entity_name + " deleted");
-                } else toastr.error("Failed to delete " + that.props.entity_name);
-              }.bind(that)
+            api.post(that.props.url+'/delete', item, (resp) => {
+              var items = this.state.items;
+              items = removeItemsById(items, [item[this.props.unique_key]], this.props.unique_key);
+              this.setState({items: items});
+              toastr.success(this.props.entity_name + " deleted");
             });
           }
         }

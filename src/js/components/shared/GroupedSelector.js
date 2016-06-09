@@ -116,32 +116,45 @@ export default class GroupedSelector extends React.Component {
     var g = this.state.group_selected;
     if (!g) return <div className="empty"><i className="fa fa-arrow-left"/> Select a group</div>
     var items = clone(this.state.items);
+    var no_items = items.length == 0;
     if (this.props.sortProp) {
       var sp = this.props.sortProp;
       items.sort(function(a, b) { return a[sp] - b[sp]; });
     }
     var title = this.props.type == "targets" ? "Targets" : "Sensors";
     var subtitle = title + " in " + g.name;
-    var icon = this.props.type == "targets" ? <FontIcon className="fa fa-th-large"/> : <FontIcon className="fa fa-map-pin"/>;
-    return (
-      <Card>
+    var icon = this.props.type == "targets" ? <FontIcon className="material-icons">view_module</FontIcon> : <FontIcon className="material-icons">fiber_smart_record</FontIcon>;
+    var _content;
+    if (no_items) _content = <div className="empty">{"No " + title}</div>
+    else _content = (
+      <div>
         <CardHeader
           title={title}
           subtitle={subtitle} />
+
         <List>{ items.map(function(item, i) {
             var subhead = this.props.subhead != null ? this.props.subhead(item) : null;
-            return <ListItem key={i} primaryText={item.name} iconLeft={icon} secondaryText={subhead} onClick={this.props.onItemClick.bind(this, item)} />
+            return <ListItem key={i} primaryText={item.name} leftIcon={icon} secondaryText={subhead} onClick={this.props.onItemClick.bind(this, item)} />
           }, this) }
         </List>
+      </div>
+    )
+    return (
+      <Card>
+        { _content }
       </Card>
     )
   }
 
   render() {
     var ri;
+    var _content;
+    var groups = util.flattenDict(this.props.groups);
+    var no_groups = groups.length == 0;
     if (this.state.loading) ri = <RefreshIndicator size={40} left={50} top={50} status="loading" />
-    return (
-      <div className="groupedSelector">
+    if (no_groups) _content = <div className="empty">No groups yet</div>
+    else _content = (
+      <div>
         { ri }
         <div className="row">
           <div className="col-sm-6">
@@ -152,6 +165,7 @@ export default class GroupedSelector extends React.Component {
           </div>
         </div>
       </div>
-      );
+    )
+    return <div className="groupedSelector">{ _content }</div>
   }
 }

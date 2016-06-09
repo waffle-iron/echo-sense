@@ -17,11 +17,28 @@ class SensorTypeStore {
         }
     }
 
+    onFetchType(res) {
+        if (res.data && res.data.sensortype != null) {
+            var st = res.data.sensortype;
+            this.sensor_types[st.id] = st;
+        }
+    }
+
     // Automatic
 
     manualUpdate(st) {
     	this.sensor_types[st.id] = st;
     }
+
+    get_sensor_type(type_id) {
+        var type = this.sensor_types[type_id];
+        if (!type) {
+            // Fetch
+            SensorTypeActions.fetchType(type_id);
+        }
+        return type;
+    }
+
 
 }
 

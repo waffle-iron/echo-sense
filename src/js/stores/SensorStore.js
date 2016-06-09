@@ -6,7 +6,7 @@ var toastr = require('toastr');
 var util = require('utils/util');
 import {merge} from 'lodash';
 
-class SennsorStore {
+class SensorStore {
     constructor() {
         this.bindActions(SensorActions);
         this.sensors = {}; // Key name -> Sensor()
@@ -38,4 +38,4 @@ class SennsorStore {
 
 }
 
-module.exports = alt.createStore(SennsorStore, 'SennsorStore');
+module.exports = alt.createStore(SensorStore, 'SensorStore');

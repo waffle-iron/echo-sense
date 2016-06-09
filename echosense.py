@@ -89,7 +89,7 @@ app = webapp2.WSGIApplication(
       webapp2.Route('/api/sensortype', handler=api.SensorTypeAPI, handler_method="update", methods=["POST"], name="SensorTypeAPI"),
       webapp2.Route('/api/sensortype/create', handler=api.SensorTypeAPI, handler_method="create", methods=["POST"], name="SensorTypeAPI"),
       webapp2.Route('/api/sensortype/delete', handler=api.SensorTypeAPI, handler_method="delete", methods=["POST"], name="SensorTypeAPI"),
-      webapp2.Route('/api/sensortype/<key>', handler=api.SensorTypeAPI, handler_method="detail", methods=["GET"], name="SensorTypeAPI"),
+      webapp2.Route('/api/sensortype/<id>', handler=api.SensorTypeAPI, handler_method="detail", methods=["GET"], name="SensorTypeAPI"),
       webapp2.Route('/api/group', handler=api.GroupAPI, handler_method="list", methods=["GET"], name="GroupAPI"),
       webapp2.Route('/api/group', handler=api.GroupAPI, handler_method="update", methods=["POST"], name="GroupAPI"),
       webapp2.Route('/api/group/delete', handler=api.GroupAPI, handler_method="delete", methods=["POST"], name="GroupAPI"),
