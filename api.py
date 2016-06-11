@@ -1007,11 +1007,10 @@ class ReportAPI(handlers.JsonRequestHandler):
     def serve(self, d):
         rkey = self.request.get('rkey')
         r = Report.GetAccessible(rkey, d['user'])
-        piece = 0
         if r:
             if r.gcs_files:
                 try:
-                    gcsfn = r.gcs_files[piece-1]
+                    gcsfn = r.gcs_files[0]
                     gcs_file = gcs.open(gcsfn, 'r')
                 except gcs.NotFoundError, e:
                     self.response.out.write("File not found")
@@ -1022,6 +1021,20 @@ class ReportAPI(handlers.JsonRequestHandler):
                     gcs_file.close()
         else:
             self.response.out.write("Unauthorized")
+
+    @authorized.role('api')
+    def delete(self, d):
+        success = False
+        rkey = self.request.get('rkey')
+        r = Report.GetAccessible(rkey, d['user'])
+        if r:
+            r.CleanDelete(self_delete=True)
+            message = "Report deleted"
+            success = True
+        else:
+            message = "Report not found"
+        self.json_out(success=success, message=message)
+
 
 class APILogAPI(handlers.JsonRequestHandler):
     @authorized.role('api')

@@ -3,33 +3,36 @@ var React = require('react');
 var mui = require('material-ui');
 var api = require('utils/api');
 var RefreshIndicator = mui.RefreshIndicator;
+var IconButton = mui.IconButton;
 var $ = require('jquery');
 
-var FetchedList = React.createClass({displayName: 'FetchedList',
-  getDefaultProps: function() {
-    return {
-      url: null,
-      params: {},
-      listProp: 'items',
-      labelProp: 'label',
-      autofetch: false,
-      renderItem: null // Function
-    };
-  },
-  getInitialState: function() {
-    return {
+export default class FetchedList extends React.Component {
+  static defaultProps = {
+    url: null,
+    params: {},
+    listProp: 'items',
+    labelProp: 'label',
+    autofetch: false,
+    renderItem: null // Function
+  };
+
+  constructor(props) {
+    super(props);
+    this.state = {
       items: [],
       loading: false
     };
-  },
-  componentWillReceiveProps: function(nextProps) {
-  },
-  componentDidUpdate: function(prevProps, prevState) {
-  },
-  componentDidMount: function() {
+  }
+
+  componentWillReceiveProps(nextProps) {
+  }
+  componentDidUpdate(prevProps, prevState) {
+  }
+  componentDidMount() {
     if (this.props.autofetch) this.fetchData();
-  },
-  fetchData: function() {
+  }
+
+  fetchData() {
     var that = this;
     if (this.props.url) {
       api.get(this.props.url, this.props.params, function(res) {
@@ -38,15 +41,34 @@ var FetchedList = React.createClass({displayName: 'FetchedList',
         }
       });
     }
-  },
-  handleItemClick: function(i) {
+  }
+
+  handleItemClick(i) {
     if (this.props.onItemClick) this.props.onItemClick(i);
-  },
-  refresh: function() {
-    console.log("FetchedList:refresh");
+  }
+
+  refresh() {
     this.fetchData();
-  },
-  render: function() {
+  }
+
+  remove_item_by_key(key, _keyProp) {
+    var keyProp = _keyProp || "key";
+    var items = this.state.items;
+    for (var i=0; i<items.length; i++) {
+      var _item = items[i];
+      if (_item) {
+        var keyval = _item[keyProp];
+        if (keyval == key) {
+          // Match
+          items.splice(i, 1);
+          break;
+        }
+      }
+    }
+    this.setState({items: items});
+  }
+
+  render() {
     var _items = this.state.items.map(function(item, i, arr) {
       if (this.props.renderItem != null) return this.props.renderItem(item);
       else {
@@ -61,6 +83,7 @@ var FetchedList = React.createClass({displayName: 'FetchedList',
     return (
       <div>
         <RefreshIndicator status={ristatus} size={50} top={50} left={50} />
+        <IconButton iconClassName="material-icons" onClick={this.refresh.bind(this)}>refresh</IconButton>
         <ul className="list-group" hidden={empty}>
           { _items }
         </ul>
@@ -73,6 +96,4 @@ var FetchedList = React.createClass({displayName: 'FetchedList',
       </div>
     );
   }
-});
-
-module.exports = FetchedList;
+}

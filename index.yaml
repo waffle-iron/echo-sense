@@ -50,7 +50,18 @@ indexes:
   properties:
   - name: enterprise
   - name: dt_created
+
+- kind: Analysis
+  properties:
+  - name: enterprise
+  - name: dt_created
     direction: desc
+
+- kind: Analysis
+  properties:
+  - name: enterprise
+  - name: sensortype
+  - name: dt_created
 
 - kind: Analysis
   properties:

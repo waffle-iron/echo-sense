@@ -39,6 +39,17 @@ class SensorTypeStore {
         return type;
     }
 
+    get_sensor_types() {
+        let sensor_type_list = [];
+        if (Object.keys(this.sensor_types).length == 0) {
+            //Fetch
+            SensorTypeActions.fetchTypes();
+        } else {
+            sensor_type_list = util.flattenDict(this.sensor_types);
+        }
+        return sensor_type_list;
+    }
+
 
 }
 
