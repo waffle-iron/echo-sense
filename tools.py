@@ -97,19 +97,6 @@ def clone_entity(e, **extra_args):
 def str_to_tuple(s):
     return tuple(float(x) for x in s[1:-1].split(','))
 
-def create_paging_specs(self, items_query, items_per_page=25):
-    pg = self.request.get_range('pg', default=1)
-    n_items = items_query.count()
-    items = items_query.fetch(items_per_page, offset=(pg-1)*items_per_page)
-    if n_items < items_per_page:
-        n_pages = 1
-    else:
-        n_pages = n_items / items_per_page
-        if n_items % items_per_page > 0:
-            n_pages += 1
-    specs = [n_pages, pg]
-    return [items, specs]
-
 def unixtime(dt=None, ms=True):
     if not dt:
         dt = datetime.now()
