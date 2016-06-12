@@ -309,20 +309,20 @@ class AlarmReportWorker(GCSReportWorker):
         super(AlarmReportWorker, self).__init__(rkey, start_att="dt_start", start_att_direction="-")
         self.enterprise = self.report.enterprise
         self.FILTERS = [("enterprise =", self.enterprise)]
-        self.report.title = "Alarm Report [ %s ]" % (self.enterprise)
-        # specs = self.report.getSpecs()
-        # ts_start = specs.get("ts_start", 0)
-        # ts_end = specs.get("ts_end", 0)
-        # if ts_start:
-        #     self.FILTERS.append(("dt_start >=", tools.dt_from_ts(ts_start)))
-        # if ts_end:
-        #     self.FILTERS.append(("dt_start <", tools.dt_from_ts(ts_end)))
-        self.sensor_lookup = tools.lookupDict(Sensor, self.enterprise.sensor_set.fetch(limit=100))
+        specs = self.report.getSpecs()
+        start = specs.get("start", 0)
+        end = specs.get("end", 0)
+        if start:
+            self.FILTERS.append(("dt_start >=", tools.dt_from_ts(start)))
+        if end:
+            self.FILTERS.append(("dt_start <", tools.dt_from_ts(end)))
+        self.report.generate_title("Alarm Report", ts_start=start, ts_end=end)
+        self.sensor_lookup = tools.lookupDict(Sensor, self.enterprise.sensor_set.fetch(limit=200), valueTransform=lambda s : s.name)
         self.rule_lookup = tools.lookupDict(Rule, self.enterprise.rule_set.fetch(limit=100))
         self.headers = ["Sensor","Rule","Apex","Start","End"]
 
     def entityData(self, alarm):
-        sensor_name = str(self.sensor_lookup.get(tools.getKey(Alarm, 'sensor', alarm, asID=False), ""))
+        sensor_name = self.sensor_lookup.get(tools.getKey(Alarm, 'sensor', alarm, asID=False), "")
         rule_name = str(self.rule_lookup.get(tools.getKey(Alarm, 'rule', alarm, asID=False), ""))
         apex = "%.2f" % alarm.apex if alarm.apex is not None else "--"
         row = [sensor_name, rule_name, apex, tools.sdatetime(alarm.dt_start), tools.sdatetime(alarm.dt_end)]

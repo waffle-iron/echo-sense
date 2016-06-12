@@ -44,6 +44,11 @@ indexes:
   properties:
   - name: enterprise
   - name: dt_start
+
+- kind: Alarm
+  properties:
+  - name: enterprise
+  - name: dt_start
     direction: desc
 
 - kind: Analysis
