@@ -9,6 +9,7 @@ import cloudstorage as gcs
 import gc
 import xlwt
 import traceback
+import csv
 import json
 from decorators import deferred_task_decorator
 
@@ -22,15 +23,15 @@ class GCSReportWorker(object):
     KIND = None
     FILTERS = []
 
-    def __init__(self, rkey, start_att="__key__", start_att_direction="", make_sub_reports=False):
+    def __init__(self, rkey, start_att="__key__", start_att_direction=""):
         self.report = Report.get(rkey)
-        
+
         if not self.report:
             logging.error("Error retrieving report [ %s ] from db" % rkey)
-            return                
+            return
         self.report.status = REPORT.GENERATING
         self.report.put()
-        
+
         self.counters = {
             'run': 0,
             'skipped': 0
@@ -47,13 +48,11 @@ class GCSReportWorker(object):
         self.projection = None
         self.query = None
         self.batch_size = 300
-        self.make_sub_reports = make_sub_reports
         self.report_prog_mckey = MC_EXPORT_STATUS % self.report.key()
         self.setProgress({'val':0, "status":REPORT.GENERATING})
         self.gcs_file = gcs.open(self.getGCSFilename(), 'w')
-        self.section_gcs_files = []
         self.setup()
-            
+
         # From: https://code.google.com/p/googleappengine/issues/detail?id=8809
         logservice.AUTOFLUSH_ENABLED = True
         logservice.AUTOFLUSH_EVERY_BYTES = None
@@ -66,9 +65,6 @@ class GCSReportWorker(object):
         filename = GCS_REPORT_BUCKET + "/eid_%d/%s.%s.%s" % (r.enterprise.key().id(), r.key(), suffix, r.extension)
         r.gcs_files.append(filename)
         return r.gcs_files[-1]
-
-    def has_section_files(self):
-        return self.make_sub_reports and self.report.ftype != REPORT.XLS and len(self.repeat_sections) > 0
 
     def setup(self):
         if self.report.ftype == REPORT.XLS:
@@ -87,22 +83,16 @@ class GCSReportWorker(object):
 
             self.wb = xlwt.Workbook()
             self.ws = self.wb.add_sheet('Data')
-            if self.make_sub_reports:
-                self.section_ws = self.wb.add_sheet('Section')
-     
-    @deferred_task_decorator       
+
+    @deferred_task_decorator
     def run(self, start_cursor=None):
         self.worker_start = tools.unixtime()
-        if self.has_section_files() and len(self.section_gcs_files) != len(self.repeat_sections):
-            for section_name, section_questions in self.repeat_sections:
-                self.section_gcs_files.append(gcs.open(self.getGCSFilename(suffix=section_name), 'w'))
-
         self.cursor = start_cursor
         self.setProgress({'max':self.count(), 'report': self.report.json()})
-        
+
         if not start_cursor:
             self.writeHeaders()
-        
+
         try:
             # This is heavy
             self.writeData()
@@ -123,16 +113,9 @@ class GCSReportWorker(object):
         if self.report.ftype == REPORT.CSV:
             string = tools.normalize_to_ascii('"'+'","'.join(self.headers)+'"\n')
             self.gcs_file.write(string)
-            if self.has_section_files():
-                for section_gcs_file, section_headers in zip(self.section_gcs_files, self.section_headers):
-                    string = tools.normalize_to_ascii('"'+'","'.join(section_headers)+'"\n')
-                    section_gcs_file.write(string)
         elif self.report.ftype == REPORT.XLS:
             for i, header in enumerate(self.headers):
                 self.ws.write(0, i, header, self.xls_styles['bold'])
-            if self.has_section_files():
-                for i, header in enumerate(self.section_headers):
-                    self.section_ws.write(0, i, header, self.xls_styles['bold'])
 
     def writeData(self):
         total_i = self.counters['run']
@@ -140,25 +123,24 @@ class GCSReportWorker(object):
             self.query = self._get_query()
             if self.query:
                 entities = self.query.fetch(limit=self.batch_size)
-                self.cursor = self._get_cursor()                
+                self.cursor = self._get_cursor()
                 if not entities:
                     logging.debug("No rows returned by query -- done")
                     return
+                else:
+                    logging.debug("Got %d rows" % len(entities))
                 if entities and self.prefetch_props:
                     entities = tools.prefetch_reference_properties(entities, *self.prefetch_props, missingRefNone=True)
                 for entity in entities:
                     if entity:
                         ed = self.entityData(entity)
+                        logging.debug(ed)
                     else:
                         continue
                     string = '?'
                     if self.report.ftype == REPORT.CSV:
                         csv.writer(self.gcs_file).writerow(tools.normalize_list_to_ascii(ed))
-                        if sections_data and self.has_section_files():
-                            for section_gcs_file, sd in zip(self.section_gcs_files, sections_data):
-                                for sd_rows in zip(*sd):
-                                    csv.writer(section_gcs_file).writerow(tools.normalize_list_to_ascii(sd_rows))
-                    elif self.report.ftype == REPORT.XLS:          
+                    elif self.report.ftype == REPORT.XLS:
                         self.gcs_file.write(json.dumps(ed)+"\n")
                         if total_i > REPORT.XLS_ROW_LIMIT:
                             self.setProgress({'error': "XLS row limit (%d) exceeded!" % REPORT.XLS_ROW_LIMIT, 'status': REPORT.ERROR})
@@ -175,12 +157,13 @@ class GCSReportWorker(object):
                             return
 
                 logging.debug("Batch of %d done" % len(entities))
-                elapsed = tools.unixtime(local=False) - self.worker_start
+                elapsed_ms = tools.unixtime() - self.worker_start
+                elapsed = elapsed_ms / 1000
                 if elapsed >= MAX_REQUEST_SECONDS or (tools.on_dev_server() and TEST_TOO_LONG_ON_EVERY_BATCH):
                     logging.debug("Elapsed %ss" % elapsed)
                     raise TooLongError()
 
-            # self.setProgress() TODO: Implement background tasks like Echo Mobile
+            # self.setProgress() TODO: Implement background tasks via memcache
 
     def updateProgressAndCheckIfCancelled(self):
         progress = self.getProgress()
@@ -202,7 +185,7 @@ class GCSReportWorker(object):
         Override with format specific to report type
         """
         self.setProgress({'val': 0})
-        return [], []
+        return []
 
     @deferred_task_decorator
     def finish(self, reportDone=True):
@@ -234,17 +217,10 @@ class GCSReportWorker(object):
                                 if x in self.report.date_columns:
                                     self.ws.write(y, x, cell, self.xls_styles['datetime'])
                                 else:
-                                    self.ws.write(y, x, cell)            
-                        if self.make_sub_reports:
-                            #TODO: Write section_work_sheet, survey to excel is not enabled for now though
-                            pass
+                                    self.ws.write(y, x, cell)
                 self.wb.save(self.gcs_file)
 
-            self.gcs_file.close()            
-            if self.has_section_files():
-                for section_gcs_file in self.section_gcs_files:
-                    section_gcs_file.close()
-
+            self.gcs_file.close()
             self.report.status = REPORT.DONE
             self.report.dt_generated = datetime.now()
             self.report.put()
@@ -274,7 +250,6 @@ class GCSReportWorker(object):
     def _get_query(self):
         """Returns a query over the specified kind, with any appropriate filters applied."""
         if self.FILTERS:
-            #logging.debug("Querying with filters: %s" % (self.FILTERS))
             q = self.KIND.all()
             for prop, value in self.FILTERS:
                 q.filter("%s" % prop, value)
@@ -325,7 +300,7 @@ class SensorDataReportWorker(GCSReportWorker):
         row = [tools.sdatetime(rec.dt_recorded, fmt="%Y-%m-%d %H:%M:%S %Z")]
         for col in self.columns:
             row.append(str(rec.columnValue(col, default="")))
-        return row, []
+        return row
 
 class AlarmReportWorker(GCSReportWorker):
     KIND = Alarm
@@ -334,21 +309,52 @@ class AlarmReportWorker(GCSReportWorker):
         super(AlarmReportWorker, self).__init__(rkey, start_att="dt_start", start_att_direction="-")
         self.enterprise = self.report.enterprise
         self.FILTERS = [("enterprise =", self.enterprise)]
-        self.report.title = "Alarm Report [ %s ]" % (self.enterprise)
-        # specs = self.report.getSpecs()
-        # ts_start = specs.get("ts_start", 0)
-        # ts_end = specs.get("ts_end", 0)
-        # if ts_start:
-        #     self.FILTERS.append(("dt_start >=", tools.dt_from_ts(ts_start)))
-        # if ts_end:
-        #     self.FILTERS.append(("dt_start <", tools.dt_from_ts(ts_end)))
-        self.sensor_lookup = tools.lookupDict(Sensor, self.enterprise.sensor_set.fetch(limit=100))
+        specs = self.report.getSpecs()
+        start = specs.get("start", 0)
+        end = specs.get("end", 0)
+        if start:
+            self.FILTERS.append(("dt_start >=", tools.dt_from_ts(start)))
+        if end:
+            self.FILTERS.append(("dt_start <", tools.dt_from_ts(end)))
+        self.report.generate_title("Alarm Report", ts_start=start, ts_end=end)
+        self.sensor_lookup = tools.lookupDict(Sensor, self.enterprise.sensor_set.fetch(limit=200), valueTransform=lambda s : s.name)
         self.rule_lookup = tools.lookupDict(Rule, self.enterprise.rule_set.fetch(limit=100))
         self.headers = ["Sensor","Rule","Apex","Start","End"]
 
     def entityData(self, alarm):
-        sensor_name = str(self.sensor_lookup.get(tools.getKey(Alarm, 'sensor', alarm, asID=False), ""))
+        sensor_name = self.sensor_lookup.get(tools.getKey(Alarm, 'sensor', alarm, asID=False), "")
         rule_name = str(self.rule_lookup.get(tools.getKey(Alarm, 'rule', alarm, asID=False), ""))
         apex = "%.2f" % alarm.apex if alarm.apex is not None else "--"
         row = [sensor_name, rule_name, apex, tools.sdatetime(alarm.dt_start), tools.sdatetime(alarm.dt_end)]
-        return row, []
+        return row
+
+class AnalysisReportWorker(GCSReportWorker):
+    KIND = Analysis
+
+    def __init__(self, entkey, rkey):
+        super(AnalysisReportWorker, self).__init__(rkey, start_att="dt_created", start_att_direction="-")
+        self.enterprise = self.report.enterprise
+        self.FILTERS = [("enterprise =", self.enterprise)]
+        specs = self.report.getSpecs()
+        start = specs.get("start", 0)
+        end = specs.get("end", 0)
+        self.columns = specs.get("columns", "").split(",")
+        sensortype_id = specs.get("sensortype_id")
+        self.report.generate_title("Analysis Report", ts_start=start, ts_end=end, sensortype_id=sensortype_id)
+        if start:
+            self.FILTERS.append(("dt_created >=", tools.dt_from_ts(start)))
+        if end:
+            self.FILTERS.append(("dt_created <", tools.dt_from_ts(end)))
+        if sensortype_id:
+            self.FILTERS.append(("sensortype =", db.Key.from_path('Enterprise', self.enterprise.key().id(), 'SensorType', int(sensortype_id))))
+        self.sensor_lookup = tools.lookupDict(Sensor, self.enterprise.sensor_set.fetch(limit=200), valueTransform=lambda s : s.name)
+        self.headers = ["Key","Sensor","Created","Updated"] + self.columns
+
+
+    def entityData(self, analysis):
+        sensor_name = self.sensor_lookup.get(tools.getKey(Analysis, 'sensor', analysis, asID=False), "")
+        row = [analysis.key().name(), sensor_name, tools.sdatetime(analysis.dt_created), tools.sdatetime(analysis.dt_updated)]
+        for col in self.columns:
+            value = analysis.columnValue(col, default="")
+            row.append(value)
+        return row

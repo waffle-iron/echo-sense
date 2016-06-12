@@ -159,7 +159,6 @@ export default class DataViewer extends React.Component {
         this.props.history.replaceState(null, `/app/data/${this.props.params.sensorKn}`, query);
     }
     changeWindow(start_end, date_or_time, null_e, date_obj) {
-        console.log(date_obj);
         var values = {};
         var param_prop;
         if (start_end == 'start') {

@@ -86,6 +86,7 @@ class REPORT():
     # Types
     SENSOR_DATA_REPORT = 1
     ALARM_REPORT = 2
+    ANALYSIS_REPORT = 3
 
     #status
     CREATED = 1
@@ -106,7 +107,7 @@ class REPORT():
 
     XLS_ROW_LIMIT = 65000
 
-    TYPE_LABELS = {SENSOR_DATA_REPORT: "Device Data", ALARM_REPORT: "Alarm Report"}
+    TYPE_LABELS = {SENSOR_DATA_REPORT: "Device Data", ALARM_REPORT: "Alarm Report", ANALYSIS_REPORT: "Analysis Report"}
     STATUS_LABELS = {CREATED:"Created", GENERATING: "Generating", DONE:"Done", CANCELLED: "Cancelled", ERROR: "Error"}
     EXTENSIONS = {CSV: "csv", XLS: "xls", XLSX: "xlsx", PDF: "pdf"}
 

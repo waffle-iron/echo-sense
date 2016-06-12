@@ -7,7 +7,7 @@ class SensorTypeActions {
 
 	constructor() {
 		// Automatic action
-		this.generateActions('manualUpdate', 'get_sensor_type');
+		this.generateActions('manualUpdate', 'get_sensor_type', 'get_sensor_types');
 	}
 
 	// Manual actions

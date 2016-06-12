@@ -561,9 +561,12 @@ def normalize_to_ascii(text):
         text = str(text).decode('utf-8')
     elif not isinstance(text, unicode):
         text = text.decode('utf-8')
-
     normalized_text = unicodedata.normalize('NFKD', text).encode('ascii','ignore')
     return normalized_text
+
+def normalize_list_to_ascii(l):
+    return [normalize_to_ascii(v) for v in l]
+
 
 def safe_geopoint(geo_str):
     '''

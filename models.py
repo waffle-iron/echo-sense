@@ -1781,6 +1781,24 @@ class Report(UserAccessible):
     def setSpecs(self, data):
         self.specs = json.dumps(data)
 
+    def generate_title(self, _title, ts_start=None, ts_end=None, **kwargs):
+        title = _title
+        start_text = end_text = None
+        if ts_start:
+            start_text = tools.sdatetime(tools.dt_from_ts(ts_start))
+        if ts_end:
+            end_text = tools.sdatetime(tools.dt_from_ts(ts_end))
+        if start_text and end_text:
+            title += " (%s - %s)" % (start_text, end_text)
+        elif start_text:
+            title += " Since %s" % start_text
+        elif end_text:
+            title += " Until %s" % end_text
+        for key, val in kwargs.items():
+            if key and val is not None:
+                title += " %s:%s" % (key, val)
+        self.title = title
+
     def filename(self, ext=None, piece=None):
         _piece = ""
         if piece is not None:
@@ -1829,6 +1847,9 @@ class Report(UserAccessible):
         elif self.type == REPORT.ALARM_REPORT:
             from reports import AlarmReportWorker
             worker = AlarmReportWorker(target, self.key())
+        elif self.type == REPORT.ANALYSIS_REPORT:
+            from reports import AnalysisReportWorker
+            worker = AnalysisReportWorker(target, self.key())
         else:
             worker = None
         if worker and self.status not in [REPORT.ERROR, REPORT.CANCELLED]:
@@ -1837,6 +1858,7 @@ class Report(UserAccessible):
             logging.error("Worker not created or invalid status for run(): type %d" % self.type)
 
     def finish(self):
+        '''Finalize report'''
         self.status = REPORT.DONE
         self.dt_generated = datetime.now()
 
@@ -1849,7 +1871,7 @@ class Report(UserAccessible):
         return url
 
     def getGCSFile(self, index=0):
-        #we actually don't anticipate more than 1 gcsfiles anymore
+        # we actually don't anticipate more than 1 gcsfiles anymore
         if self.gcs_files and len(self.gcs_files) >= index + 1:
             return self.gcs_files[index]
         return None
