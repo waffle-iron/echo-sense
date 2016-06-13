@@ -592,16 +592,17 @@ class GroupAPI(handlers.JsonRequestHandler):
     def delete(self, d):
         success = False
         message = None
-        grp = None
+        grp = id = None
         key = self.request.get('key')
         grp = SensorGroup.get(key)
         if grp:
             success = grp.clean_delete()
+            id = grp.key().id()
             if not success:
                 message = "Couldn't delete group - not empty?"
         else:
             message = "Group not found"
-        self.json_out({}, message=message, success=success)
+        self.json_out({"key": key, "id": id}, message=message, success=success)
 
 class TargetAPI(handlers.JsonRequestHandler):
     @authorized.role('api')

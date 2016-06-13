@@ -3,7 +3,8 @@
 var React = require('react');
 var Router = require('react-router');
 
-var FetchedList = require('components/FetchedList');
+import AltContainer from 'alt-container';
+var FluxFetchedList = require('components/FluxFetchedList');
 var SensorDetail = require('components/SensorDetail');
 var $ = require('jquery');
 var util = require('utils/util');
@@ -11,6 +12,7 @@ var mapc = require('utils/map_common');
 var api = require('utils/api');
 var mui = require('material-ui'),
   FlatButton = mui.FlatButton,
+  RaisedButton = mui.RaisedButton,
   List = mui.List,
   Card = mui.Card,
   CardTitle = mui.CardTitle,
@@ -19,10 +21,12 @@ var mui = require('material-ui'),
   // IconMenu = mui.IconMenu,
   // MenuItem = mui.MenuItem;
 var GroupedSelector = require('components/shared/GroupedSelector');
+var GroupStore = require('stores/GroupStore');
+var GroupActions = require('actions/GroupActions');
 
 var IconMenu = mui.IconMenu;
 var MenuItem = mui.MenuItem;
-
+var bootbox = require('bootbox');
 var Link = Router.Link;
 import history from 'config/history'
 
@@ -51,17 +55,21 @@ export default class Groups extends React.Component {
     if (g==null) history.replaceState(null, `/app/groups`);
     else history.replaceState(null, `/app/groups/${g.id}`);
   }
+
   closeDetail() {
     this.gotoGroup(null);
   }
 
-  render_group(g) {
-    return (
-      <li className="list-group-item">
-        <i className="fa fa-folder"/>&nbsp;
-        <Link className="title" to={`/app/groups/${g.id}`}>{ g.name }</Link>
-      </li>
-      )
+  new_group_dialog() {
+    bootbox.prompt({
+      title: "Enter new group name",
+      callback: (result) => {
+        if (result === null) {
+        } else {
+          GroupActions.update({name: result});
+        }
+      }
+    });
   }
 
   render() {
@@ -76,8 +84,17 @@ export default class Groups extends React.Component {
         <p className="lead">Groups are a way to organize sensors and targets. Users can access items in a group they have been given permission for.</p>
         { this.props.children }
 
-        <FetchedList renderItem={this.render_group.bind(this)} url="/api/group" listProp="groups" autofetch={true} />
+        <AltContainer store={GroupStore} actions={ function(props) {
+          return {
+            fetchItems: function() {
+              return GroupActions.fetchGroups();
+            }
+          }
+        } } >
+          <FluxFetchedList listStyle="mui" icon={<FontIcon className="material-icons">folder</FontIcon>} listProp="groups" labelProp="name" autofetch={true} onItemClick={this.gotoGroup.bind(this)} store={GroupStore} actions={GroupActions} />
+        </AltContainer>
 
+        <RaisedButton label="New Group" primary={true} onClick={this.new_group_dialog.bind(this)} />
       </div>
     );
   }

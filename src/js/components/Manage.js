@@ -62,7 +62,6 @@ export default class Manage extends React.Component {
         var tabs = [
             {id: 'sensors', label: "Sensors"},
             {id: 'stypes', label: "Sensor Types"},
-            {id: 'groups', label: "Groups"},
             {id: 'targets', label: "Targets"},
             {id: 'rules', label: "Rules"},
             {id: 'processes', label: "Process Tasks"},
@@ -158,23 +157,6 @@ export default class Manage extends React.Component {
                 getListFromJSON: function(data) { return data.data.rules; },
                 getObjectFromJSON: function(data) { return data.data.rule; },
                 onItemCreated: function(item) { RuleActions.manualUpdate(item); }
-            }
-        } else if (tab == "groups") {
-
-            props = {
-                'url': "/api/group", // Duplicate fetch here and flux
-                'id': 'sa',
-                'entity_name': "Group",
-                'attributes': [
-                    { name: 'id', label: "ID" },
-                    { name: 'name', label: "Name", editable: true },
-                ],
-                'add_params': {},
-                'unique_key': 'key',
-                'max': 50,
-                getListFromJSON: function(data) { return data.data.groups; },
-                getObjectFromJSON: function(data) { return data.data.group; },
-                onItemCreated: function(item) { GroupActions.manualUpdate(item); }
             }
 
         } else if (tab == "targets") {
