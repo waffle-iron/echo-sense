@@ -47,10 +47,12 @@ export default class GroupDetail extends React.Component {
     return st;
   }
 
-  componentWillReceiveProps(nextProps) {
-    var newGroup = nextProps.params.groupID && (!this.props.params.groupID || nextProps.params.groupID != this.props.params.groupID);
+  componentDidUpdate(prevState, prevProps) {
+    var newGroup = this.props.params.groupID && (!prevProps.params.groupID || this.props.params.groupID != prevProps.params.groupID);
     if (newGroup) {
-      this.prepareGroup(nextProps.params.groupID);
+      this.prepareGroup(this.props.params.groupID);
+      this.refs.sensors.refresh();
+      this.refs.targets.refresh();
     }
   }
 
@@ -153,11 +155,11 @@ export default class GroupDetail extends React.Component {
 
           <div>
             <h2>Sensors</h2>
-            <FetchedList url="/api/sensor" listStyle="mui" params={{group_id: g.id}} icon={<FontIcon className="material-icons">fiber_smart_record</FontIcon>} autofetch={true} listProp="sensors" labelProp="name" subProp="kn" onItemClick={this.gotoSensor.bind(this)} />
+            <FetchedList ref="sensors" url="/api/sensor" listStyle="mui" params={{group_id: g.id}} icon={<FontIcon className="material-icons">fiber_smart_record</FontIcon>} autofetch={true} listProp="sensors" labelProp="name" subProp="kn" onItemClick={this.gotoSensor.bind(this)} />
           </div>
           <div>
             <h2>Targets</h2>
-            <FetchedList url="/api/target" listStyle="mui" params={{group_id: g.id}} autofetch={true} listProp="targets" labelProp="name" onItemClick={this.gotoTarget.bind(this)} />
+            <FetchedList ref="targets" url="/api/target" listStyle="mui" params={{group_id: g.id}} autofetch={true} listProp="targets" labelProp="name" onItemClick={this.gotoTarget.bind(this)} />
           </div>
 
         </div>

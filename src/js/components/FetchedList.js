@@ -30,8 +30,10 @@ export default class FetchedList extends React.Component {
 
   componentWillReceiveProps(nextProps) {
   }
+
   componentDidUpdate(prevProps, prevState) {
   }
+
   componentDidMount() {
     if (this.props.autofetch) this.fetchData();
   }

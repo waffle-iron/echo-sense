@@ -80,7 +80,6 @@ export default class FluxFetchedList extends React.Component {
 
   render() {
     var items = this.items();
-    console.log(items);
     var _items = this.items().map(function(item, i, arr) {
       if (this.props.renderItem != null) return this.props.renderItem(item);
       else {
