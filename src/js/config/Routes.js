@@ -17,7 +17,10 @@ var SensorDetail = require('components/SensorDetail');
 var AlarmDetail = require('components/AlarmDetail');
 var RecordDetail = require('components/RecordDetail');
 var AnalysisDetail = require('components/AnalysisDetail');
+var Analyze = require('components/Analyze');
 var AnalysisViewer = require('components/AnalysisViewer');
+var AnalysisSettings = require('components/AnalysisSettings');
+var ProcessTaskDetail = require('components/ProcessTaskDetail');
 var TargetDetail = require('components/TargetDetail');
 var GroupDetail = require('components/GroupDetail');
 var Manage = require('components/Manage');
@@ -52,7 +55,13 @@ module.exports = (
       </Route>
       <Route path="reports" component={Reports} />
       <Route path="alarms/:sensorKn/:aid" component={AlarmDetail} />
-      <Route path="analysis/viewer" component={AnalysisViewer} />
+      <Route path="analyze" component={Analyze}>
+        <Route path="viewer" component={AnalysisViewer} />
+        <Route path="settings" component={AnalysisSettings}>
+          <Route path=":processtaskID" component={ProcessTaskDetail} />
+        </Route>
+        <IndexRoute component="AnalysisSettings" />
+      </Route>
       <Route path="analysis/:analysisKn" component={AnalysisDetail} />
       <Route path="data/:sensorKn" component={DataViewer} />
       <Route path="data/:sensorKn/record/:recordKn" component={RecordDetail} />
