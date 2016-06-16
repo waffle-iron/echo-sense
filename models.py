@@ -1151,7 +1151,7 @@ class ProcessTask(UserAccessible):
     time_end = db.TimeProperty(indexed=False)  # UTC
     # Scheduling - OR of the below
     month_days = db.ListProperty(int, indexed=False)  # 1 - 31
-    week_days = db.ListProperty(int, indexed=False)  # 1 - 7 (Mon - Sun)
+    week_days = db.ListProperty(int, default=[1,2,3,4,5,6,7], indexed=False)  # 1 - 7 (Mon - Sun)
     rule_ids = db.ListProperty(int, indexed=False)
     label = db.StringProperty(indexed=False)
     # JSON spec for ExpressionParser (cleaning, calculations, and production of analysis records). TODO: Validate

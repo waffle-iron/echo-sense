@@ -48,8 +48,8 @@ export default class AnalysisSettings extends React.Component {
   }
 
   goto_task(task) {
-    if (task==null) history.replaceState(null, `/app/analyze/settings`);
-    else history.replaceState(null, `/app/analyze/settings/${task.id}`);
+    if (task==null) history.replaceState(null, `/app/processing/settings`);
+    else history.replaceState(null, `/app/processing/settings/${task.id}`);
   }
 
   closeDetail() {

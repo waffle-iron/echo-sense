@@ -27,15 +27,16 @@ export default class Analyze extends React.Component {
   }
 
   section_change(section) {
-    history.pushState(null, `/app/analyze/${section}`)
+    history.pushState(null, `/app/processing/${section}`)
   }
 
   render() {
     return (
       <div>
-        <h1><FontIcon className="material-icons">show_chart</FontIcon> Analyze</h1>
+        <h1><FontIcon className="material-icons">show_chart</FontIcon> Processing</h1>
 
         <FlatButton label="Settings" onClick={this.section_change.bind(this, 'settings')} />
+        <FlatButton label="Rules" onClick={this.section_change.bind(this, 'rules')} />
         <FlatButton label="Viewer" onClick={this.section_change.bind(this, 'viewer')} />
 
         <div>
