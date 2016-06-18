@@ -893,11 +893,14 @@ class ProcessTaskAPI(handlers.JsonRequestHandler):
             }
         self.json_out(data, success=success, message=message)
 
-    @authorized.role()
-    def detail(self, key, d):
+    @authorized.role('api')
+    def detail(self, key_or_id, d):
         success = False
         message = None
-        p = ProcessTask.get(key)
+        if key_or_id.isdigit():
+            p = ProcessTask.get_by_id(int(key_or_id), parent=self.enterprise)
+        else:
+            p = ProcessTask.get(key_or_id)
         if p:
             success = True
         else:

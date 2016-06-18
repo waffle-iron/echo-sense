@@ -21,8 +21,9 @@ class ProcessTaskStore {
     }
 
     onFetchTask(res) {
-        if (res.data && res.data.task != null) {
+        if (res.data && res.data.processtask != null) {
             var t = res.data.processtask;
+            t.updated_ms = util.nowTimestamp(); // ms
             this.tasks[t.id] = t;
         }
     }
@@ -30,6 +31,7 @@ class ProcessTaskStore {
     onUpdate(res) {
         if (res.data && res.data.processtask != null) {
             var task = res.data.processtask;
+            t.updated_ms = util.nowTimestamp(); // ms
             this.tasks[task.id] = task;
         }
     }
@@ -59,7 +61,7 @@ class ProcessTaskStore {
     get_tasks() {
         var tasks = this.tasks;
         if (isEmpty(tasks)) {
-            ProcessTaskActions.fetchGroups()
+            ProcessTaskActions.fetchTasks()
             return {};
         } else {
             return tasks;

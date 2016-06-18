@@ -1015,13 +1015,22 @@ class Rule(db.Model):
                 diff = delta - dceiling
         elif self.trigger == RULE.ANY_DATA:
             passed = val is not None
-        elif self.trigger == RULE.GEOFENCE:
+        elif self.trigger in [RULE.GEOFENCE_OUT, RULE.GEOFENCE_IN]:
             geo_json = tools.getJson(self.value_complex)
             if geo_json and val:
                 polygon = tools.polygon_from_geojson(geo_json)
                 gp = tools.safe_geopoint(val)
                 if gp:
-                    passed = not tools.point_inside_polygon(gp.lat, gp.lon, polygon)
+                    inside = tools.point_inside_polygon(gp.lat, gp.lon, polygon)
+                    passed = inside == (self.trigger == RULE.GEOFENCE_IN)
+        elif self.trigger in [RULE.GEORADIUS_OUT, RULE.GEORADIUS_IN]:
+            geo_json = tools.getJson(self.value_complex)
+            if geo_json and val:
+                polygon = tools.polygon_from_geojson(geo_json)
+                gp = tools.safe_geopoint(val)
+                if gp:
+                    inside = tools.point_within_radius(gp.lat, gp.lon, target.get('lat'), target.get('lon'), radius=self.value2)
+                    passed = inside == (self.trigger == RULE.GEORADIUS_IN)
         else:
             raise Exception("Unsupported trigger type: %s" % self.trigger)
         # logging.debug("%s %s at value: %s (diff %s)" % (self, "passed" if passed else "not passed", val, diff))

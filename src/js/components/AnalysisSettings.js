@@ -75,9 +75,9 @@ export default class AnalysisSettings extends React.Component {
     return (
       <div>
 
-        <p className="lead">Analysis...</p>
-
         { this.props.children }
+
+        <h2>Process Tasks</h2>
 
         <AltContainer store={ProcessTaskStore} actions={ function(props) {
           return {

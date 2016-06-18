@@ -397,7 +397,7 @@ class ProcessingTestCase(BaseTestCase):
             name="Off Route",
             sensortype_id=self.spedometer.key().id(),
             column="location",
-            trigger=RULE.GEOFENCE,
+            trigger=RULE.GEOFENCE_OUT,
             value_complex=json.dumps(DUMMY_GEOFENCE)
             )
         self.offroute_alarm.put()
