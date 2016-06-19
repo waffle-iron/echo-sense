@@ -4,7 +4,8 @@ var AppConstants = {
   DOWNSAMPLES: [
   	{ value: 0, label: "None" },
   	{ value: 1, label: "Minute" },
-    { value: 2, label: "Hour" }
+    { value: 2, label: "10 Minutes" },
+    { value: 3, label: "Hour" }
   ],
   RULE_TRIGGERS: [
     { value: 1, label: "No Data" },

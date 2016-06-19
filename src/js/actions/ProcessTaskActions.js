@@ -13,12 +13,16 @@ class ProcessTaskActions {
 	// Manual actions
 
 	fetchTasks() {
-	    get(this, "/api/processtask");
+	    api.get("/api/processtask", {}, (res) => {
+	    	this.dispatch(res);
+	    });
 	}
 
 
 	fetchTask(id) {
-	    get(this, `/api/processtask/${id}`);
+	    api.get(`/api/processtask/${id}`, {}, (res) => {
+	    	this.dispatch(res);
+	    });
 	}
 
 	update(data) {

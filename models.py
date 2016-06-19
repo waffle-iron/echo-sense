@@ -1485,8 +1485,10 @@ class Record(db.Expando):
 
     @staticmethod
     def Fetch(sensor, limit=50, dt_start=None, dt_end=None, downsample=DOWNSAMPLE.NONE):
-        '''
-        Takes sensor as Sensor() or Key
+        '''Takes sensor as Sensor() or Key
+
+        Note that unindexed downsamples (see DOWNSAMPLE()) uses limit for the initial fetch,
+        but will return less records after post-query filtering.
         '''
         if downsample:
             ds_prop = DOWNSAMPLE.PROPERTIES.get(downsample)
@@ -1509,6 +1511,10 @@ class Record(db.Expando):
                 q.filter(ds_prop+" <=", end)
             # Query returns keys of downsampled records
             proj_records = q.fetch(limit=limit)
+            if downsample in DOWNSAMPLE.UNINDEXED:
+                # Manually filter (uniq?)
+                # TODO
+                pass
             return Record.get([x.key() for x in proj_records])
         else:
             q.order("-dt_recorded")

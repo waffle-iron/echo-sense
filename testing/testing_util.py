@@ -182,11 +182,26 @@ class UtilTestCase(BaseTestCase):
             (datetime(2016, 1, 29), datetime(2015, 1, 4), RULE.MONTH, False)
         ]
         for v in volley:
-            print v
             dt1, dt2, period_type, same = v
             ms1, ms2 = tools.unixtime(dt1), tools.unixtime(dt2)
             out = tools.in_same_period(ms1, ms2, period_type)
             self.assertEqual(out, same)
+
+    def testInRadius(self):
+        center_lat = 1.2
+        center_lon = 32.0
+        volley = [
+            # lat, lon, radius, inside (boolean)
+            (1.2, 32.0, 10, True),
+            (1.2, 33.0, 10, False),
+            # TODO: Add tests
+        ]
+
+        for v in volley:
+            lat, lon, radius, expect_inside = v
+            inside = tools.point_within_radius(lat, lon, center_lat, center_lon, radius_m=radius)
+            self.assertEqual(inside, expect_inside)
+
 
     def tearDown(self):
         pass

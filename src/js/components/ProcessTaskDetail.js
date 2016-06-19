@@ -21,6 +21,7 @@ var UserStore = require('stores/UserStore');
 var ProcessTaskStore = require('stores/ProcessTaskStore');
 var ProcessTaskActions = require('actions/ProcessTaskActions');
 var RuleStore = require('stores/RuleStore');
+var RuleActions = require('actions/RuleActions');
 var IconMenu = mui.IconMenu;
 var MenuItem = mui.MenuItem;
 var api = require('utils/api');
@@ -67,7 +68,9 @@ export default class ProcessTaskDetail extends React.Component {
     var id = this.props.params.processtaskID;
     if (id) {
       var task = ProcessTaskActions.get_task(id);
+      if (task) this.prepare_task(id);
     }
+    RuleStore.get_rules();
   }
 
   prepare_task(id) {
@@ -112,6 +115,9 @@ export default class ProcessTaskDetail extends React.Component {
   save() {
     var data = clone(this.state.form);
     if (data.spec) data.spec = JSON.stringify(data.spec);
+    if (data.week_days.length > 0) data.week_days = data.week_days.join(',');
+    if (data.month_days.length > 0) data.month_days = data.month_days.join(',');
+    if (data.rule_ids.length > 0) data.rule_ids = data.rule_ids.join(',');
     api.post("/api/processtask", data, (res) => {
 
     });
@@ -129,7 +135,7 @@ export default class ProcessTaskDetail extends React.Component {
     this.setState({form: form});
   }
 
-  spec_change(prop, index, e) {
+  spec_change(index, prop, e) {
     var val = e.target.value;
     var form = this.state.form;
     var processer = form.spec.processers[index];
@@ -159,7 +165,6 @@ export default class ProcessTaskDetail extends React.Component {
       var _processers, _spec_editor;
       if (form.spec != null) {
         var spec = form.spec;
-        console.log(spec);
         if (spec != null && spec.processers != null) {
           _processers = spec.processers.map((processer, i) => {
             return (
@@ -172,7 +177,7 @@ export default class ProcessTaskDetail extends React.Component {
                     <TextField floatingLabelText="Column" value={processer.column || ""} onChange={this.spec_change.bind(this, i, 'column')} fullWidth />
                   </div>
                   <div className="col-sm-4">
-                    <IconButton className="material-icons" onClick={this.remove_processer.bind(this, i)} tooltip="Remove">delete</IconButton>
+                    <IconButton iconClassName="material-icons" onClick={this.remove_processer.bind(this, i)} tooltip="Remove">delete</IconButton>
                   </div>
                   <div className="col-sm-12">
                     <TextField floatingLabelText="Calculation" value={processer.calculation || ""} onChange={this.spec_change.bind(this, i, 'calculation')} fullWidth />
@@ -220,18 +225,18 @@ export default class ProcessTaskDetail extends React.Component {
           <div className="row">
             <div className="col-sm-12">
               <label>Rules</label>
-              <Select value={form.rule_ids} multi={true} options={rule_opts} onChange={this.changeHandlerVal.bind(this, 'form', 'rule_ids')} simpleValue />
+              <Select value={form.rule_ids} multi={true} options={rule_opts} onChange={this.changeHandlerMultiVal.bind(this, 'form', 'rule_ids')} />
             </div>
           </div>
           <div className="row">
             <div className="col-sm-6">
               <label>Days of Month</label>
               <div className="help-block">Task will run if day matches either month day or week day, so either or both must be set. Comma separated list of ints.</div>
-              <Select multi={true} value={form.month_days} onChange={this.changeHandlerVal.bind(this, 'form', 'month_days')} options={month_day_opts} simpleValue />
+              <Select multi={true} value={form.month_days} onChange={this.changeHandlerMultiVal.bind(this, 'form', 'month_days')} options={month_day_opts} />
             </div>
             <div className="col-sm-6">
               <label>Days of Week</label>
-              <Select multi={true} value={form.week_days} onChange={this.changeHandlerVal.bind(this, 'form', 'week_days')} options={AppConstants.WEEKDAYS} simpleValue />
+              <Select multi={true} value={form.week_days} onChange={this.changeHandlerMultiVal.bind(this, 'form', 'week_days')} options={AppConstants.WEEKDAYS} />
             </div>
           </div>
           <div className="row">

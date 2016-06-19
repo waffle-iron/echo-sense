@@ -932,6 +932,7 @@ class ProcessTaskAPI(handlers.JsonRequestHandler):
             p.Update(**params)
             p.put()
             success = True
+            message = "Process task updated!"
         data = {
             'processtask': p.json() if p else None
             }
