@@ -86,7 +86,7 @@ export default class AnalysisSettings extends React.Component {
             }
           }
         } } >
-          <FluxFetchedList listStyle="mui" icon={<FontIcon className="material-icons">bubble_chart</FontIcon>} listProp="tasks" labelProp="label" autofetch={true} onItemClick={this.goto_task.bind(this)} store={ProcessTaskStore} actions={ProcessTaskActions} />
+          <FluxFetchedList listStyle="mui" icon={<FontIcon className="material-icons">insert_chart</FontIcon>} listProp="tasks" labelProp="label" autofetch={true} onItemClick={this.goto_task.bind(this)} store={ProcessTaskStore} actions={ProcessTaskActions} />
         </AltContainer>
 
         <RaisedButton label="New Process Task" primary={true} onClick={this.new_task_dialog.bind(this)} />

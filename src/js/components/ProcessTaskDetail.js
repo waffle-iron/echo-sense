@@ -58,18 +58,14 @@ export default class ProcessTaskDetail extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     var task = this.task();
     var form = this.state.form;
-    var newTask = this.props.params.processtaskID && (task && (task.updated_ms > form.updated_ms || task.id != form.id));
+    var newTask = this.props.params.processtaskID && (task && (task.updated_ms > (form.updated_ms || 0) || task.id != form.id));
     if (newTask) {
       this.prepare_task(this.props.params.processtaskID);
     }
   }
 
   componentDidMount() {
-    var id = this.props.params.processtaskID;
-    if (id) {
-      var task = ProcessTaskActions.get_task(id);
-      if (task) this.prepare_task(id);
-    }
+    ProcessTaskActions.fetchTask(this.props.params.processtaskID);
     RuleStore.get_rules();
   }
 
@@ -118,9 +114,7 @@ export default class ProcessTaskDetail extends React.Component {
     if (data.week_days.length > 0) data.week_days = data.week_days.join(',');
     if (data.month_days.length > 0) data.month_days = data.month_days.join(',');
     if (data.rule_ids.length > 0) data.rule_ids = data.rule_ids.join(',');
-    api.post("/api/processtask", data, (res) => {
-
-    });
+    ProcessTaskActions.update(data);
   }
 
   add_processer() {
