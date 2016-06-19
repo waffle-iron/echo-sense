@@ -18,11 +18,9 @@ def jinja2_factory(app):
     })
     j.environment.tests.update({
         })
-    # j.package_path = 'views/templates'
     j.environment.globals.update({
         # Set global variables.
         'uri_for': webapp2.uri_for,
-        # ...
     })
     return j
 

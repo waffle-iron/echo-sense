@@ -99,7 +99,7 @@ var AlarmDetail = React.createClass({displayName: 'AlarmDetail',
         </li>
       }, this);
       var first_record;
-      if (a.first_record_kn) first_record = <span><b>First Record:</b> <Link to={`/app/data/${a.sensor_kn}/record/${a.first_record_kn}`}>{ a.first_record_kn }</Link></span>
+      if (a.first_record_kn) first_record = <span><b>First Record:</b> <Link to={`/app/data/${a.sensor_kn}/record/${a.first_record_kn}`}>{ a.first_record_kn }</Link><br/></span>
       content = (
         <div>
           <h1><i className="fa fa-warning"></i> { a.rule_name }</h1>

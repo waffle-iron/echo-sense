@@ -9,7 +9,7 @@ from google.appengine.api import memcache
 from constants import SENDER_EMAIL, ERROR_EMAIL, EMAIL_PREFIX
 import tools
 
-#A llowed number of retries
+# Allowed number of retries
 NOTIFY_RETRY_COUNT = 5
 
 def deferred_task_decorator(method):
@@ -99,7 +99,6 @@ def auto_cache(expiration=60*60, key=None):
                 result = memcache.get(mc_key)
             if result:
                 pass
-                #logging.debug("Got key %s from cache: %s" % (mc_key, result))
             else:
                 result = fn(*args, **kwargs)
                 try:

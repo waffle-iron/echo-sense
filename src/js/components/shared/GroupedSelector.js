@@ -105,7 +105,13 @@ export default class GroupedSelector extends React.Component {
           subtitle="Choose a group" />
         <List>
           { groups.map(function(g, i) {
-            return <ListItem key={i} primaryText={g.name} onClick={this.handle_group_click.bind(this, g)} leftIcon={<FontIcon className="material-icons">folder</FontIcon>} />
+            var sel_group = this.state.group_selected;
+            var sel = sel_group && g.id == sel_group.id;
+            var st = null;
+            if (sel) st = {
+              backgroundColor: "#F6EED9"
+            }
+            return <ListItem style={st} key={i} primaryText={g.name} onClick={this.handle_group_click.bind(this, g)} leftIcon={<FontIcon className="material-icons">folder</FontIcon>} />
           }, this) }
         </List>
       </Card>

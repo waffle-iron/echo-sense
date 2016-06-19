@@ -6,9 +6,11 @@ var RefreshIndicator = mui.RefreshIndicator;
 var IconButton = mui.IconButton;
 var List = mui.List;
 var ListItem = mui.ListItem;
+var util = require('utils/util');
 var $ = require('jquery');
+import connectToStores from 'alt/utils/connectToStores';
 
-export default class FetchedList extends React.Component {
+export default class FluxFetchedList extends React.Component {
   static defaultProps = {
     url: null,
     params: {},
@@ -17,36 +19,33 @@ export default class FetchedList extends React.Component {
     subProp: null,
     listStyle: 'list', // or 'mui'
     autofetch: false,
+    store: null,
+    actions: null,
+    flatten: true,
     renderItem: null // Function
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      items: [],
       loading: false
     };
   }
 
   componentWillReceiveProps(nextProps) {
   }
-
   componentDidUpdate(prevProps, prevState) {
   }
-
   componentDidMount() {
-    if (this.props.autofetch) this.fetchData();
+    if (this.empty()) this.fetchData();
+  }
+
+  empty() {
+    return this.items().length == 0;
   }
 
   fetchData() {
-    var that = this;
-    if (this.props.url) {
-      api.get(this.props.url, this.props.params, function(res) {
-        if (res.success) {
-          that.setState({items: res.data[that.props.listProp]})
-        }
-      });
-    }
+    this.props.fetchItems();
   }
 
   handleItemClick(i) {
@@ -57,9 +56,14 @@ export default class FetchedList extends React.Component {
     this.fetchData();
   }
 
+  items() {
+    if (this.props.flatten) return util.flattenDict(this.props[this.props.listProp]);
+    else return this.props[this.props.listProp];
+  }
+
   remove_item_by_key(key, _keyProp) {
     var keyProp = _keyProp || "key";
-    var items = this.state.items;
+    var items = this.items();
     for (var i=0; i<items.length; i++) {
       var _item = items[i];
       if (_item) {
@@ -75,7 +79,8 @@ export default class FetchedList extends React.Component {
   }
 
   render() {
-    var _items = this.state.items.map(function(item, i, arr) {
+    var items = this.items();
+    var _items = this.items().map(function(item, i, arr) {
       if (this.props.renderItem != null) return this.props.renderItem(item);
       else {
         var name = item[this.props.labelProp] || "Unnamed";
@@ -90,7 +95,7 @@ export default class FetchedList extends React.Component {
       }
     }, this);
     var ristatus = this.state.loading ? "loading" : "hide";
-    var empty = this.state.items.length == 0;
+    var empty = items.length == 0;
     var _list;
     if (this.props.listStyle == 'list') {
       _list = (

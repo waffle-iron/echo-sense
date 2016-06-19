@@ -70,22 +70,30 @@ MS_PER_DAY = MS_PER_HOUR * 24
 class DOWNSAMPLE():
     NONE = 0
     MINUTE = 1
-    HOUR = 2
+    TEN_MINUTE = 2
+    HOUR = 3
 
+    # Indexed
     PROPERTIES = {
         MINUTE: "minute",
-        HOUR: "hour"
+        HOUR: "hour",
+        TEN_MINUTE: "minute"
     }
 
     MS_PER = {
         MINUTE: MS_PER_MINUTE,
-        HOUR: MS_PER_HOUR
+        HOUR: MS_PER_HOUR,
+        TEN_MINUTE: MS_PER_MINUTE * 10
     }
+
+    INDEXED = [MINUTE, HOUR]
+    UNINDEXED = [TEN_MINUTE]
 
 class REPORT():
     # Types
     SENSOR_DATA_REPORT = 1
     ALARM_REPORT = 2
+    ANALYSIS_REPORT = 3
 
     #status
     CREATED = 1
@@ -106,7 +114,7 @@ class REPORT():
 
     XLS_ROW_LIMIT = 65000
 
-    TYPE_LABELS = {SENSOR_DATA_REPORT: "Device Data", ALARM_REPORT: "Alarm Report"}
+    TYPE_LABELS = {SENSOR_DATA_REPORT: "Device Data", ALARM_REPORT: "Alarm Report", ANALYSIS_REPORT: "Analysis Report"}
     STATUS_LABELS = {CREATED:"Created", GENERATING: "Generating", DONE:"Done", CANCELLED: "Cancelled", ERROR: "Error"}
     EXTENSIONS = {CSV: "csv", XLS: "xls", XLSX: "xlsx", PDF: "pdf"}
 
@@ -149,7 +157,10 @@ class RULE():
   DELTA_FLOOR = 6
   DELTA_CEILING = 7
   ANY_DATA = 8
-  GEOFENCE = 9
+  GEOFENCE_OUT = 9
+  GEOFENCE_IN = 10
+  GEORADIUS_OUT = 11
+  GEORADIUS_IN = 12
 
   TRIGGER_LABELS = {
     NO_DATA: "No Data (To Implement)",
@@ -160,7 +171,10 @@ class RULE():
     DELTA_FLOOR: "Delta Floor",
     DELTA_CEILING: "Delta Ceiling",
     ANY_DATA: "Any Data",
-    GEOFENCE: "Outside Geofence"
+    GEOFENCE_OUT: "Outside Geofence",
+    GEOFENCE_IN: "Inside Geofence",
+    GEORADIUS_OUT: "Outside Geo-Radius",
+    GEORADIUS_IN: "Inside Geo-Radius"
   }
 
   # Other Constants

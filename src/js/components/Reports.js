@@ -14,36 +14,56 @@ var FetchedList = require('components/FetchedList');
 var api = require('utils/api');
 var toastr = require('toastr');
 var mui = require('material-ui'),
-  FlatButton = mui.FlatButton;
-  // IconMenu = mui.IconMenu,
-  // MenuItem = mui.MenuItem;
+  FlatButton = mui.FlatButton,
+  DatePicker = mui.DatePicker,
+  TimePicker = mui.TimePicker,
+  IconMenu = mui.IconMenu,
+  TextField = mui.TextField,
+  MenuItem = mui.MenuItem;
 
-var IconMenu = mui.IconMenu;
-var MenuItem = mui.MenuItem;
+var SensorTypeActions = require('actions/SensorTypeActions');
+var SensorTypeStore = require('stores/SensorTypeStore');
+
+import {Tabs, Tab} from 'material-ui/Tabs';
+import connectToStores from 'alt/utils/connectToStores';
+import {changeHandler} from 'utils/component-utils';
+import {removeItemsById} from 'utils/store-utils';
+var Select = require('react-select');
+import {clone} from 'lodash';
 
 var Link = Router.Link;
 
-var Sensors = React.createClass({displayName: 'Sensors',
-  mixins: [ Router.State ],
-  getDefaultProps: function() {
-    return {
-      user: null
-    };
-  },
-  getInitialState: function() {
-    return {
-      reports: [],
+@connectToStores
+@changeHandler
+export default class Reports extends React.Component {
+  static defaultProps = { user: null };
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      form: {},
       loading: false
     };
-  },
-  componentDidMount: function() {
+  }
+
+  static getStores() {
+    return [SensorTypeStore];
+  }
+  static getPropsFromStores() {
+    var st = SensorTypeStore.getState();
+    return st;
+  }
+
+  componentDidMount() {
     this.fetchReports();
-  },
-  componentDidUpdate: function(prevProps, prevState) {
+    SensorTypeActions.get_sensor_types(); // Fetch if not in store
+  }
+
+  componentDidUpdate(prevProps, prevState) {
     var detailOpenClose = (prevProps.params.sensorKn == null) != (this.props.params.sensorKn == null);
     if (detailOpenClose) this.refs.map.resize();
-  },
-  fetchReports: function() {
+  }
+  fetchReports() {
     var that = this;
     this.setState({loading: true});
     var data = {
@@ -54,46 +74,95 @@ var Sensors = React.createClass({displayName: 'Sensors',
         that.setState({reports: reports, loading: false });
       } else that.setState({loading: false});
     });
-  },
-  generate_report: function(type_int) {
+  }
+  generate_report(type_int) {
+    var specs = clone(this.state.form);
+    if (specs.start) specs.start = specs.start.getTime();
+    if (specs.end) specs.end = specs.end.getTime();
     var data = {
-      type: type_int
-    };
+        type: type_int,
+        specs_json: JSON.stringify(specs)
+    }
     api.post("/api/report/generate", data, function(res) {
-      toastr.info("Generating...");
     })
-  },
-  download: function(r) {
+  }
+
+  delete(r) {
+    api.post("/api/report/delete", {rkey: r.key}, (res) => {
+      this.refs.list.remove_item_by_key(r.key, 'key');
+    });
+  }
+
+  download(r) {
     if (r.serve_url) window.open(r.serve_url,'_blank');
-  },
-  renderReport: function(r) {
+  }
+
+  renderReport(r) {
     return (
       <li className="list-group-item">
         <span className="title">{ r.title }</span>
-        <a href="javascript:void(0)" onClick={this.download.bind(this, r)}>Download</a>
+        <a href="javascript:void(0)" onClick={this.download.bind(this, r)}>Download</a>&nbsp;
+        <a href="javascript:void(0)" onClick={this.delete.bind(this, r)}><i className="fa fa-trash"></i></a>
         <span className="sub right" data-ts={r.ts_created}></span>
       </li>
       )
-  },
-  render: function() {
-    var detail;
-    var _other_reports = [<MenuItem primaryText="Alarm Report" onClick={this.generate_report.bind(this, 2)} />];
+  }
+
+  render() {
+    var form = this.state.form;
+    var sensortype_opts = util.flattenDict(this.props.sensor_types).map((st) => {
+      return {value: st.id, label: st.name};
+    });
     return (
       <div>
         <h1>Reports</h1>
-        <FetchedList url="/api/report" listProp="reports" renderItem={this.renderReport} autofetch={true}/>
 
-        <IconMenu iconButtonElement={ <FlatButton label="Other Reports" /> }>
-          { _other_reports }
-        </IconMenu>
+        <FetchedList ref="list" url="/api/report" listProp="reports" renderItem={this.renderReport.bind(this)} autofetch={true}/>
+
+        <h2>Generate Report</h2>
+        <Tabs>
+          <Tab label="Alarms">
+
+            <div className="row">
+              <div className="col-sm-6">
+                <DatePicker onChange={this.changeHandlerNilVal.bind(this, 'form', 'start')} value={form.start} autoOk={true} hintText="From" />
+              </div>
+              <div className="col-sm-6">
+                <DatePicker onChange={this.changeHandlerNilVal.bind(this, 'form', 'end')} value={form.end} autoOk={true} hintText="End" />
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col-sm-6">
+              </div>
+            </div>
+
+            <FlatButton label="Generate" onClick={this.generate_report.bind(this, 2)} />
+          </Tab>
+
+          <Tab label="Analyses">
+
+            <div className="row">
+              <div className="col-sm-6">
+                <DatePicker onChange={this.changeHandlerNilVal.bind(this, 'form', 'start')} value={form.start} autoOk={true} hintText="From" />
+              </div>
+              <div className="col-sm-6">
+                <DatePicker onChange={this.changeHandlerNilVal.bind(this, 'form', 'end')} value={form.end} autoOk={true} hintText="End" />
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-sm-6">
+                <label>Sensor Type (optional)</label>
+                <Select options={sensortype_opts} onChange={this.changeHandlerVal.bind(this, 'form', 'sensortype_id')} value={form.sensortype_id} simpleValue />
+              </div>
+              <div className="col-sm-6">
+                <TextField hint="Columns" floatingLabelText="Columns (comma separated)" onChange={this.changeHandler.bind(this, 'form', 'columns')} value={form.columns} />
+              </div>
+            </div>
+            <FlatButton label="Generate" onClick={this.generate_report.bind(this, 3)} />
+          </Tab>
+        </Tabs>
       </div>
     );
   }
-});
-
-Sensors.contextTypes = {
-  router: React.PropTypes.func
 };
-
-
-module.exports = Sensors;

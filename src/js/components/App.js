@@ -100,7 +100,7 @@ export default class App extends React.Component {
               <div ><Link to="/app/sensors"><IconButton iconClassName="material-icons" iconStyle={this.iSt} style={this.ibSt} tooltipPosition="bottom-right" tooltip="Sensors">fiber_smart_record</IconButton></Link></div>
               <div ><Link to="/app/targets"><IconButton iconClassName="material-icons" iconStyle={this.iSt} style={this.ibSt} tooltipPosition="bottom-right" tooltip="Targets">view_module</IconButton></Link></div>
               <div ><Link to="/app/groups"><IconButton iconClassName="material-icons" iconStyle={this.iSt} style={this.ibSt} tooltipPosition="bottom-right" tooltip="Groups">folder</IconButton></Link></div>
-              <div ><Link to="/app/analysis/viewer"><IconButton iconClassName="material-icons" iconStyle={this.iSt} style={this.ibSt} tooltipPosition="bottom-right" tooltip="Analysis Viewer">show_chart</IconButton></Link></div>
+              <div ><Link to="/app/processing"><IconButton iconClassName="material-icons" iconStyle={this.iSt} style={this.ibSt} tooltipPosition="bottom-right" tooltip="Processing">show_chart</IconButton></Link></div>
               <div hidden={!can_write}><Link to="/app/reports"><IconButton iconClassName="material-icons" iconStyle={this.iSt} style={this.ibSt} tooltipPosition="bottom-right" tooltip="Reports">cloud_download</IconButton></Link></div>
               <div><a href="javascript:void(0)" onClick={this.toggle_search.bind(this, true)}><IconButton iconClassName="material-icons" iconStyle={this.iSt} style={this.ibSt} tooltipPosition="bottom-right" tooltip="Search">search</IconButton></a></div>
             </nav>

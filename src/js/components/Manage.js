@@ -62,10 +62,7 @@ export default class Manage extends React.Component {
         var tabs = [
             {id: 'sensors', label: "Sensors"},
             {id: 'stypes', label: "Sensor Types"},
-            {id: 'groups', label: "Groups"},
-            {id: 'targets', label: "Targets"},
-            {id: 'rules', label: "Rules"},
-            {id: 'processes', label: "Process Tasks"},
+            {id: 'targets', label: "Targets"}
         ];
         if (tab == "sensors") {
             var group_opts = util.flattenDict(this.props.groups).map(function(group, i, arr) {
@@ -120,62 +117,6 @@ export default class Manage extends React.Component {
                 getObjectFromJSON: function(data) { return data.data.sensortype; },
                 onItemCreated: function(item) { SensorTypeActions.manualUpdate(item); }
             }
-        } else if (tab == "rules") {
-            var plimit_type_opts = [];
-            AppConstants.RULE_PLIMIT_TYPES.forEach(function(op, i, arr) {
-                if (!op.disabled) plimit_type_opts.push({ val: op.value, lab: op.label });
-            });
-            var trigger_opts = AppConstants.RULE_TRIGGERS.map(function(op, i, arr) {
-                return { val: op.value, lab: op.label };
-            });
-
-            props = {
-                'url': "/api/rule",
-                'id': 'sa',
-                'entity_name': "Rule",
-                'attributes': [
-                    { name: 'id', label: "ID" },
-                    { name: 'name', label: "Name", editable: true },
-                    { name: 'column', label: "Column", editable: true },
-                    { name: 'trigger', label: "Trigger", editable: true, inputType: "select", opts: trigger_opts },
-                    { name: 'duration', label: "Duration (ms)", editable: true,editOnly: true },
-                    { name: 'buffer', label: "Buffer (ms)", editable: true,editOnly: true },
-                    { name: 'plimit_type', label: "Period Limit Type", hint: "Type of Period (for period limit)", editable: true, editOnly: true, inputType: "select", opts: plimit_type_opts, defaultValue: -2 },
-                    { name: 'plimit', label: "Period Limit", hint: "Allowed alarms per period", editable: true, editOnly: true },
-                    { name: 'consecutive', label: "Consecutive", editable: true, editOnly: true },
-                    { name: 'consecutive_limit', label: "Consecutive Limit (deactivate after)", editable: true, editOnly: true },
-                    { name: 'value1', label: "Value 1", editable: true, editOnly: true },
-                    { name: 'value2', label: "Value 2", editable: true, editOnly: true },
-                    { name: 'value_complex', label: "Complex Value", editable: true, editOnly: true, inputType: 'textarea', hint: "JSON representation of complex rule values. See geojson.io for GeoJSON editor." },
-                    { name: 'alert_contacts', label: "Alert Contacts (list of contact aliases)", editable: true, editOnly: true, formFromValue: util.comma_join },
-                    { name: 'alert_message', label: "Alert Message", editable: true, editOnly: true },
-                    { name: 'payment_contacts', label: "Payment Contacts (list of contact aliases)", editable: true, editOnly: true, formFromValue: util.comma_join },
-                    { name: 'payment_amount', label: "Payment Amount (user currency)", editable: true, editOnly: true }
-                ],
-                'add_params': {},
-                'unique_key': 'key',
-                'max': 50,
-                getListFromJSON: function(data) { return data.data.rules; },
-                getObjectFromJSON: function(data) { return data.data.rule; },
-                onItemCreated: function(item) { RuleActions.manualUpdate(item); }
-            }
-        } else if (tab == "groups") {
-
-            props = {
-                'url': "/api/group", // Duplicate fetch here and flux
-                'id': 'sa',
-                'entity_name': "Group",
-                'attributes': [
-                    { name: 'id', label: "ID" },
-                    { name: 'name', label: "Name", editable: true },
-                ],
-                'add_params': {},
-                'unique_key': 'key',
-                'max': 50,
-                getListFromJSON: function(data) { return data.data.groups; },
-                getObjectFromJSON: function(data) { return data.data.group; },
-                onItemCreated: function(item) { GroupActions.manualUpdate(item); }
-            }
 
         } else if (tab == "targets") {
             var group_opts = util.flattenDict(this.props.groups).map(function(group, i, arr) {
@@ -198,35 +139,6 @@ export default class Manage extends React.Component {
                 getListFromJSON: function(data) { return data.data.targets; },
                 getObjectFromJSON: function(data) { return data.data.target; },
                 onItemCreated: function(item) { TargetActions.manualUpdate(item); }
-            }
-
-        } else if (tab == "processes") {
-            var rule_opts = util.flattenDict(this.props.rules).map(function(rule, i, arr) {
-                return { val: rule.id, lab: rule.name };
-            });
-            props = {
-                'url': "/api/processtask",
-                'id': 'sa',
-                'entity_name': "Process Task",
-                'attributes': [
-                    { name: 'id', label: "ID" },
-                    { name: 'label', label: "Label", editable: true },
-                    { name: 'interval', label: "Interval (secs)", editable: true, hint: "Task scheduled to run up to [interval] after new data is received." },
-                    { name: 'rule_ids', label: "Rules", editable: true, editOnly: true, hint: "Comma separated list of rule IDs", inputType: "select", multiple: true, opts: rule_opts },
-                    { name: 'time_start', label: "Start Time", editable: true },
-                    { name: 'time_end', label: "End Time", editable: true },
-                    { name: 'month_days', label: "Days of Month (1 - 31)", editOnly: true, editable: true, formFromValue: util.comma_join, hint: "Task will run if day matches either month day or week day, so either or both must be set. Comma separated list of ints." },
-                    { name: 'week_days', label: "Days of Week", editOnly: true, editable: true, multiple: true, opts: AppConstants.WEEKDAYS, inputType: "select" },
-                    { name: 'spec', label: "Spec", inputType: "textarea", editOnly: true, editable: true, hint: "JSON object which can contain a 'processers' Array of objects with props: analysis_key_pattern, calculation, column." }
-                ],
-                'add_params': {},
-                'unique_key': 'key',
-                'max': 50,
-                'detail_url': function(item) {
-                    return "/admin/processtask/"+item.key;
-                },
-                getListFromJSON: function(data) { return data.data.processtasks; },
-                getObjectFromJSON: function(data) { return data.data.processtask; }
             }
 
         }

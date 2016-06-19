@@ -37,16 +37,5 @@ def UpdateGoogleKeyCerts():
     return None
 
 def VerifyGoogleJWT(token, iss="accounts.google.com", aud=TOKEN_AUD, azp=TOKEN_AZP, email=None):
+    # NOTE: Unimplemented
     return True
-    # LIB = "OAUTH2CLIENT"
-    # certs = GetGoogleKeyCerts()
-    # _jwt = None
-    # ok = False
-    # if LIB == "OAUTH2CLIENT": # TODO: Does not verify token!!
-    #     _jwt = client._extract_id_token(token)
-    # if _jwt:
-    #     logging.debug("Decoded JWT!")
-    #     logging.debug(_jwt)
-    #     ok = _jwt['iss'] == iss and _jwt['aud'] == aud and _jwt['azp'] in azp and _jwt['email'] == email
-    # return ok
-

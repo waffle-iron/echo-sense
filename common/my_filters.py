@@ -6,8 +6,6 @@ import json
 from models import *
 import tools
 
-# register = webapp.template.create_template_register()
-
 def printjson(d):
     return jinja2.Markup(json.dumps(d))
 

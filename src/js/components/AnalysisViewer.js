@@ -207,7 +207,7 @@ export default class AnalysisViewer extends React.Component {
         return (
             <div>
 
-                <h1><FontIcon className="material-icons">show_chart</FontIcon> Analysis Viewer</h1>
+                <h2>Viewer</h2>
 
                 <div className="well">
                     <div className="row">

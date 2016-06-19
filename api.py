@@ -592,16 +592,17 @@ class GroupAPI(handlers.JsonRequestHandler):
     def delete(self, d):
         success = False
         message = None
-        grp = None
+        grp = id = None
         key = self.request.get('key')
         grp = SensorGroup.get(key)
         if grp:
             success = grp.clean_delete()
+            id = grp.key().id()
             if not success:
                 message = "Couldn't delete group - not empty?"
         else:
             message = "Group not found"
-        self.json_out({}, message=message, success=success)
+        self.json_out({"key": key, "id": id}, message=message, success=success)
 
 class TargetAPI(handlers.JsonRequestHandler):
     @authorized.role('api')
@@ -892,11 +893,14 @@ class ProcessTaskAPI(handlers.JsonRequestHandler):
             }
         self.json_out(data, success=success, message=message)
 
-    @authorized.role()
-    def detail(self, key, d):
+    @authorized.role('api')
+    def detail(self, key_or_id, d):
         success = False
         message = None
-        p = ProcessTask.get(key)
+        if key_or_id.isdigit():
+            p = ProcessTask.get_by_id(int(key_or_id), parent=self.enterprise)
+        else:
+            p = ProcessTask.get(key_or_id)
         if p:
             success = True
         else:
@@ -928,6 +932,7 @@ class ProcessTaskAPI(handlers.JsonRequestHandler):
             p.Update(**params)
             p.put()
             success = True
+            message = "Process task updated!"
         data = {
             'processtask': p.json() if p else None
             }
@@ -1007,11 +1012,10 @@ class ReportAPI(handlers.JsonRequestHandler):
     def serve(self, d):
         rkey = self.request.get('rkey')
         r = Report.GetAccessible(rkey, d['user'])
-        piece = 0
         if r:
             if r.gcs_files:
                 try:
-                    gcsfn = r.gcs_files[piece-1]
+                    gcsfn = r.gcs_files[0]
                     gcs_file = gcs.open(gcsfn, 'r')
                 except gcs.NotFoundError, e:
                     self.response.out.write("File not found")
@@ -1022,6 +1026,20 @@ class ReportAPI(handlers.JsonRequestHandler):
                     gcs_file.close()
         else:
             self.response.out.write("Unauthorized")
+
+    @authorized.role('api')
+    def delete(self, d):
+        success = False
+        rkey = self.request.get('rkey')
+        r = Report.GetAccessible(rkey, d['user'])
+        if r:
+            r.CleanDelete(self_delete=True)
+            message = "Report deleted"
+            success = True
+        else:
+            message = "Report not found"
+        self.json_out(success=success, message=message)
+
 
 class APILogAPI(handlers.JsonRequestHandler):
     @authorized.role('api')

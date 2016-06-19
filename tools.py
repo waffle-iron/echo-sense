@@ -97,19 +97,6 @@ def clone_entity(e, **extra_args):
 def str_to_tuple(s):
     return tuple(float(x) for x in s[1:-1].split(','))
 
-def create_paging_specs(self, items_query, items_per_page=25):
-    pg = self.request.get_range('pg', default=1)
-    n_items = items_query.count()
-    items = items_query.fetch(items_per_page, offset=(pg-1)*items_per_page)
-    if n_items < items_per_page:
-        n_pages = 1
-    else:
-        n_pages = n_items / items_per_page
-        if n_items % items_per_page > 0:
-            n_pages += 1
-    specs = [n_pages, pg]
-    return [items, specs]
-
 def unixtime(dt=None, ms=True):
     if not dt:
         dt = datetime.now()
@@ -561,9 +548,12 @@ def normalize_to_ascii(text):
         text = str(text).decode('utf-8')
     elif not isinstance(text, unicode):
         text = text.decode('utf-8')
-
     normalized_text = unicodedata.normalize('NFKD', text).encode('ascii','ignore')
     return normalized_text
+
+def normalize_list_to_ascii(l):
+    return [normalize_to_ascii(v) for v in l]
+
 
 def safe_geopoint(geo_str):
     '''
@@ -801,3 +791,19 @@ def point_inside_polygon(x,y,poly):
                         inside = not inside
         p1x,p1y = p2x,p2y
     return inside
+
+def point_within_radius(x,y, center_lat, center_lon, radius_m=1000):
+    '''Determine whether a point is within a specified radius of
+      a given center geopoint.
+
+    Args:
+        x, y: coordinates to test
+        center_lat: lat of center
+        center_lon: lon of center
+        radius_m: radius in meters
+
+    Returns:
+        bool: If point is inside radius
+    '''
+    dist = calcDistance(x, y, center_lat, center_lon)
+    return dist <= radius_m
