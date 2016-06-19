@@ -153,7 +153,14 @@ class ExpressionParser(object):
         elif fnName == "COUNT":
             return len(args)
         elif fnName == "ALARMS":
-            return self.alarm_list
+            # Usage: ALARMS([rule_id])
+            # Returns list of alarms in processed batch, optionally filtered by rule_id
+            alarm_list = list(self.alarm_list)
+            if args and args[0].isdigit():
+                rule_id = int(args[0])
+                if rule_id:
+                    alarm_list.filter(lambda al : tools.getKey(Alarm, 'rule', al, asID=True) == rule_id)
+            return alarm_list
         elif fnName == "DISTANCE":
             dist = 0
             # self.prior_batch_last_record.columnValue()

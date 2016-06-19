@@ -791,3 +791,19 @@ def point_inside_polygon(x,y,poly):
                         inside = not inside
         p1x,p1y = p2x,p2y
     return inside
+
+def point_within_radius(x,y, center_lat, center_lon, radius_m=1000):
+    '''Determine whether a point is within a specified radius of
+      a given center geopoint.
+
+    Args:
+        x, y: coordinates to test
+        center_lat: lat of center
+        center_lon: lon of center
+        radius_m: radius in meters
+
+    Returns:
+        bool: If point is inside radius
+    '''
+    dist = calcDistance(x, y, center_lat, center_lon)
+    return dist <= radius_m

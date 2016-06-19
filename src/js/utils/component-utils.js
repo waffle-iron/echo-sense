@@ -15,6 +15,14 @@ export default {
       state.lastChange = util.nowTimestamp(); // ms
       this.setState(state);
     };
+    target.prototype.changeHandlerMultiVal = function(key, attr, option_array) {
+      var state = {};
+      state[key] = this.state[key] || {};
+      var value_array = option_array.map((op) => { return op.value });
+      state[key][attr] = value_array;
+      state.lastChange = util.nowTimestamp(); // ms
+      this.setState(state);
+    };
     target.prototype.changeHandlerValWithAdditions = function(key, attr, additional_state_updates, value) {
       var state = {};
       state[key] = this.state[key] || {};

@@ -70,17 +70,24 @@ MS_PER_DAY = MS_PER_HOUR * 24
 class DOWNSAMPLE():
     NONE = 0
     MINUTE = 1
-    HOUR = 2
+    TEN_MINUTE = 2
+    HOUR = 3
 
+    # Indexed
     PROPERTIES = {
         MINUTE: "minute",
-        HOUR: "hour"
+        HOUR: "hour",
+        TEN_MINUTE: "minute"
     }
 
     MS_PER = {
         MINUTE: MS_PER_MINUTE,
-        HOUR: MS_PER_HOUR
+        HOUR: MS_PER_HOUR,
+        TEN_MINUTE: MS_PER_MINUTE * 10
     }
+
+    INDEXED = [MINUTE, HOUR]
+    UNINDEXED = [TEN_MINUTE]
 
 class REPORT():
     # Types
@@ -150,7 +157,10 @@ class RULE():
   DELTA_FLOOR = 6
   DELTA_CEILING = 7
   ANY_DATA = 8
-  GEOFENCE = 9
+  GEOFENCE_OUT = 9
+  GEOFENCE_IN = 10
+  GEORADIUS_OUT = 11
+  GEORADIUS_IN = 12
 
   TRIGGER_LABELS = {
     NO_DATA: "No Data (To Implement)",
@@ -161,7 +171,10 @@ class RULE():
     DELTA_FLOOR: "Delta Floor",
     DELTA_CEILING: "Delta Ceiling",
     ANY_DATA: "Any Data",
-    GEOFENCE: "Outside Geofence"
+    GEOFENCE_OUT: "Outside Geofence",
+    GEOFENCE_IN: "Inside Geofence",
+    GEORADIUS_OUT: "Outside Geo-Radius",
+    GEORADIUS_IN: "Inside Geo-Radius"
   }
 
   # Other Constants

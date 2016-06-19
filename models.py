@@ -1015,13 +1015,22 @@ class Rule(db.Model):
                 diff = delta - dceiling
         elif self.trigger == RULE.ANY_DATA:
             passed = val is not None
-        elif self.trigger == RULE.GEOFENCE:
+        elif self.trigger in [RULE.GEOFENCE_OUT, RULE.GEOFENCE_IN]:
             geo_json = tools.getJson(self.value_complex)
             if geo_json and val:
                 polygon = tools.polygon_from_geojson(geo_json)
                 gp = tools.safe_geopoint(val)
                 if gp:
-                    passed = not tools.point_inside_polygon(gp.lat, gp.lon, polygon)
+                    inside = tools.point_inside_polygon(gp.lat, gp.lon, polygon)
+                    passed = inside == (self.trigger == RULE.GEOFENCE_IN)
+        elif self.trigger in [RULE.GEORADIUS_OUT, RULE.GEORADIUS_IN]:
+            geo_json = tools.getJson(self.value_complex)
+            if geo_json and val:
+                polygon = tools.polygon_from_geojson(geo_json)
+                gp = tools.safe_geopoint(val)
+                if gp:
+                    inside = tools.point_within_radius(gp.lat, gp.lon, target.get('lat'), target.get('lon'), radius=self.value2)
+                    passed = inside == (self.trigger == RULE.GEORADIUS_IN)
         else:
             raise Exception("Unsupported trigger type: %s" % self.trigger)
         # logging.debug("%s %s at value: %s (diff %s)" % (self, "passed" if passed else "not passed", val, diff))
@@ -1151,7 +1160,7 @@ class ProcessTask(UserAccessible):
     time_end = db.TimeProperty(indexed=False)  # UTC
     # Scheduling - OR of the below
     month_days = db.ListProperty(int, indexed=False)  # 1 - 31
-    week_days = db.ListProperty(int, indexed=False)  # 1 - 7 (Mon - Sun)
+    week_days = db.ListProperty(int, default=[1,2,3,4,5,6,7], indexed=False)  # 1 - 7 (Mon - Sun)
     rule_ids = db.ListProperty(int, indexed=False)
     label = db.StringProperty(indexed=False)
     # JSON spec for ExpressionParser (cleaning, calculations, and production of analysis records). TODO: Validate
@@ -1476,8 +1485,10 @@ class Record(db.Expando):
 
     @staticmethod
     def Fetch(sensor, limit=50, dt_start=None, dt_end=None, downsample=DOWNSAMPLE.NONE):
-        '''
-        Takes sensor as Sensor() or Key
+        '''Takes sensor as Sensor() or Key
+
+        Note that unindexed downsamples (see DOWNSAMPLE()) uses limit for the initial fetch,
+        but will return less records after post-query filtering.
         '''
         if downsample:
             ds_prop = DOWNSAMPLE.PROPERTIES.get(downsample)
@@ -1500,6 +1511,10 @@ class Record(db.Expando):
                 q.filter(ds_prop+" <=", end)
             # Query returns keys of downsampled records
             proj_records = q.fetch(limit=limit)
+            if downsample in DOWNSAMPLE.UNINDEXED:
+                # Manually filter (uniq?)
+                # TODO
+                pass
             return Record.get([x.key() for x in proj_records])
         else:
             q.order("-dt_recorded")

@@ -47,7 +47,7 @@ export default class GroupDetail extends React.Component {
     return st;
   }
 
-  componentDidUpdate(prevState, prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     var newGroup = this.props.params.groupID && (!prevProps.params.groupID || this.props.params.groupID != prevProps.params.groupID);
     if (newGroup) {
       this.prepareGroup(this.props.params.groupID);

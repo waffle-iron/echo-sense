@@ -83,7 +83,7 @@ app = webapp2.WSGIApplication(
       webapp2.Route('/api/processtask/delete', handler=api.ProcessTaskAPI, handler_method="delete", methods=["POST"], name="ProcessTaskAPI"),
       webapp2.Route('/api/processtask/associate', handler=api.ProcessTaskAPI, handler_method="associate", methods=["POST"], name="ProcessTaskAPI"),
       webapp2.Route('/api/processtask/run', handler=api.ProcessTaskAPI, handler_method="run", methods=["POST"], name="ProcessTaskAPI"),
-      webapp2.Route('/api/processtask/<key>', handler=api.ProcessTaskAPI, handler_method="detail", methods=["GET"], name="ProcessTaskAPI"),
+      webapp2.Route('/api/processtask/<key_or_id>', handler=api.ProcessTaskAPI, handler_method="detail", methods=["GET"], name="ProcessTaskAPI"),
       webapp2.Route('/api/sensor/media/upload', handler=api.UploadMedia, name="UploadMedia", methods=["POST"]),
       webapp2.Route('/api/sensortype', handler=api.SensorTypeAPI, handler_method="list", methods=["GET"], name="SensorTypeAPI"),
       webapp2.Route('/api/sensortype', handler=api.SensorTypeAPI, handler_method="update", methods=["POST"], name="SensorTypeAPI"),
