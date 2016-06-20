@@ -1024,12 +1024,11 @@ class Rule(db.Model):
                     inside = tools.point_inside_polygon(gp.lat, gp.lon, polygon)
                     passed = inside == (self.trigger == RULE.GEOFENCE_IN)
         elif self.trigger in [RULE.GEORADIUS_OUT, RULE.GEORADIUS_IN]:
-            geo_json = tools.getJson(self.value_complex)
-            if geo_json and val:
-                polygon = tools.polygon_from_geojson(geo_json)
+            geo_value = tools.getJson(self.value_complex)
+            if geo_value and val:
                 gp = tools.safe_geopoint(val)
-                if gp:
-                    inside = tools.point_within_radius(gp.lat, gp.lon, target.get('lat'), target.get('lon'), radius=self.value2)
+                if gp and 'lat' in geo_value and 'lon' in geo_value:
+                    inside = tools.point_within_radius(gp.lat, gp.lon, geo_value.get('lat'), geo_value.get('lon'), radius_m=self.value2)
                     passed = inside == (self.trigger == RULE.GEORADIUS_IN)
         else:
             raise Exception("Unsupported trigger type: %s" % self.trigger)
