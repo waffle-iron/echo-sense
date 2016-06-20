@@ -1511,9 +1511,16 @@ class Record(db.Expando):
             # Query returns keys of downsampled records
             proj_records = q.fetch(limit=limit)
             if downsample in DOWNSAMPLE.UNINDEXED:
-                # Manually filter (uniq?)
-                # TODO
-                pass
+                # Manual downsampling using dict keys
+                prop_divider = DOWNSAMPLE.UNINDEXED_PROP_DIVIDER.get(downsample)
+                if prop_divider:
+                    unique_by_period = {}
+                    for rec in proj_records:
+                        ds_value = getattr(rec, ds_prop, 0)
+                        if type(ds_value) in [float, int, long]:
+                            rec.ds_period = ds_value / prop_divider
+                            unique_by_period[rec.ds_period] = rec
+                    proj_records = sorted(unique_by_period.values(), key=lambda r : r.ds_period)
             return Record.get([x.key() for x in proj_records])
         else:
             q.order("-dt_recorded")

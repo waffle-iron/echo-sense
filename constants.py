@@ -83,11 +83,15 @@ class DOWNSAMPLE():
     MS_PER = {
         MINUTE: MS_PER_MINUTE,
         HOUR: MS_PER_HOUR,
-        TEN_MINUTE: MS_PER_MINUTE * 10
+        TEN_MINUTE: MS_PER_MINUTE
     }
 
     INDEXED = [MINUTE, HOUR]
     UNINDEXED = [TEN_MINUTE]
+
+    UNINDEXED_PROP_DIVIDER = {
+        TEN_MINUTE: 10
+    }
 
 class REPORT():
     # Types
