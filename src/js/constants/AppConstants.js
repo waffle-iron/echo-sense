@@ -7,6 +7,9 @@ var AppConstants = {
     { value: 2, label: "10 Minutes" },
     { value: 3, label: "Hour" }
   ],
+  DOWNSAMPLE_MIN: 1,
+  DOWNSAMPLE_TEN_MIN: 2,
+  DOWNSAMPLE_HOUR: 3,
   RULE_TRIGGERS: [
     { value: 1, label: "No Data" },
     { value: 2, label: "Floor" },
@@ -16,7 +19,10 @@ var AppConstants = {
     { value: 6, label: "Delta Floor" },
     { value: 7, label: "Delta Ceiling" },
     { value: 8, label: "Any Data" },
-    { value: 9, label: "Outside Geofence" }
+    { value: 9, label: "Outside Geofence" },
+    { value: 10, label: "Inside Geofence" },
+    { value: 11, label: "Outside Radius" },
+    { value: 12, label: "Inside Radius" }
   ],
   RULE_PLIMIT_TYPES: [
     { value: -2, label: "Disabled" },
@@ -44,8 +50,6 @@ var AppConstants = {
   ],
   GAP_MINIMUM_SECS: 60,
   DATA_WINDOW_BUFFER_MS: 1000*30,  // 30 secs
-  DOWNSAMPLE_MIN: 1,
-  DOWNSAMPLE_HOUR: 2,
   USER_READ: 1,
   USER_RW: 2,
   USER_ACCOUNT_ADMIN: 3,

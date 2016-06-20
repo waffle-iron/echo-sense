@@ -1024,12 +1024,11 @@ class Rule(db.Model):
                     inside = tools.point_inside_polygon(gp.lat, gp.lon, polygon)
                     passed = inside == (self.trigger == RULE.GEOFENCE_IN)
         elif self.trigger in [RULE.GEORADIUS_OUT, RULE.GEORADIUS_IN]:
-            geo_json = tools.getJson(self.value_complex)
-            if geo_json and val:
-                polygon = tools.polygon_from_geojson(geo_json)
+            geo_value = tools.getJson(self.value_complex)
+            if geo_value and val:
                 gp = tools.safe_geopoint(val)
-                if gp:
-                    inside = tools.point_within_radius(gp.lat, gp.lon, target.get('lat'), target.get('lon'), radius=self.value2)
+                if gp and 'lat' in geo_value and 'lon' in geo_value:
+                    inside = tools.point_within_radius(gp.lat, gp.lon, geo_value.get('lat'), geo_value.get('lon'), radius_m=self.value2)
                     passed = inside == (self.trigger == RULE.GEORADIUS_IN)
         else:
             raise Exception("Unsupported trigger type: %s" % self.trigger)
@@ -1512,9 +1511,16 @@ class Record(db.Expando):
             # Query returns keys of downsampled records
             proj_records = q.fetch(limit=limit)
             if downsample in DOWNSAMPLE.UNINDEXED:
-                # Manually filter (uniq?)
-                # TODO
-                pass
+                # Manual downsampling using dict keys
+                prop_divider = DOWNSAMPLE.UNINDEXED_PROP_DIVIDER.get(downsample)
+                if prop_divider:
+                    unique_by_period = {}
+                    for rec in proj_records:
+                        ds_value = getattr(rec, ds_prop, 0)
+                        if type(ds_value) in [float, int, long]:
+                            rec.ds_period = ds_value / prop_divider
+                            unique_by_period[rec.ds_period] = rec
+                    proj_records = sorted(unique_by_period.values(), key=lambda r : r.ds_period)
             return Record.get([x.key() for x in proj_records])
         else:
             q.order("-dt_recorded")

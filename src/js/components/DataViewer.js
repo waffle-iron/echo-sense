@@ -57,7 +57,7 @@ export default class DataViewer extends React.Component {
         else return [];
     }
     _downsample() {
-        return this.props.location.query.ds;
+        return parseInt(this.props.location.query.ds);
     }
     _ts_start() {
         var ts_now = util.nowTimestamp();
@@ -231,6 +231,7 @@ export default class DataViewer extends React.Component {
         var ds = this._downsample();
         var gap_cutoff_ms;
         if (ds == AppConstants.DOWNSAMPLE_MIN) gap_cutoff_ms = 1000*60*5; // 5 mins
+        else if (ds == AppConstants.DOWNSAMPLE_TEN_MIN) gap_cutoff_ms = 1000*60*50; // 50 mins
         else if (ds == AppConstants.DOWNSAMPLE_HOUR) gap_cutoff_ms = 1000*60*60*5; // 5 hours
         else gap_cutoff_ms = AppConstants.GAP_MINIMUM_SECS * 1000;
         this.state.records.forEach(function(r, i, arr) {
@@ -269,7 +270,7 @@ export default class DataViewer extends React.Component {
                 _columns.push({ value:colname, label: label });
             }
         }
-        var _downsamples = AppConstants.DOWNSAMPLES.map(function(ds, i, arr) { return ds; } );
+        var _downsamples = AppConstants.DOWNSAMPLES;
         var _visualization;
         var colname = this._vis_column();
         var listcols = this._list_columns();
