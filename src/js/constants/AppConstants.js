@@ -16,7 +16,10 @@ var AppConstants = {
     { value: 6, label: "Delta Floor" },
     { value: 7, label: "Delta Ceiling" },
     { value: 8, label: "Any Data" },
-    { value: 9, label: "Outside Geofence" }
+    { value: 9, label: "Outside Geofence" },
+    { value: 10, label: "Inside Geofence" },
+    { value: 11, label: "Outside Radius" },
+    { value: 12, label: "Inside Radius" }
   ],
   RULE_PLIMIT_TYPES: [
     { value: -2, label: "Disabled" },
