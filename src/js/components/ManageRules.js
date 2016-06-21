@@ -85,7 +85,7 @@ export default class ManageRules extends React.Component {
         return (
             <div>
 
-                <h2>Ruels</h2>
+                <h2>Rules</h2>
 
                 <SimpleAdmin {...props} />
 

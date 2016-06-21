@@ -103,7 +103,7 @@ export default class ProcessTaskDetail extends React.Component {
       if (ok) {
         var task = this.task();
         ProcessTaskActions.delete(task.key);
-        this.props.history.push("/app/analyze/settings");
+        this.props.history.push("/app/processing/settings");
       }
     });
   }
