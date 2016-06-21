@@ -334,6 +334,29 @@ class AlarmReportWorker(GCSReportWorker):
         row = [sensor_name, rule_name, apex, tools.sdatetime(alarm.dt_start), tools.sdatetime(alarm.dt_end)]
         return row
 
+class APILogReportWorker(GCSReportWorker):
+    KIND = APILog
+
+    def __init__(self, rkey):
+        super(APILogReportWorker, self).__init__(rkey, start_att="date", start_att_direction="-")
+        self.enterprise = self.report.enterprise
+        self.FILTERS = [("enterprise =", self.enterprise)]
+        specs = self.report.getSpecs()
+        start = specs.get("start", 0)
+        end = specs.get("end", 0)
+        if start:
+            self.FILTERS.append(("date >=", tools.dt_from_ts(start)))
+        if end:
+            self.FILTERS.append(("date <", tools.dt_from_ts(end)))
+        self.report.generate_title("API Log Report", ts_start=start, ts_end=end)
+        self.headers = ["User ID","Date","Path","Method","Request"]
+
+    def entityData(self, apilog):
+        uid = tools.getKey(APILog, 'user', apilog, asID=True)
+        row = [uid, tools.sdatetime(apilog.date), apilog.path, apilog.method, apilog.request]
+        return row
+
+
 class AnalysisReportWorker(GCSReportWorker):
     KIND = Analysis
 

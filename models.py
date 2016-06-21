@@ -1768,7 +1768,7 @@ class Report(UserAccessible):
     def getSpecs(self):
         if self.specs:
             return json.loads(self.specs)
-        return None
+        return {}
 
     def isDone(self):
         return self.status == REPORT.DONE
@@ -1848,6 +1848,9 @@ class Report(UserAccessible):
         elif self.type == REPORT.ANALYSIS_REPORT:
             from reports import AnalysisReportWorker
             worker = AnalysisReportWorker(target, self.key())
+        elif self.type == REPORT.APILOG_REPORT:
+            from reports import APILogReportWorker
+            worker = APILogReportWorker(self.key())
         else:
             worker = None
         if worker and self.status not in [REPORT.ERROR, REPORT.CANCELLED]:
@@ -1958,6 +1961,6 @@ class APILog(UserAccessible):
             return None
 
     @staticmethod
-    def Recent(_max=20):
-        q = APILog.all().order("-date")
+    def Recent(enterprise, _max=20):
+        q = APILog.all().filter("enterprise =", enterprise).order("-date")
         return q.fetch(_max)
