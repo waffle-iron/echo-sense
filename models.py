@@ -642,8 +642,6 @@ class Sensor(UserAccessible):
     # color = db.StringProperty(indexed=False)
     # size = db.IntegerProperty(indexed=False)
     bearing = db.IntegerProperty(indexed=False) # Degrees CCW (0 = North), Deprecate
-    batt_level = db.FloatProperty(indexed=False) # (0.0,1.0)
-    batt_charging = db.BooleanProperty(indexed=False)
 
     def __repr__(self):
         return "<Sensor name=%s kn=%s>" % (self.name, self.key().name())
@@ -662,8 +660,6 @@ class Sensor(UserAccessible):
             'enterprise_id': tools.getKey(Sensor, 'enterprise', self, asID=True),
             'target_id': tools.getKey(Sensor, 'target', self, asID=True),
             'contacts': self.contacts,
-            'batt_level': self.batt_level,
-            'batt_charging': self.batt_charging,
             'group_ids': self.group_ids,
             'location': str(self.location) if self.location else None,
             'bearing': self.bearing
@@ -1438,8 +1434,6 @@ class Record(db.Expando):
     dt_created = db.DateTimeProperty(auto_now_add=True)  # Hit server
     minute = db.IntegerProperty()  # Minutes since UTC epoch (for downsample)
     hour = db.IntegerProperty()  # Minutes since UTC epoch (for downsample)
-    batt_level = db.FloatProperty(indexed=False)
-    batt_charging = db.BooleanProperty(indexed=False)
 
     def __repr__(self):
         return "<Record kn=%s />" % self.key().name()
@@ -1451,8 +1445,7 @@ class Record(db.Expando):
                 'kn': self.key().name(),
                 'ts': tools.unixtime(self.dt_recorded),
                 'ts_created': tools.unixtime(self.dt_created),
-                'sensor_key': tools.getKey(Record, 'sensor', self, asID=False),
-                'batt_level': self.batt_level
+                'sensor_key': tools.getKey(Record, 'sensor', self, asID=False)
             }
         if with_props:
             res['columns'] = {}
@@ -1543,25 +1536,9 @@ class Record(db.Expando):
             logging.warning("Non-sane ts in Record.Create, not creating: %s" % ts)
         else:
             if kn and schema:
-                batt_level = data.get('batt_level', -1.0)
-                if type(batt_level) in [float, int, long]:
-                    batt_level = float(batt_level)
-                else:
-                    batt_level = None
-                batt_charging = bool(data.get('batt_charging', 0))
-                if apply_roles:
-                    # Standard roles (currently just battery)
-                    if 'batt_level' in data and batt_level >= 0:
-                        prev_batt_level = sensor.batt_level
-                        sensor.batt_level = float(batt_level)
-                        if batt_level < WARN_BATT_LEVEL and prev_batt_level >= WARN_BATT_LEVEL:
-                            warning_text = "Battery for %s is %s" % (sensor, batt_level)
-                            outbox.email_admins("Battery warning", warning_text)
-                    if 'batt_charging' in data:
-                        sensor.batt_charging = batt_charging
                 minute = int(ts / 1000 / 60)
                 hour = int(minute / 60)
-                r = Record(key_name=kn, parent=sensor, sensor=sensor, target=sensor.target, dt_recorded=tools.dt_from_ts(ts), minute=minute, hour=hour, batt_level=batt_level, batt_charging=batt_charging, enterprise=sensor.enterprise)
+                r = Record(key_name=kn, parent=sensor, sensor=sensor, target=sensor.target, dt_recorded=tools.dt_from_ts(ts), minute=minute, hour=hour, enterprise=sensor.enterprise)
                 # First pass extracts record data as defined by schema, and creates dict of pending calculations
                 calculations = {}
                 for column, colschema in schema.items():

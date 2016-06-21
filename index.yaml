@@ -82,6 +82,12 @@ indexes:
     direction: desc
 
 - kind: Record
+  properties:
+  - name: enterprise
+  - name: dt_recorded
+    direction: desc
+
+- kind: Record
   ancestor: yes
   properties:
   - name: dt_recorded
