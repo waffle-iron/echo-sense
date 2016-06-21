@@ -239,11 +239,6 @@ export default class DataViewer extends React.Component {
             this._list_columns().map(function(colname, j, arr2) {
                 _cols.push(<span title={colname}>{ r.columns[colname] }</span>)
             });
-            var _batt;
-            if (r.batt_level >= 0.0) {
-                var batt_level_icon = parseInt(r.batt_level * 4);
-                _batt = <span className="right"><i className={"fa fa-battery-"+batt_level_icon}></i> { util.printPercent(r.batt_level) }</span>
-            }
             if (prior_ts != null) {
                 var since_prior = Math.abs(r.ts - prior_ts);
                 if (since_prior > gap_cutoff_ms) {
@@ -259,7 +254,6 @@ export default class DataViewer extends React.Component {
                     <a href="javascript:void(0)" onClick={this.show_record_actions.bind(this, r)}><i className="fa fa-compress" /></a>
                      <span className="sub">{ util.printDate(r.ts, true) }</span>
                     { _cols }
-                    { _batt }
                 </li>
             );
         }, this);

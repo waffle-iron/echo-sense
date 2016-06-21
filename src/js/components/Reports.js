@@ -121,6 +121,25 @@ export default class Reports extends React.Component {
 
         <h2>Generate Report</h2>
         <Tabs>
+          <Tab label="Records">
+
+            <div className="row">
+              <div className="col-sm-6">
+                <DatePicker onChange={this.changeHandlerNilVal.bind(this, 'form', 'start')} value={form.start} autoOk={true} hintText="From" />
+              </div>
+              <div className="col-sm-6">
+                <DatePicker onChange={this.changeHandlerNilVal.bind(this, 'form', 'end')} value={form.end} autoOk={true} hintText="End" />
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="col-sm-6">
+              </div>
+            </div>
+
+            <FlatButton label="Generate" onClick={this.generate_report.bind(this, 1)} />
+          </Tab>
+
           <Tab label="Alarms">
 
             <div className="row">
