@@ -123,6 +123,10 @@ export default class Reports extends React.Component {
         <Tabs>
           <Tab label="Records">
 
+            <br/>
+            <div className="alert alert-info">Generate a report of all raw records for all sensors. To generate a report
+            for a particular sensor, go to the data viewer and choose 'export'</div>
+
             <div className="row">
               <div className="col-sm-6">
                 <DatePicker onChange={this.changeHandlerNilVal.bind(this, 'form', 'start')} value={form.start} autoOk={true} hintText="From" />

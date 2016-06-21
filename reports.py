@@ -282,16 +282,22 @@ class SensorDataReportWorker(GCSReportWorker):
 
     def __init__(self, sensorkey, rkey):
         super(SensorDataReportWorker, self).__init__(rkey, start_att="dt_recorded", start_att_direction="-")
-        self.sensor = Sensor.get(sensorkey)
-        self.FILTERS = [("sensor =", self.sensor)]
-        self.report.title = "Sensor Data Report [ %s ]" % (self.sensor)
+        title_kwargs = {}
+        if sensorkey:
+            self.sensor = Sensor.get(sensorkey)
+            self.FILTERS = [("sensor =", self.sensor)]
+            title_kwargs['sensor'] = str(self.sensor)
+        else:
+            # Enterprise wide
+            self.FILTERS = [("enterprise =", self.report.enterprise)]
         specs = self.report.getSpecs()
-        ts_start = specs.get("ts_start", 0)
-        ts_end = specs.get("ts_end", 0)
-        if ts_start:
-            self.FILTERS.append(("dt_recorded >=", tools.dt_from_ts(ts_start)))
-        if ts_end:
-            self.FILTERS.append(("dt_recorded <", tools.dt_from_ts(ts_end)))
+        start = specs.get("start", 0)
+        end = specs.get("end", 0)
+        if start:
+            self.FILTERS.append(("dt_recorded >=", tools.dt_from_ts(start)))
+        if end:
+            self.FILTERS.append(("dt_recorded <", tools.dt_from_ts(end)))
+        self.report.generate_title("Sensor Data Report", ts_start=start, ts_end=end, **title_kwargs)
         self.columns = specs.get('columns',[])
         standard_cols = ["Date"]
         self.headers = standard_cols + self.columns
