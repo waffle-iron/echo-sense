@@ -195,18 +195,23 @@ export default class DataViewer extends React.Component {
             that.toggle_datapoint_dlg()
         });
     }
+
     goto_record_detail(r) {
       var params = {
         sensorKn: this.props.params.sensorKn
       };
       this.props.history.pushState(null, `/app/data/${params.sensorKn}/record/${r.kn}`);
     }
+
     handle_export_request() {
         console.log("Export...")
+        var cols = this._list_columns();
+        var viz_col = this._vis_column();
+        if (viz_col != null && cols.indexOf(viz_col) == -1) cols.push(viz_col);
         var specs = {
             ts_start: this._ts_start(),
             ts_end: this._ts_end(),
-            columns: this._list_columns()
+            columns: cols
         };
         var data = {
             type: 1, // Sensor Data
@@ -219,9 +224,11 @@ export default class DataViewer extends React.Component {
             } else toastr.error(res.message);
         }, 'json');
     }
+
     toggle_datapoint_dlg() {
         this.setState({datapoint_dlg_open: !this.state.datapoint_dlg_open});
     }
+
     render() {
         var detail;
         var s = this.state.sensor;

@@ -113,6 +113,7 @@ class GCSReportWorker(object):
         if self.report.ftype == REPORT.CSV:
             string = tools.normalize_to_ascii('"'+'","'.join(self.headers)+'"\n')
             self.gcs_file.write(string)
+            logging.debug(string)
         elif self.report.ftype == REPORT.XLS:
             for i, header in enumerate(self.headers):
                 self.ws.write(0, i, header, self.xls_styles['bold'])
@@ -134,7 +135,6 @@ class GCSReportWorker(object):
                 for entity in entities:
                     if entity:
                         ed = self.entityData(entity)
-                        logging.debug(ed)
                     else:
                         continue
                     string = '?'

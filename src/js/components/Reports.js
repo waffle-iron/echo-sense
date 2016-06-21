@@ -138,6 +138,7 @@ export default class Reports extends React.Component {
 
             <div className="row">
               <div className="col-sm-6">
+                <TextField hint="Columns" floatingLabelText="Columns (comma separated)" onChange={this.changeHandler.bind(this, 'form', 'columns')} value={form.columns} />
               </div>
             </div>
 
