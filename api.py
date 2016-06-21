@@ -1049,7 +1049,7 @@ class APILogAPI(handlers.JsonRequestHandler):
 
         _max = self.request.get_range('max', max_value=500, default=100)
 
-        apilogs = APILog.Recent(_max=_max)
+        apilogs = APILog.Recent(self.enterprise, _max=_max)
         success = True
 
         data = {
