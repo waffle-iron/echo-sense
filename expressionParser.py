@@ -82,11 +82,14 @@ class ExpressionParser(object):
 
     def __multOp(self, toks):
         value = toks[0]
-        prod = value[0]
+        _prod = value[0]
+        if type(_prod) not in [int, long, float]:
+            # Handle unexpected text addition
+            _prod = 0
         for op,val in self.operatorOperands(value[1:]):
-            if op == '*': prod *= val
-            if op == '/': prod /= val
-        return prod
+            if op == '*': _prod *= val
+            if op == '/': _prod /= val
+        return _prod
 
     def __expOp(self, toks):
         value = toks[0]
@@ -97,11 +100,14 @@ class ExpressionParser(object):
 
     def __addOp(self, toks):
         value = toks[0]
-        sum = value[0]
+        _sum = value[0]
+        if type(_sum) not in [int, long, float]:
+            # Handle unexpected text addition
+            _sum = 0
         for op,val in self.operatorOperands(value[1:]):
-            if op == '+': sum += val
-            if op == '-': sum -= val
-        return sum
+            if op == '+': _sum += val
+            if op == '-': _sum -= val
+        return _sum
 
     def __evalLogicOp(self, toks):
         args = toks[0]
@@ -153,13 +159,14 @@ class ExpressionParser(object):
         elif fnName == "COUNT":
             return len(args)
         elif fnName == "ALARMS":
+            from models import Alarm
             # Usage: ALARMS([rule_id])
             # Returns list of alarms in processed batch, optionally filtered by rule_id
             alarm_list = list(self.alarm_list)
             if args and type(args[0]) in [int, long, float]:
                 rule_id = int(args[0])
                 if rule_id:
-                    alarm_list = [al for al in alarm_list if tools.getKey(Alarm, 'rule', al, asID=True) == rule_id)]
+                    alarm_list = [al for al in alarm_list if tools.getKey(Alarm, 'rule', al, asID=True) == rule_id]
             return alarm_list
         elif fnName == "DISTANCE":
             dist = 0

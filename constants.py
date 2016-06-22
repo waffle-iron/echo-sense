@@ -70,27 +70,31 @@ MS_PER_DAY = MS_PER_HOUR * 24
 class DOWNSAMPLE():
     NONE = 0
     MINUTE = 1
-    TEN_MINUTE = 2
-    HOUR = 3
+    FIVE_MINUTE = 2
+    TEN_MINUTE = 3
+    HOUR = 4
 
     # Indexed
     PROPERTIES = {
         MINUTE: "minute",
         HOUR: "hour",
+        FIVE_MINUTE: "minute",
         TEN_MINUTE: "minute"
     }
 
     MS_PER = {
         MINUTE: MS_PER_MINUTE,
         HOUR: MS_PER_HOUR,
+        FIVE_MINUTE: MS_PER_MINUTE,
         TEN_MINUTE: MS_PER_MINUTE
     }
 
     INDEXED = [MINUTE, HOUR]
-    UNINDEXED = [TEN_MINUTE]
+    UNINDEXED = [FIVE_MINUTE, TEN_MINUTE]
 
     UNINDEXED_PROP_DIVIDER = {
-        TEN_MINUTE: 10
+        TEN_MINUTE: 10,
+        FIVE_MINUTE: 5
     }
 
 class REPORT():

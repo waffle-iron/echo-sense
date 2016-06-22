@@ -1150,7 +1150,7 @@ class ProcessTask(UserAccessible):
     enterprise = db.ReferenceProperty(Enterprise)
     dt_created = db.DateTimeProperty(auto_now_add=True)
     # Run every 'interval' seconds between 'time_start' and 'time_end'
-    interval = db.IntegerProperty(default=0)  # Seconds, 0 = disabled (run once)
+    interval = db.IntegerProperty(default=120)  # Seconds
     time_start = db.TimeProperty(indexed=False)  # UTC
     time_end = db.TimeProperty(indexed=False)  # UTC
     # Scheduling - OR of the below
@@ -1481,6 +1481,14 @@ class Record(db.Expando):
 
         Note that unindexed downsamples (see DOWNSAMPLE()) uses limit for the initial fetch,
         but will return less records after post-query filtering.
+
+        Args:
+            dt_start (datetime): Start of date filter range
+            dt_end (datetime): End of date filter range
+            downsample (int): Optional downsample
+
+        Returns:
+            List of Record() objects (most recent first)
         '''
         if downsample:
             ds_prop = DOWNSAMPLE.PROPERTIES.get(downsample)
@@ -1501,19 +1509,25 @@ class Record(db.Expando):
             if dt_end:
                 end = tools.unixtime(dt_end) / ms_per
                 q.filter(ds_prop+" <=", end)
-            # Query returns keys of downsampled records
-            proj_records = q.fetch(limit=limit)
+
+            prop_divider = 0
             if downsample in DOWNSAMPLE.UNINDEXED:
                 # Manual downsampling using dict keys
                 prop_divider = DOWNSAMPLE.UNINDEXED_PROP_DIVIDER.get(downsample)
-                if prop_divider:
-                    unique_by_period = {}
-                    for rec in proj_records:
-                        ds_value = getattr(rec, ds_prop, 0)
-                        if type(ds_value) in [float, int, long]:
-                            rec.ds_period = ds_value / prop_divider
-                            unique_by_period[rec.ds_period] = rec
-                    proj_records = sorted(unique_by_period.values(), key=lambda r : r.ds_period)
+            # Multiply limit if we're doing an unindexed downsample since we will lose
+            # records in the filtering.
+            if prop_divider:
+                limit *= prop_divider
+            # Query returns keys of downsampled records
+            proj_records = q.fetch(limit=limit)
+            if prop_divider:
+                unique_by_period = {}
+                for rec in proj_records:
+                    ds_value = getattr(rec, ds_prop, 0)
+                    if type(ds_value) in [float, int, long]:
+                        rec.ds_period = ds_value / prop_divider
+                        unique_by_period[rec.ds_period] = rec
+                proj_records = sorted(unique_by_period.values(), key=lambda r : r.ds_period, reverse=True)
             return Record.get([x.key() for x in proj_records])
         else:
             q.order("-dt_recorded")
@@ -1661,7 +1675,7 @@ class Alarm(db.Model):
         try:
             self.apex = float(value)
         except:
-            logging.warning("Failed to set apex to %s" % value)
+            logging.debug("Failed to set apex to %s" % value)
 
     def duration(self):
         '''

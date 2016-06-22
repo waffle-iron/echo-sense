@@ -235,7 +235,7 @@ class ProcessingTestCase(BaseTestCase):
                 'analysis_key_pattern': ANALYSIS_KEY_PATTERN
             },
             {
-                'calculation': '. + COUNT(ALARMS())',
+                'calculation': '. + COUNT(ALARMS(%d))' % self.speeding_alarm.key().id(),
                 'column': 'count_alarms',
                 'analysis_key_pattern': ANALYSIS_KEY_PATTERN
             }
