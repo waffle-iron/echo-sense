@@ -156,7 +156,7 @@ class ExpressionParser(object):
             # Usage: ALARMS([rule_id])
             # Returns list of alarms in processed batch, optionally filtered by rule_id
             alarm_list = list(self.alarm_list)
-            if args and args[0].isdigit():
+            if args and type(args[0]) in [int, long, float]:
                 rule_id = int(args[0])
                 if rule_id:
                     alarm_list.filter(lambda al : tools.getKey(Alarm, 'rule', al, asID=True) == rule_id)
