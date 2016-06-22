@@ -159,7 +159,7 @@ class ExpressionParser(object):
             if args and type(args[0]) in [int, long, float]:
                 rule_id = int(args[0])
                 if rule_id:
-                    alarm_list.filter(lambda al : tools.getKey(Alarm, 'rule', al, asID=True) == rule_id)
+                    alarm_list = [al for al in alarm_list if tools.getKey(Alarm, 'rule', al, asID=True) == rule_id)]
             return alarm_list
         elif fnName == "DISTANCE":
             dist = 0
