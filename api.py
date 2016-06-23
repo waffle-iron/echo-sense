@@ -1015,7 +1015,7 @@ class ReportAPI(handlers.JsonRequestHandler):
         rkey = self.request.get('rkey')
         r = Report.GetAccessible(rkey, d['user'])
         if r:
-            if rr.isDone() and r.gcs_files:
+            if r.isDone() and r.gcs_files:
                 try:
                     gcsfn = r.gcs_files[0]
                     gcs_file = gcs.open(gcsfn, 'r')
