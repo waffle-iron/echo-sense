@@ -145,6 +145,10 @@ export default class Reports extends React.Component {
               <div className="col-sm-6">
                 <TextField hint="Columns" floatingLabelText="Columns (comma separated)" onChange={this.changeHandler.bind(this, 'form', 'columns')} value={form.columns} />
               </div>
+              <div className="col-sm-6">
+                <label>Sensor Type (optional)</label>
+                <Select options={sensortype_opts} onChange={this.changeHandlerVal.bind(this, 'form', 'sensortype_id')} value={form.sensortype_id} simpleValue />
+              </div>
             </div>
 
             <FlatButton label="Generate" onClick={this.generate_report.bind(this, 1)} />

@@ -127,3 +127,9 @@ indexes:
 # manually, move them above the marker line.  The index.yaml file is
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
+
+- kind: Record
+  properties:
+  - name: sensortype
+  - name: dt_recorded
+    direction: desc

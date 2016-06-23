@@ -283,14 +283,18 @@ class SensorDataReportWorker(GCSReportWorker):
     def __init__(self, sensorkey, rkey):
         super(SensorDataReportWorker, self).__init__(rkey, start_att="dt_recorded", start_att_direction="-")
         title_kwargs = {}
+        specs = self.report.getSpecs()
         if sensorkey:
             self.sensor = Sensor.get(sensorkey)
             self.FILTERS = [("sensor =", self.sensor)]
             title_kwargs['sensor'] = str(self.sensor)
+        elif specs.get('sensortype_id'):
+            sensortype_id = specs.get('sensortype_id')
+            title_kwargs['sensor_type'] = sensortype_id
+            self.FILTERS = [("sensortype =", db.Key.from_path('SensorType', sensortype_id, parent=self.report.enterprise.key()))]
         else:
             # Enterprise wide
             self.FILTERS = [("enterprise =", self.report.enterprise)]
-        specs = self.report.getSpecs()
         start = specs.get("start", 0)
         end = specs.get("end", 0)
         if start:
@@ -299,12 +303,15 @@ class SensorDataReportWorker(GCSReportWorker):
             self.FILTERS.append(("dt_recorded <", tools.dt_from_ts(end)))
         self.report.generate_title("Sensor Data Report", ts_start=start, ts_end=end, **title_kwargs)
         self.columns = specs.get('columns',[])
-        standard_cols = ["Date"]
+        standard_cols = ["Sensor ID", "Date"]
         self.headers = standard_cols + self.columns
         self.batch_size = 1000
 
     def entityData(self, rec):
-        row = [tools.sdatetime(rec.dt_recorded, fmt="%Y-%m-%d %H:%M:%S %Z")]
+        row = [
+            tools.getKey(Record, 'sensor', rec, asID=True),
+            tools.sdatetime(rec.dt_recorded, fmt="%Y-%m-%d %H:%M:%S %Z")
+        ]
         for col in self.columns:
             row.append(str(rec.columnValue(col, default="")))
         return row
