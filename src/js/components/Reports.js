@@ -6,6 +6,7 @@ var Router = require('react-router');
 var EntityMap = require('components/EntityMap');
 var SensorDetail = require('components/SensorDetail');
 var $ = require('jquery');
+var AppConstants = require('constants/AppConstants');
 var util = require('utils/util');
 var api = require('utils/api');
 var mapc = require('utils/map_common');
@@ -98,11 +99,15 @@ export default class Reports extends React.Component {
   }
 
   renderReport(r) {
+    var _download;
+    if (r.status == AppConstants.REPORT_DONE) _download = <a href="javascript:void(0)" onClick={this.download.bind(this, r)}>Download</a>;
+    var status_text = util.findItemById(AppConstants.REPORT_STATUSES, r.status, 'value').label;
     return (
       <li className="list-group-item">
         <span className="title">{ r.title }</span>
-        <a href="javascript:void(0)" onClick={this.download.bind(this, r)}>Download</a>&nbsp;
-        <a href="javascript:void(0)" onClick={this.delete.bind(this, r)}><i className="fa fa-trash"></i></a>
+        <span className="sub">{ status_text }</span>
+        { _download }
+        &nbsp;<a href="javascript:void(0)" onClick={this.delete.bind(this, r)}><i className="fa fa-trash"></i></a>
         <span className="sub right" data-ts={r.ts_created}></span>
       </li>
       )

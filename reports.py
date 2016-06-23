@@ -100,7 +100,7 @@ class GCSReportWorker(object):
             logging.debug("TooLongError: Going to the next batch")
             if self.report:
                 self.finish(reportDone=False)
-                tools.safe_add_task(self.run, start_cursor=self._get_cursor(), _queue="worker-queue")
+                tools.safe_add_task(self.run, start_cursor=self._get_cursor(), _queue="report-queue")
         except Exception, e:  # including DeadlineExceededError
             traceback.print_exc()
             logging.error("Error: %s" % e)
@@ -301,6 +301,7 @@ class SensorDataReportWorker(GCSReportWorker):
         self.columns = specs.get('columns',[])
         standard_cols = ["Date"]
         self.headers = standard_cols + self.columns
+        self.batch_size = 1000
 
     def entityData(self, rec):
         row = [tools.sdatetime(rec.dt_recorded, fmt="%Y-%m-%d %H:%M:%S %Z")]

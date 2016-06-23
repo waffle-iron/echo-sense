@@ -1006,14 +1006,16 @@ class ReportAPI(handlers.JsonRequestHandler):
         report = Report.Create(d['enterprise'], type=type, specs=specs, ftype=ftype)
         report.put()
         tools.safe_add_task(backgroundReportRun, str(report.key()), target=target, _queue="worker-queue")
-        self.json_out(success=True, message="%s generating..." % report.title)
+        self.json_out(success=True, message="%s generating..." % report.title, data={
+            'report': report.json() if report else None
+            })
 
     @authorized.role('api')
     def serve(self, d):
         rkey = self.request.get('rkey')
         r = Report.GetAccessible(rkey, d['user'])
         if r:
-            if r.gcs_files:
+            if rr.isDone() and r.gcs_files:
                 try:
                     gcsfn = r.gcs_files[0]
                     gcs_file = gcs.open(gcsfn, 'r')
@@ -1024,6 +1026,8 @@ class ReportAPI(handlers.JsonRequestHandler):
                     self.response.headers['Content-Disposition'] = str('attachment; filename="%s"' % r.filename())
                     self.response.write(gcs_file.read())
                     gcs_file.close()
+            else:
+                self.json_out(success=False, status=404, message="Report not ready") # Not found
         else:
             self.response.out.write("Unauthorized")
 

@@ -11,6 +11,14 @@ var AppConstants = {
   DOWNSAMPLE_MIN: 1,
   DOWNSAMPLE_TEN_MIN: 2,
   DOWNSAMPLE_HOUR: 3,
+  REPORT_DONE: 3,
+  REPORT_STATUSES: [
+    { value: 1, label: "Created" },
+    { value: 2, label: "Generating" },
+    { value: 3, label: "Done" },
+    { value: 4, label: "Cancelled" },
+    { value: 5, label: "Error" }
+  ],
   RULE_TRIGGERS: [
     { value: 1, label: "No Data" },
     { value: 2, label: "Floor" },

@@ -1429,6 +1429,7 @@ class Record(db.Expando):
     """
     enterprise = db.ReferenceProperty(Enterprise)
     sensor = db.ReferenceProperty(Sensor)
+    sensortype = db.ReferenceProperty(SensorType)
     target = db.ReferenceProperty(Target)
     dt_recorded = db.DateTimeProperty()  # Real time in UTC (from timestamp)
     dt_created = db.DateTimeProperty(auto_now_add=True)  # Hit server
@@ -1552,7 +1553,9 @@ class Record(db.Expando):
             if kn and schema:
                 minute = int(ts / 1000 / 60)
                 hour = int(minute / 60)
-                r = Record(key_name=kn, parent=sensor, sensor=sensor, target=sensor.target, dt_recorded=tools.dt_from_ts(ts), minute=minute, hour=hour, enterprise=sensor.enterprise)
+                targetkey = tools.getKey(Sensor, 'target', sensor, asID=False, keyObj=True)
+                sensortypekey = tools.getKey(Sensor, 'sensortype', sensor, asID=False, keyObj=True)
+                r = Record(key_name=kn, parent=sensor, sensor=sensor, target=targetkey, sensortype=sensortypekey, dt_recorded=tools.dt_from_ts(ts), minute=minute, hour=hour, enterprise=sensor.enterprise)
                 # First pass extracts record data as defined by schema, and creates dict of pending calculations
                 calculations = {}
                 for column, colschema in schema.items():
@@ -1759,6 +1762,7 @@ class Report(UserAccessible):
     def json(self):
         return {
             'key': str(self.key()),
+            'id': self.key().id(),
             'title': self.title,
             'status': self.status,
             'serve_url': self.serving_url(),
