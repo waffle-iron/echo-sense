@@ -132,4 +132,9 @@ indexes:
   properties:
   - name: sensortype
   - name: dt_recorded
+
+- kind: Record
+  properties:
+  - name: sensortype
+  - name: dt_recorded
     direction: desc

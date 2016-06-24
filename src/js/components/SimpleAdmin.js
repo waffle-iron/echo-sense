@@ -283,7 +283,7 @@ export default class SimpleAdmin extends React.Component {
   }
   clearAndFetch() {
     var that = this;
-    this.setState({items: [], status: 'closed', selected: null}, function() {
+    this.setState({items: [], status: 'closed', selected: null, page: 0}, function() {
       that.fetchItems();
     });
   }
