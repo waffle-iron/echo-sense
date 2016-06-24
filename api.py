@@ -149,7 +149,8 @@ class UserAPI(handlers.JsonRequestHandler):
     @authorized.role('api')
     def list(self, d):
         message = None
-        users = User.all().fetch(100)
+        page, max, offset = tools.paging_params(self.request, limit_default=100)
+        users = self.enterprise.user_set.fetch(limit=max, offset=offset)
         success = True
         data = {
             'users': [user.json() for user in users]
