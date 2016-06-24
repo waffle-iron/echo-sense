@@ -302,14 +302,14 @@ class SensorDataReportWorker(GCSReportWorker):
         if end:
             self.FILTERS.append(("dt_recorded <", tools.dt_from_ts(end)))
         self.report.generate_title("Sensor Data Report", ts_start=start, ts_end=end, **title_kwargs)
-        self.columns = specs.get('columns',[])
+        self.columns = specs.get('columns', [])
         standard_cols = ["Sensor ID", "Date"]
         self.headers = standard_cols + self.columns
         self.batch_size = 1000
 
     def entityData(self, rec):
         row = [
-            tools.getKey(Record, 'sensor', rec, asID=True),
+            "ID:%s" % tools.getKey(Record, 'sensor', rec, asID=True),
             tools.sdatetime(rec.dt_recorded, fmt="%Y-%m-%d %H:%M:%S %Z")
         ]
         for col in self.columns:
@@ -333,13 +333,14 @@ class AlarmReportWorker(GCSReportWorker):
         self.report.generate_title("Alarm Report", ts_start=start, ts_end=end)
         self.sensor_lookup = tools.lookupDict(Sensor, self.enterprise.sensor_set.fetch(limit=200), valueTransform=lambda s : s.name)
         self.rule_lookup = tools.lookupDict(Rule, self.enterprise.rule_set.fetch(limit=100))
-        self.headers = ["Sensor","Rule","Apex","Start","End"]
+        self.headers = ["Sensor ID","Sensor","Rule","Apex","Start","End"]
 
     def entityData(self, alarm):
-        sensor_name = self.sensor_lookup.get(tools.getKey(Alarm, 'sensor', alarm, asID=False), "")
+        sensor_id = tools.getKey(Alarm, 'sensor', alarm, asID=False)
+        sensor_name = self.sensor_lookup.get(sensor_id, "")
         rule_name = str(self.rule_lookup.get(tools.getKey(Alarm, 'rule', alarm, asID=False), ""))
         apex = "%.2f" % alarm.apex if alarm.apex is not None else "--"
-        row = [sensor_name, rule_name, apex, tools.sdatetime(alarm.dt_start), tools.sdatetime(alarm.dt_end)]
+        row = ["ID:%s" % sensor_id, sensor_name, rule_name, apex, tools.sdatetime(alarm.dt_start), tools.sdatetime(alarm.dt_end)]
         return row
 
 class APILogReportWorker(GCSReportWorker):
@@ -360,7 +361,7 @@ class APILogReportWorker(GCSReportWorker):
         self.headers = ["User ID","Date","Path","Method","Request"]
 
     def entityData(self, apilog):
-        uid = tools.getKey(APILog, 'user', apilog, asID=True)
+        uid = "ID:%s" % tools.getKey(APILog, 'user', apilog, asID=True)
         row = [uid, tools.sdatetime(apilog.date), apilog.path, apilog.method, apilog.request]
         return row
 

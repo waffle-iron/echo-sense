@@ -1728,7 +1728,9 @@ class Alarm(db.Model):
             recipients = User.UsersFromSensorContactIDs(self.sensor, self.rule.alert_contacts)
             for recipient in recipients:
                 rendered_message = self.render_alert_message(recipient=recipient)
-                outbox.send_message(recipient, rendered_message)
+                outbox.send_message(recipient, rendered_message, additional_params={
+                    'rule_id': self.rule.key().id()
+                })
         return self.rule.alert_contacts
 
     def request_payments(self):
@@ -1956,7 +1958,7 @@ class APILog(UserAccessible):
             path = request.path
             host = request.host
             method = request.method
-            AUTH_PARAMS = ['auth', 'password']  # To not be included in log
+            AUTH_PARAMS = ['auth', 'password', 'uid', 'pw']  # To not be included in log
             req = {}
             for arg in request.arguments():
                 if arg not in AUTH_PARAMS:
