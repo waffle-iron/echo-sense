@@ -16,6 +16,8 @@ var api = require('utils/api');
 var toastr = require('toastr');
 var mui = require('material-ui'),
   FlatButton = mui.FlatButton,
+  RaisedButton = mui.RaisedButton,
+  FontIcon = mui.FontIcon,
   DatePicker = mui.DatePicker,
   TimePicker = mui.TimePicker,
   IconMenu = mui.IconMenu,
@@ -151,7 +153,7 @@ export default class Reports extends React.Component {
               </div>
             </div>
 
-            <FlatButton label="Generate" onClick={this.generate_report.bind(this, 1)} />
+            <RaisedButton label="Generate" primary={true} icon={<FontIcon className="material-icons">play_circle_filled</FontIcon>} onClick={this.generate_report.bind(this, 1)} />
           </Tab>
 
           <Tab label="Alarms">
