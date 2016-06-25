@@ -23,7 +23,6 @@ var GChart = React.createClass({displayName: 'GChart',
   },
   getInitialState: function() {
     return {
-      open: this.props.defaultOpen, // Unused?
       dataTable: this.props.dataSourceUrl ? null : new google.visualization.DataTable(),
       wrapper: null
     }
@@ -45,9 +44,6 @@ var GChart = React.createClass({displayName: 'GChart',
   initializeDataTable: function(callback) {
     var dt = new google.visualization.DataTable();
     if (dt) {
-      // Remove columns if any
-      var n_cols = dt.getNumberOfColumns();
-      if (n_cols > 0) dt.removeColumns(0, n_cols);
       // Add columns and data from props
       for (var i in this.props.columns) {
         var c = this.props.columns[i];

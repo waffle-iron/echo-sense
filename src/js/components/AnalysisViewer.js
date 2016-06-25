@@ -96,7 +96,7 @@ export default class AnalysisViewer extends React.Component {
                 if (res.success) {
                     var analyses = res.data.analyses;
                     console.log("Got "+analyses.length+" analyses");
-                    var suggested_columns = that.state.suggested_columns;
+                    var suggested_columns = [];
                     var sensor_key_names = [];
                     if (analyses.length > 0) {
                         for (var i=0; i<10 && i<analyses.length; i++) {
@@ -192,18 +192,17 @@ export default class AnalysisViewer extends React.Component {
                 if (ts_updated == null || (ts_updated - a.ts_created) < this.MIN_CHART_DURATION) ts_updated = ts_updated + this.MIN_CHART_DURATION;
                 var end = new Date(ts_updated);
                 var tooltip = a.kn;
-                var row_label = a.sensor_kn;
+                var sensor_label = a.sensor_kn;
                 var s = this.props.sensors[a.sensor_kn];
-                if (s) row_label = s.name;
+                if (s) sensor_label = s.name;
                 var row = [];
-                if (form.chart_type == "Timeline") row = [row_label, value || "--", tooltip, start, end];
+                if (form.chart_type == "Timeline") row = [sensor_label, value || "--", tooltip, start, end];
                 else if (form.chart_type == "ScatterChart") {
                     var color = util.stringToColor(a.sensor_kn);
                     var point_style = 'point { fill-color: '+color+'; }';
-                    tooltip += " (Sensor: "+a.sensor_key_names+")";
+                    tooltip += " (Sensor: "+sensor_label+")";
                     row = [start, value ? parseFloat(value) : 0, point_style, tooltip];
                 }
-                console.log(row);
                 return row;
             });
             var opts = {tooltip: {isHtml: true}};
