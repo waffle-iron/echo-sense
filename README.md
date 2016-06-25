@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/echomobi/echo-sense.png?label=ready&title=Ready)](https://waffle.io/echomobi/echo-sense)
 # Echo Sense
 
 Echo Sense is a generic M2M/sensor platform that runs on Google Cloud Platform, and has 4 primary functions:
